@@ -50,7 +50,7 @@
           mouseDown: false,
           ctx: null,
           board: {
-            width: 900,
+            width: 1200,
             height: 900,
             gridSize: 10,
             rowCount: 0,
@@ -67,7 +67,6 @@
         const { canvas } = this.$refs;
         this.ctx = canvas.getContext("2d");
         this.boardInit();
-        console.log(this.board.gridMeta)
         this.$refs.canvas.addEventListener(
           "mousedown",
           function (e) {
@@ -105,20 +104,20 @@
               row += 1
             ) {
               const size = this.board.gridSize;
-              const x = row * size;
-              const y = column * size;
-              const rowIndex = row;
+              const x = column * size;
+              const y = row * size;
               const columnIndex = column;
-              if (!Array.isArray(this.board.gridMeta[rowIndex])) {
-                this.board.gridMeta[rowIndex] = [];
+              const rowIndex = row;
+              if (!Array.isArray(this.board.gridMeta[columnIndex])) {
+                this.board.gridMeta[columnIndex] = [];
               }
               // 奇数行奇数列
               if (rowIndex % 2 !== 0 && columnIndex % 2 !== 0) {
                 this.ctx.fillStyle = "#ffffff";
                 this.ctx.fillRect(x, y, size, size);
-                this.board.gridMeta[rowIndex][columnIndex] = {
-                  rowIndex: rowIndex,
+                this.board.gridMeta[columnIndex][rowIndex] = {
                   columnIndex: columnIndex,
+                  rowIndex: rowIndex,
                   x: x,
                   y: y,
                   size: size,
@@ -129,9 +128,9 @@
               if (rowIndex % 2 !== 0 && columnIndex % 2 === 0) {
                 this.ctx.fillStyle = "#d9d9d9";
                 this.ctx.fillRect(x, y, size, size);
-                this.board.gridMeta[rowIndex][columnIndex] = {
-                  rowIndex: rowIndex,
+                this.board.gridMeta[columnIndex][rowIndex] = {
                   columnIndex: columnIndex,
+                  rowIndex: rowIndex,
                   x: x,
                   y: y,
                   size: size,
@@ -142,9 +141,9 @@
               if (rowIndex % 2 === 0 && columnIndex % 2 !== 0) {
                 this.ctx.fillStyle = "#d9d9d9";
                 this.ctx.fillRect(x, y, size, size);
-                this.board.gridMeta[rowIndex][columnIndex] = {
-                  rowIndex: rowIndex,
+                this.board.gridMeta[columnIndex][rowIndex] = {
                   columnIndex: columnIndex,
+                  rowIndex: rowIndex,
                   x: x,
                   y: y,
                   size: size,
@@ -155,9 +154,9 @@
               if (rowIndex % 2 === 0 && columnIndex % 2 === 0) {
                 this.ctx.fillStyle = "#ffffff";
                 this.ctx.fillRect(x, y, size, size);
-                this.board.gridMeta[rowIndex][columnIndex] = {
-                  rowIndex: rowIndex,
+                this.board.gridMeta[columnIndex][rowIndex] = {
                   columnIndex: columnIndex,
+                  rowIndex: rowIndex,
                   x: x,
                   y: y,
                   size: size,
@@ -175,14 +174,13 @@
           const { gridColor, gridBoardColor } = gridMeta;
           return gridColor ? gridColor : gridBoardColor;
         },
-        drawGrid(rowIndex, columnIndex) {
-          const { x, y, size } = this.board.gridMeta[rowIndex][columnIndex];
+        drawGrid(columnIndex, rowIndex) {
+          const { x, y, size } = this.board.gridMeta[columnIndex][rowIndex];
           this.ctx.fillRect(x, y, size, size);
         },
         handleMouseMove(e) {
           this.draw(e);
         },
-        // 连续绘制
         draw(e) {
           let xIndex = Math.floor(e.clientX / this.board.gridSize);
           let yIndex = Math.floor(e.clientY / this.board.gridSize);
@@ -206,14 +204,14 @@
           const operators = this.board.operatorStack.pop();
           if (!operators) return;
           const newOperators = operators.map(operator => {
-            const { rowIndex, columnIndex } = operator;
+            const { columnIndex,rowIndex,  } = operator;
             const gridColor = this.getGridColor(operator);
-            const tempGird = { ...this.board.gridMeta[rowIndex][columnIndex] };
+            const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex]};
             this.setGridColor(operator);
-            this.drawGrid(rowIndex, columnIndex);
+            this.drawGrid(columnIndex, rowIndex);
             // 更新元数据
-            this.board.gridMeta[rowIndex][columnIndex] = {
-              ...this.board.gridMeta[rowIndex][columnIndex],
+            this.board.gridMeta[columnIndex][rowIndex] = {
+              ...this.board.gridMeta[columnIndex][rowIndex],
               gridColor: gridColor
             };
             return {
@@ -229,12 +227,12 @@
           const newOperators = operators.map(operator => {
             const { rowIndex, columnIndex } = operator;
             const gridColor = this.getGridColor(operator);
-            const tempGird = { ...this.board.gridMeta[rowIndex][columnIndex] };
+            const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex]};
             this.setGridColor(operator);
-            this.drawGrid(rowIndex, columnIndex);
+            this.drawGrid(columnIndex, rowIndex);
             // 更新元数据
-            this.board.gridMeta[rowIndex][columnIndex] = {
-              ...this.board.gridMeta[rowIndex][columnIndex],
+            this.board.gridMeta[columnIndex][rowIndex] = {
+              ...this.board.gridMeta[columnIndex][rowIndex],
               gridColor: gridColor
             };
             return {
