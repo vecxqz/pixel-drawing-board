@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      .btn-group-operator {
+        margin-top: 10px;
+        display: flex;
+      }
+      .btn-operator {
+        display: flex;
+        justify-content: center;
+        width: 200px;
+        padding: 10px;
+        margin-left: 10px;
+        border-radius: 4px;
+        background: rgb(255, 220, 220);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <canvas ref="canvas" :width="board.width" :height="board.height"></canvas>
+      <div class="btn-group-operator">
+        <div class="btn-operator" @click="redo()">redo</div>
+        <div class="btn-operator" @click="undo()">undo</div>
+      </div>
+    </div>
+  </body>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script>
+    let app = {
+      setup() {
+        let state = Vue.reactive({
+          message: 10
+        });
+        return {
+          state
+        };
+      },
+      data() {
+        return {
+          mouseDown: false,
+          ctx: null,
+          board: {
+            width: 900,
+            height: 900,
+            gridSize: 10,
+            rowCount: 0,
+            columnCount: 0,
+            gridMeta: [],
+            operatorStack: [],
+            operatorPopStack: [],
+            color: "#199732",
+            tempStack: []
+          }
+        };
+      },
+      mounted() {
+        const { canvas } = this.$refs;
+        this.ctx = canvas.getContext("2d");
+        this.boardInit();
+        console.log(this.board.gridMeta)
+        this.$refs.canvas.addEventListener(
+          "mousedown",
+          function (e) {
+            this.board.tempStack = [];
+            this.mouseDown = true;
+            this.draw(e);
+            this.$refs.canvas.addEventListener(
+              "mousemove",
+              this.handleMouseMove
+            );
+          }.bind(this)
+        );
+        this.$refs.canvas.addEventListener(
+          "mouseup",
+          function (e) {
+            this.mouseDown = false;
+            this.board.operatorStack.push(this.board.tempStack);
+            this.$refs.canvas.removeEventListener(
+              "mousemove",
+              this.handleMouseMove
+            );
+          }.bind(this)
+        );
+      },
+      methods: {
+        boardInit() {
+          for (
+            let column = 0;
+            column < Math.floor(this.board.width / this.board.gridSize);
+            column += 1
+          ) {
+            for (
+              let row = 0;
+              row < Math.floor(this.board.height / this.board.gridSize);
+              row += 1
+            ) {
+              const size = this.board.gridSize;
+              const x = row * size;
+              const y = column * size;
+              const rowIndex = row;
+              const columnIndex = column;
+              if (!Array.isArray(this.board.gridMeta[rowIndex])) {
+                this.board.gridMeta[rowIndex] = [];
+              }
+              // 奇数行奇数列
+              if (rowIndex % 2 !== 0 && columnIndex % 2 !== 0) {
+                this.ctx.fillStyle = "#ffffff";
+                this.ctx.fillRect(x, y, size, size);
+                this.board.gridMeta[rowIndex][columnIndex] = {
+                  rowIndex: rowIndex,
+                  columnIndex: columnIndex,
+                  x: x,
+                  y: y,
+                  size: size,
+                  gridBoardColor: "#ffffff"
+                };
+              }
+              // 奇数行偶数列
+              if (rowIndex % 2 !== 0 && columnIndex % 2 === 0) {
+                this.ctx.fillStyle = "#d9d9d9";
+                this.ctx.fillRect(x, y, size, size);
+                this.board.gridMeta[rowIndex][columnIndex] = {
+                  rowIndex: rowIndex,
+                  columnIndex: columnIndex,
+                  x: x,
+                  y: y,
+                  size: size,
+                  gridBoardColor: "#d9d9d9"
+                };
+              }
+              // 偶数行奇数列
+              if (rowIndex % 2 === 0 && columnIndex % 2 !== 0) {
+                this.ctx.fillStyle = "#d9d9d9";
+                this.ctx.fillRect(x, y, size, size);
+                this.board.gridMeta[rowIndex][columnIndex] = {
+                  rowIndex: rowIndex,
+                  columnIndex: columnIndex,
+                  x: x,
+                  y: y,
+                  size: size,
+                  gridBoardColor: "#d9d9d9"
+                };
+              }
+              // 偶数行偶数列
+              if (rowIndex % 2 === 0 && columnIndex % 2 === 0) {
+                this.ctx.fillStyle = "#ffffff";
+                this.ctx.fillRect(x, y, size, size);
+                this.board.gridMeta[rowIndex][columnIndex] = {
+                  rowIndex: rowIndex,
+                  columnIndex: columnIndex,
+                  x: x,
+                  y: y,
+                  size: size,
+                  gridBoardColor: "#ffffff"
+                };
+              }
+            }
+          }
+        },
+        setGridColor(gridMeta) {
+          const { gridColor, gridBoardColor } = gridMeta;
+          this.ctx.fillStyle = gridColor ? gridColor : gridBoardColor;
+        },
+        getGridColor(gridMeta) {
+          const { gridColor, gridBoardColor } = gridMeta;
+          return gridColor ? gridColor : gridBoardColor;
+        },
+        drawGrid(rowIndex, columnIndex) {
+          const { x, y, size } = this.board.gridMeta[rowIndex][columnIndex];
+          this.ctx.fillRect(x, y, size, size);
+        },
+        handleMouseMove(e) {
+          this.draw(e);
+        },
+        // 连续绘制
+        draw(e) {
+          let xIndex = Math.floor(e.clientX / this.board.gridSize);
+          let yIndex = Math.floor(e.clientY / this.board.gridSize);
+          let x = xIndex * this.board.gridSize;
+          let y = yIndex * this.board.gridSize;
+          this.ctx.fillStyle = this.board.color;
+          this.ctx.fillRect(x, y, this.board.gridSize, this.board.gridSize);
+          // 记录连续绘制的点
+          let result = this.board.tempStack.filter(
+            operator => operator.x === x && operator.y === y
+          );
+          if (result.length === 0) {
+            this.board.tempStack.push(this.board.gridMeta[xIndex][yIndex]);
+          }
+          this.board.gridMeta[xIndex][yIndex] = {
+            ...this.board.gridMeta[xIndex][yIndex],
+            gridColor: this.board.color
+          };
+        },
+        redo() {
+          const operators = this.board.operatorStack.pop();
+          if (!operators) return;
+          const newOperators = operators.map(operator => {
+            const { rowIndex, columnIndex } = operator;
+            const gridColor = this.getGridColor(operator);
+            const tempGird = { ...this.board.gridMeta[rowIndex][columnIndex] };
+            this.setGridColor(operator);
+            this.drawGrid(rowIndex, columnIndex);
+            // 更新元数据
+            this.board.gridMeta[rowIndex][columnIndex] = {
+              ...this.board.gridMeta[rowIndex][columnIndex],
+              gridColor: gridColor
+            };
+            return {
+              ...operator,
+              ...tempGird
+            };
+          });
+          this.board.operatorPopStack.push(newOperators);
+        },
+        undo() {
+          const operators = this.board.operatorPopStack.pop();
+          if (!operators) return;
+          const newOperators = operators.map(operator => {
+            const { rowIndex, columnIndex } = operator;
+            const gridColor = this.getGridColor(operator);
+            const tempGird = { ...this.board.gridMeta[rowIndex][columnIndex] };
+            this.setGridColor(operator);
+            this.drawGrid(rowIndex, columnIndex);
+            // 更新元数据
+            this.board.gridMeta[rowIndex][columnIndex] = {
+              ...this.board.gridMeta[rowIndex][columnIndex],
+              gridColor: gridColor
+            };
+            return {
+              ...operator,
+              ...tempGird
+            };
+          });
+          this.board.operatorStack.push(newOperators);
+        }
+      }
+    };
+    let vm = Vue.createApp(app).mount("#app");
+  </script>
+</html>
