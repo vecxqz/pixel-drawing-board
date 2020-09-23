@@ -34,6 +34,7 @@
       </div>
     </div>
   </body>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="https://unpkg.com/vue@next"></script>
   <script>
     let app = {
@@ -59,12 +60,14 @@
             operatorStack: [],
             operatorPopStack: [],
             color: "#199732",
-            tempStack: []
+            tempStack: [],
+            socket: null
           }
         };
       },
       mounted() {
         const { canvas } = this.$refs;
+        this.socket = io();
         this.ctx = canvas.getContext("2d");
         this.boardInit();
         this.$refs.canvas.addEventListener(
@@ -90,6 +93,12 @@
             );
           }.bind(this)
         );
+        this.socket.on("message", data => {
+          const { xIndex, yIndex, gridMeta } = data;
+          console.log(data);
+          this.board.gridMeta[xIndex][yIndex] = gridMeta;
+          this.drawGridBySocket(xIndex, yIndex);
+        });
       },
       methods: {
         boardInit() {
@@ -174,6 +183,13 @@
           const { gridColor, gridBoardColor } = gridMeta;
           return gridColor ? gridColor : gridBoardColor;
         },
+        drawGridBySocket(columnIndex, rowIndex) {
+          const { x, y, size, gridColor, gridBoardColor } = this.board.gridMeta[
+            columnIndex
+          ][rowIndex];
+          this.ctx.fillStyle = gridColor ? gridColor : gridBoardColor;
+          this.ctx.fillRect(x, y, size, size);
+        },
         drawGrid(columnIndex, rowIndex) {
           const { x, y, size } = this.board.gridMeta[columnIndex][rowIndex];
           this.ctx.fillRect(x, y, size, size);
@@ -199,14 +215,20 @@
             ...this.board.gridMeta[xIndex][yIndex],
             gridColor: this.board.color
           };
+          this.socket.emit("message", {
+            type: "update",
+            xIndex,
+            yIndex,
+            gridMeta: this.board.gridMeta[xIndex][yIndex]
+          });
         },
         redo() {
           const operators = this.board.operatorStack.pop();
           if (!operators) return;
           const newOperators = operators.map(operator => {
-            const { columnIndex,rowIndex,  } = operator;
+            const { columnIndex, rowIndex } = operator;
             const gridColor = this.getGridColor(operator);
-            const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex]};
+            const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex] };
             this.setGridColor(operator);
             this.drawGrid(columnIndex, rowIndex);
             // 更新元数据
@@ -227,7 +249,7 @@
           const newOperators = operators.map(operator => {
             const { rowIndex, columnIndex } = operator;
             const gridColor = this.getGridColor(operator);
-            const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex]};
+            const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex] };
             this.setGridColor(operator);
             this.drawGrid(columnIndex, rowIndex);
             // 更新元数据
