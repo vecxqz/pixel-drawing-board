@@ -19,18 +19,59 @@
         justify-content: center;
         width: 200px;
         padding: 10px;
-        margin-left: 10px;
         border-radius: 4px;
         background: rgb(255, 220, 220);
+      }
+      .btn-operator:last-of-type {
+        margin-left: 10px;
+      }
+      .box {
+        display: flex;
+      }
+      .tools {
+        margin-left: 10px;
+      }
+      ul {
+        padding: 0;
+        list-style: none;
+      }
+      .color-choose ul {
+        display: flex;
+      }
+      .color-choose ul li {
+        border: 1px solid rgba(218, 216, 216, 0.567);
+        border-radius: 4px;
+        margin-right: 10px;
       }
     </style>
   </head>
   <body>
     <div id="app">
-      <canvas ref="canvas" :width="board.width" :height="board.height"></canvas>
-      <div class="btn-group-operator">
-        <div class="btn-operator" @click="redo()">redo</div>
-        <div class="btn-operator" @click="undo()">undo</div>
+      <div class="box">
+        <canvas
+          ref="canvas"
+          :width="board.width"
+          :height="board.height"
+        ></canvas>
+        <div class="tools">
+          <p>当前在线</p>
+          <ul>
+            <li v-for="user in userList">{{user}}</li>
+          </ul>
+          <div class="color-choose">
+            <ul>
+              <li
+                v-for="color in colors"
+                :style="{backgroundColor:color,height:'30px',width:'30px'}"
+                @click="colorSetByChoose(color)"
+              />
+            </ul>
+          </div>
+          <div class="btn-group-operator">
+            <div class="btn-operator" @click="redo()">redo</div>
+            <div class="btn-operator" @click="undo()">undo</div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
@@ -38,14 +79,6 @@
   <script src="https://unpkg.com/vue@next"></script>
   <script>
     let app = {
-      setup() {
-        let state = Vue.reactive({
-          message: 10
-        });
-        return {
-          state
-        };
-      },
       data() {
         return {
           mouseDown: false,
@@ -59,10 +92,12 @@
             gridMeta: [],
             operatorStack: [],
             operatorPopStack: [],
-            color: "#199732",
-            tempStack: [],
-            socket: null
-          }
+            color: "black",
+            tempStack: []
+          },
+          userListData: [],
+          socket: null,
+          colors: ["red", "yellow", "blue", "green", "black", "white"]
         };
       },
       mounted() {
@@ -94,10 +129,21 @@
           }.bind(this)
         );
         this.socket.on("message", data => {
-          const { xIndex, yIndex, gridMeta } = data;
           console.log(data);
-          this.board.gridMeta[xIndex][yIndex] = gridMeta;
-          this.drawGridBySocket(xIndex, yIndex);
+          if (data.type === "update") {
+            const { xIndex, yIndex, gridMeta } = data;
+            console.log(data);
+            this.board.gridMeta[xIndex][yIndex] = gridMeta;
+            this.drawGridBySocket(xIndex, yIndex);
+          }
+          if (data.type === "userAdd") {
+            const { data: userData } = data;
+            this.userListData= userData;
+          }
+          if (data.type === "userRemove") {
+            const { data: userData } = data;
+            this.userListData= userData;
+          }
         });
       },
       methods: {
@@ -263,6 +309,14 @@
             };
           });
           this.board.operatorStack.push(newOperators);
+        },
+        colorSetByChoose(color) {
+          this.board.color = color;
+        }
+      },
+      computed: {
+        userList() {
+          return this.userListData;
         }
       }
     };
