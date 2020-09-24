@@ -84,8 +84,8 @@
           mouseDown: false,
           ctx: null,
           board: {
-            width: 1200,
-            height: 900,
+            width: 600,
+            height: 600,
             gridSize: 10,
             rowCount: 0,
             columnCount: 0,
@@ -93,11 +93,17 @@
             operatorStack: [],
             operatorPopStack: [],
             color: "black",
-            tempStack: []
+            tempStack: [],
+            startPoint: { e: null, x: null, y: null },
+            endPoint: { e: null, x: null, y: null },
+            lastStartPoint: { e: null, x: null, y: null },
+            lastEndPoint: { e: null, x: null, y: null }
           },
           userListData: [],
           socket: null,
-          colors: ["red", "yellow", "blue", "green", "black", "white"]
+          colors: ["red", "yellow", "blue", "green", "black", "white"],
+          // mode: "line",
+          mode: "point"
         };
       },
       mounted() {
@@ -110,7 +116,11 @@
           function (e) {
             this.board.tempStack = [];
             this.mouseDown = true;
-            this.draw(e);
+            this.board.startPoint.e = e;
+            this.board.lastStartPoint.x = null;
+            this.board.lastStartPoint.y = null;
+            this.board.lastEndPoint.x = null;
+            this.board.lastEndPoint.y = null;
             this.$refs.canvas.addEventListener(
               "mousemove",
               this.handleMouseMove
@@ -138,11 +148,11 @@
           }
           if (data.type === "userAdd") {
             const { data: userData } = data;
-            this.userListData= userData;
+            this.userListData = userData;
           }
           if (data.type === "userRemove") {
             const { data: userData } = data;
-            this.userListData= userData;
+            this.userListData = userData;
           }
         });
       },
@@ -225,6 +235,13 @@
           const { gridColor, gridBoardColor } = gridMeta;
           this.ctx.fillStyle = gridColor ? gridColor : gridBoardColor;
         },
+        clearGrid(x, y) {
+          const color = this.getColorToDefalut(x, y);
+          this.drawGrid(x, y, color);
+        },
+        getColorToDefalut(x, y) {
+          return this.getGridColor(this.board.gridMeta[x][y]);
+        },
         getGridColor(gridMeta) {
           const { gridColor, gridBoardColor } = gridMeta;
           return gridColor ? gridColor : gridBoardColor;
@@ -236,12 +253,43 @@
           this.ctx.fillStyle = gridColor ? gridColor : gridBoardColor;
           this.ctx.fillRect(x, y, size, size);
         },
-        drawGrid(columnIndex, rowIndex) {
+        drawGrid(columnIndex, rowIndex, color) {
           const { x, y, size } = this.board.gridMeta[columnIndex][rowIndex];
+          this.ctx.fillStyle = color;
           this.ctx.fillRect(x, y, size, size);
         },
         handleMouseMove(e) {
-          this.draw(e);
+          this.board.endPoint.e = e;
+          if (this.mode === "point") {
+            this.draw(e);
+          }
+          if (this.mode === "line") {
+            let x1, y1, x2, y2;
+            x1 = Math.floor(
+              this.board.startPoint.e.clientX / this.board.gridSize
+            );
+            y1 = Math.floor(
+              this.board.startPoint.e.clientY / this.board.gridSize
+            );
+            x2 = Math.floor(
+              this.board.endPoint.e.clientX / this.board.gridSize
+            );
+            y2 = Math.floor(
+              this.board.endPoint.e.clientY / this.board.gridSize
+            );
+            const { x: x3, y: y3 } = this.board.lastStartPoint;
+            const { x: x4, y: y4 } = this.board.lastEndPoint;
+            console.log(x3, y3, x4, y4);
+            if (x3 !== null && y3 !== null && (x4 !== null) & (y4 !== null)) {
+              this.bresenhamLine(x3, y3, x4, y4, this.clearGrid);
+            }
+            this.ctx.fillStyle = "black";
+            this.bresenhamLine(x1, y1, x2, y2, this.drawGrid);
+            this.board.lastStartPoint.x = x1;
+            this.board.lastStartPoint.y = y1;
+            this.board.lastEndPoint.x = x2;
+            this.board.lastEndPoint.y = y2;
+          }
         },
         draw(e) {
           let xIndex = Math.floor(e.clientX / this.board.gridSize);
@@ -275,8 +323,8 @@
             const { columnIndex, rowIndex } = operator;
             const gridColor = this.getGridColor(operator);
             const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex] };
-            this.setGridColor(operator);
-            this.drawGrid(columnIndex, rowIndex);
+            const color = this.getGridColor(operator);
+            this.drawGrid(columnIndex, rowIndex, color);
             // 更新元数据
             this.board.gridMeta[columnIndex][rowIndex] = {
               ...this.board.gridMeta[columnIndex][rowIndex],
@@ -296,8 +344,8 @@
             const { rowIndex, columnIndex } = operator;
             const gridColor = this.getGridColor(operator);
             const tempGird = { ...this.board.gridMeta[columnIndex][rowIndex] };
-            this.setGridColor(operator);
-            this.drawGrid(columnIndex, rowIndex);
+            const color = this.getGridColor(operator);
+            this.drawGrid(columnIndex, rowIndex, color);
             // 更新元数据
             this.board.gridMeta[columnIndex][rowIndex] = {
               ...this.board.gridMeta[columnIndex][rowIndex],
@@ -312,6 +360,44 @@
         },
         colorSetByChoose(color) {
           this.board.color = color;
+        },
+        bresenhamLine(x1, y1, x2, y2, callback, color) {
+          var w = x2 - x1;
+          var h = y2 - y1;
+          var dx = ((w > 0) << 1) - 1;
+          var dy = ((h > 0) << 1) - 1;
+          w = Math.abs(w);
+          h = Math.abs(h);
+          var f, y, x, delta1, delta2;
+          if (w > h) {
+            f = 2 * h - w;
+            delta1 = 2 * h;
+            delta2 = (h - w) * 2;
+            for (x = x1, y = y1; x != x2; x += dx) {
+              callback(x, y, color);
+              if (f < 0) {
+                f += delta1;
+              } else {
+                y += dy;
+                f += delta2;
+              }
+            }
+            callback(x, y, color);
+          } else {
+            f = 2 * w - h;
+            delta1 = w * 2;
+            delta2 = (w - h) * 2;
+            for (x = x1, y = y1; y != y2; y += dy) {
+              callback(x, y, color);
+              if (f < 0) {
+                f += delta1;
+              } else {
+                x += dx;
+                f += delta2;
+              }
+            }
+            callback(x, y, color);
+          }
         }
       },
       computed: {
