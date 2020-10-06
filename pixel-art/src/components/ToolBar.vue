@@ -1,68 +1,107 @@
 <template>
-  <div class="toolbar">
+  <div id="toolbar">
     <div class="title">TOOLS</div>
     <ul class="toolbar-list">
-      <li id="tool-pecil" class="toolbar-item">
-        <div class="toolbar-icon" title="Pecil Tool"></div>
-      </li>
-      <li id="tool-eraser" class="toolbar-item">
-        <div class="toolbar-icon" title="Eraser Tool"></div>
-      </li>
-      <li id="tool-brush" class="toolbar-item">
-        <div class="toolbar-icon" title="Brush Tool"></div>
-      </li>
-      <li id="tool-line" class="toolbar-item">
-        <div class="toolbar-icon" title="Line Tool"></div>
-      </li>
-      <li id="tool-square" class="toolbar-item">
-        <div class="toolbar-icon" title="Square Tool"></div>
-      </li>
-      <li id="tool-circle" class="toolbar-item">
-        <div class="toolbar-icon" title="Circle Tool"></div>
-      </li>
-      <li id="tool-bucket" class="toolbar-item">
-        <div class="toolbar-icon" title="Bucket Tool"></div>
-      </li>
-      <li id="tool-color-picker" class="toolbar-item">
-        <div class="toolbar-icon" title="Color Picker Tool"></div>
-      </li>
-      <li id="tool-move" class="toolbar-item">
-        <div class="toolbar-icon" title="Move Tool"></div>
-      </li>
-      <li id="tool-select" class="toolbar-item">
-        <div class="toolbar-icon" title="Select Tool"></div>
-      </li>
-      <li id="tool-text" class="toolbar-item">
-        <div class="toolbar-icon" title="Text Tool"></div>
-      </li>
-      <li id="tool-lighten-darken" class="toolbar-item">
-        <div class="toolbar-icon" title="Lighten/Darken Tool"></div>
-      </li>
-      <li id="tool-dithering" class="toolbar-item">
-        <div class="toolbar-icon" title="Dithering Tool"></div>
-      </li>
-      <li id="tool-stamp" class="toolbar-item">
-        <div class="toolbar-icon" title="Stamp Tool"></div>
-      </li>
-      <li id="tool-crop" class="toolbar-item">
-        <div
-          class="toolbar-icon"
-          title="Crop Tool - Resize Drawing Canvas"
-        ></div>
-      </li>
-      <li id="tool-gradient" class="toolbar-item">
-        <div class="toolbar-icon" title="Gradient Tool"></div>
+      <li
+        class="toolbar-item"
+        :class="{ active: toolActiveIndex === index }"
+        v-for="(tool, index) in tools"
+        :title="tool.title"
+        :id="tool.id"
+        :key="tool.id"
+        @click="toolSelect(index, $event)"
+      >
+        <div class="toolbar-icon"></div>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-export default {};
+export default {
+  name: "ToolBar",
+  data() {
+    return {
+      toolActiveIndex: 0,
+      tools: [
+        {
+          id: "tool-pecil",
+          title: "Pecil Tool"
+        },
+        {
+          id: "tool-eraser",
+          title: "Eraser Tool"
+        },
+        {
+          id: "tool-brush",
+          title: "Brush Tool"
+        },
+        {
+          id: "tool-line",
+          title: "Line Tool"
+        },
+        {
+          id: "tool-square",
+          title: "Square Tool"
+        },
+        {
+          id: "tool-circle",
+          title: "Circle Tool"
+        },
+        {
+          id: "tool-bucket",
+          title: "Bucket Tool"
+        },
+        {
+          id: "tool-color-picker",
+          title: "Color Picker Tool"
+        },
+        {
+          id: "tool-move",
+          title: "Move Tool"
+        },
+        {
+          id: "tool-select",
+          title: "Select Tool"
+        },
+        {
+          id: "tool-text",
+          title: "Text Tool"
+        },
+        {
+          id: "tool-lighten-darken",
+          title: "Lighten/Darken Tool"
+        },
+        {
+          id: "tool-dithering",
+          title: "Dithering Tool"
+        },
+        {
+          id: "tool-stamp",
+          title: "Stamp Tool"
+        },
+        {
+          id: "tool-crop",
+          title: "Crop Tool - Resize Drawing Canvas"
+        },
+        {
+          id: "tool-gradient",
+          title: "Gradient Tool"
+        }
+      ]
+    };
+  },
+  methods: {
+    toolSelect(index) {
+      this.toolActiveIndex = index;
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped>
-.toolbar {
+#toolbar {
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
   background-color: #333;
   .title {
     color: #fff;
@@ -83,6 +122,9 @@ export default {};
   cursor: pointer;
   &:hover {
     background-color: rgba(255, 255, 255, 0.075);
+  }
+  &.active {
+    background-color: rgba(37, 138, 224, 1);
   }
 }
 .toolbar-icon {

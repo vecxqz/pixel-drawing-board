@@ -1,25 +1,25 @@
 <template>
-  <div>operate Header</div>
+  <ToolHeader />
   <div class="dis-flex">
-    <div class="area-tool">
-      <ToolBar />
-    </div>
-    <div class="area-canvas">
-      <PixleCanvas />
-    </div>
-    <div class="area-attribute">
-      attribute area
-    </div>
+    <ToolBar class="area-tool" />
+    <PixleCanvas class="area-canvas" />
+    <CanvasAttribute class="area-attribute" />
   </div>
-  <div>canvas animation preview</div>
+  <AnimationPreview />
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
+import ToolHeader from "@/components/ToolHeader.vue";
 import ToolBar from "@/components/ToolBar.vue";
+import CanvasAttribute from "@/components/CanvasAttribute.vue";
+import AnimationPreview from "@/components/AnimationPreview.vue";
 export default {
   components: {
     PixleCanvas,
-    ToolBar
+    ToolBar,
+    CanvasAttribute,
+    ToolHeader,
+    AnimationPreview
   }
 };
 </script>
