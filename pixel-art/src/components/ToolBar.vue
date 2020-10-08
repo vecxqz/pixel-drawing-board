@@ -26,67 +26,83 @@ export default {
       tools: [
         {
           id: "tool-pecil",
-          title: "Pecil Tool"
+          title: "Pecil Tool",
+          mode: "pecil"
         },
         {
           id: "tool-eraser",
-          title: "Eraser Tool"
+          title: "Eraser Tool",
+          mode: "eraser"
         },
         {
           id: "tool-brush",
-          title: "Brush Tool"
+          title: "Brush Tool",
+          mode: "brush"
         },
         {
           id: "tool-line",
-          title: "Line Tool"
+          title: "Line Tool",
+          mode: "line"
         },
         {
           id: "tool-square",
-          title: "Square Tool"
+          title: "Square Tool",
+          mode: "square"
         },
         {
           id: "tool-circle",
-          title: "Circle Tool"
+          title: "Circle Tool",
+          mode: "circle"
         },
         {
           id: "tool-bucket",
-          title: "Bucket Tool"
+          title: "Bucket Tool",
+          mode: "bucket"
         },
         {
           id: "tool-color-picker",
-          title: "Color Picker Tool"
+          title: "Color Picker Tool",
+          mode: "coolPicker"
         },
         {
           id: "tool-move",
-          title: "Move Tool"
+          title: "Move Tool",
+          mode: "move"
         },
         {
           id: "tool-select",
-          title: "Select Tool"
+          title: "Select Tool",
+          mode: "select"
         },
         {
           id: "tool-text",
-          title: "Text Tool"
+          title: "Text Tool",
+          mode: "text"
         },
         {
           id: "tool-lighten-darken",
-          title: "Lighten/Darken Tool"
+          title: "Lighten/Darken Tool",
+          mode: "lighten/darken"
         },
         {
           id: "tool-dithering",
-          title: "Dithering Tool"
+          title: "Dithering Tool",
+          mode: "dithering"
         },
         {
           id: "tool-stamp",
-          title: "Stamp Tool"
+          title: "Stamp Tool",
+          mode: "stamp"
         },
         {
           id: "tool-crop",
-          title: "Crop Tool - Resize Drawing Canvas"
+          title: "Crop Tool - Resize Drawing Canvas",
+          mode: "crop"
         },
         {
           id: "tool-gradient",
-          title: "Gradient Tool"
+          title: "Gradient Tool",
+          mode: "gradient"
         }
       ]
     };

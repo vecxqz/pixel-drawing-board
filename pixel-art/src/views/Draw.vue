@@ -20,6 +20,9 @@ export default {
     CanvasAttribute,
     ToolHeader,
     AnimationPreview
+  },
+  mounted() {
+    this.$store.dispatch("canvasModule/CREATE_PAGE");
   }
 };
 </script>
