@@ -6,11 +6,35 @@ const module: Module<CanvasState, any> = {
   namespaced: true,
   state: () => ({
     mode: "point",
+    color: "#000",
     currentLayerIndex: 0,
     currentPageIndex: 0,
     pages: [],
     width: 800,
-    height: 800
+    height: 800,
+    canvasCtx: undefined,
+    eventPoint: {
+      startPoint: {
+        e: undefined,
+        x: undefined,
+        y: undefined
+      },
+      endPoint: {
+        e: undefined,
+        x: undefined,
+        y: undefined
+      },
+      lastStartPoint: {
+        e: undefined,
+        x: undefined,
+        y: undefined
+      },
+      lastEndPoint: {
+        e: undefined,
+        x: undefined,
+        y: undefined
+      }
+    }
   }),
   mutations: {
     ...CanvasMutations

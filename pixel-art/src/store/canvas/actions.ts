@@ -1,7 +1,7 @@
 import { CanvasState } from "./type";
 import { RootState } from "../type";
 import { ActionTree } from "vuex";
-import { ActionsTypes, MutationsTypes } from "../../enum/canvas";
+import { ActionsTypes, MutationsTypes } from "./enum";
 const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.SET_PAINT_MODE]({ commit }, mode: string): void {
     console.log(mode);
@@ -12,6 +12,37 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   },
   [ActionsTypes.CREATE_PAGE]({ commit }): void {
     commit(MutationsTypes.CREATE_PAGE);
+  },
+  [ActionsTypes.SET_CANVASCTX]({ commit }, canvas: HTMLCanvasElement): void {
+    const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+    commit(MutationsTypes.SET_CANVASCTX, canvasCtx);
+  },
+  [ActionsTypes.SET_COLOR]({ commit }, color: string): void {
+    commit(MutationsTypes.SET_COLOR, color);
+  },
+  [ActionsTypes.SET_START_POINT](
+    { commit },
+    { e, x, y }: { e: MouseEvent; x: number; y: number }
+  ) {
+    commit(MutationsTypes.SET_START_POINT, { e, x, y });
+  },
+  [ActionsTypes.SET_END_POINT](
+    { commit },
+    { e, x, y }: { e: MouseEvent; x: number; y: number }
+  ) {
+    commit(MutationsTypes.SET_END_POINT, { e, x, y });
+  },
+  [ActionsTypes.SET_LASET_START_POINT](
+    { commit },
+    { e, x, y }: { e: MouseEvent; x: number; y: number }
+  ) {
+    commit(MutationsTypes.SET_LASET_START_POINT, { e, x, y });
+  },
+  [ActionsTypes.SET_LASET_END_POINT](
+    { commit },
+    { e, x, y }: { e: MouseEvent; x: number; y: number }
+  ) {
+    commit(MutationsTypes.SET_LASET_END_POINT, { e, x, y });
   }
 };
 export { CanvasActions };

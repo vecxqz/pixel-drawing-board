@@ -10,16 +10,27 @@
         />
       </ul>
     </div>
-    <div class="btn-group-operator">
+    <!-- <div class="btn-group-operator">
       <div class="btn-operator" @click="redo()">redo</div>
       <div class="btn-operator" @click="undo()">undo</div>
-    </div>
+    </div> -->
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {
-  name: "CanvasAttribute"
+  name: "CanvasAttribute",
+  data() {
+    return {
+      colors: ["red", "yellow", "blue", "green", "black", "white"]
+    };
+  },
+  methods: {
+    colorSetByChoose(this: any, color: string) {
+      this.$store.dispatch("canvasModule/SET_COLOR", color);
+      console.log(this.$store.state)
+    }
+  }
 };
 </script>
 
