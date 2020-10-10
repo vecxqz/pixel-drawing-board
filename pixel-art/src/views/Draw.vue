@@ -23,6 +23,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch("canvasModule/CREATE_PAGE");
+    this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
   }
 };
 </script>

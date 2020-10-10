@@ -110,7 +110,7 @@ export default {
   methods: {
     toolSelect(index) {
       this.toolActiveIndex = index;
-      this.$store.dispatch("canvasModule/SET_PAINT_MODE", this.tools[index]);
+      this.$store.dispatch("canvasModule/SET_PAINT_MODE", this.tools[index].mode);
     }
   }
 };

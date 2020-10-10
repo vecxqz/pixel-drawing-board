@@ -81,6 +81,7 @@ function drawGrid(
   color: string
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
+  layerMeta[columnIndex][rowIndex].color = color;
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(x, y, size, size);
 }

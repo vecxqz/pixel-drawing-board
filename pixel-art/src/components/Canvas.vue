@@ -1,26 +1,21 @@
 <template>
   <div id="canvas">
-    <canvas ref="canvas" :width="board.width" :height="board.height"></canvas>
+    <canvas
+      ref="canvas"
+      :width="$store.state.canvasModule.width"
+      :height="$store.state.canvasModule.height"
+    ></canvas>
   </div>
 </template>
 
 <script lang="ts">
 import { bresenhamLine, drawGrid } from "../util/canvas";
+import { isUndefined } from "../util/common";
 export default {
   name: "Canvas",
   data() {
     return {
       mouseDown: false,
-      ctx: null,
-      board: {
-        width: 600,
-        height: 600,
-        gridSize: 10,
-        rowCount: 0,
-        columnCount: 0,
-        gridMeta: [],
-        color: "black"
-      },
       // mode: "line"
       mode: "point"
     };
@@ -45,6 +40,38 @@ export default {
     });
     this.$refs.canvas.addEventListener("mouseup", () => {
       this.mouseDown = false;
+      const {
+        currentPageIndex,
+        currentLayerIndex,
+        canvasCtx,
+        color,
+        mode,
+        size,
+        eventPoint: { startPoint, endPoint }
+      } = this.$store.state.canvasModule;
+      if (mode === "line") {
+        const x1 = Math.floor(startPoint.e.offsetX / size),
+          y1 = Math.floor(startPoint.e.offsetY / size),
+          x2 = Math.floor(endPoint.e.offsetX / size),
+          y2 = Math.floor(endPoint.e.offsetY / size);
+        this.bresenhamLine(
+          x1,
+          y1,
+          x2,
+          y2,
+          (columnIndex: number, rowIndex: number) => {
+            this.drawGrid(
+              canvasCtx as CanvasRenderingContext2D,
+              this.$store.state.canvasModule.pages[currentPageIndex].layers[
+                currentLayerIndex
+              ],
+              columnIndex,
+              rowIndex,
+              color
+            );
+          }
+        );
+      }
       this.$refs.canvas.removeEventListener("mousemove", (e: MouseEvent) =>
         this.handleMouseMove(e)
       );
@@ -58,56 +85,79 @@ export default {
         : gridBoardColor;
     },
     clearGrid(this: any, x: number, y: number) {
+      const {
+        currentPageIndex,
+        currentLayerIndex
+      } = this.$store.state.canvasModule;
       const color = this.getColorToDefalut(x, y);
       this.drawGrid(
-        this.$store.state.canvasModule.canvasCtx,
-        this.board.gridMeta,
+        this.$store.state.canvasModule.canvasCtx as CanvasRenderingContext2D,
+        this.$store.state.canvasModule.pages[currentPageIndex].layers[
+          currentLayerIndex
+        ],
         x,
         y,
         color
       );
     },
     getColorToDefalut(this: any, x: any, y: any) {
-      return this.getGridColor(this.board.gridMeta[x][y]);
+      const {
+        currentPageIndex,
+        currentLayerIndex
+      } = this.$store.state.canvasModule;
+      return this.getGridColor(
+        this.$store.state.canvasModule.pages[currentPageIndex].layers[
+          currentLayerIndex
+        ][x][y]
+      );
     },
     getGridColor(this: any, gridMeta: any) {
-      const { gridColor, gridBoardColor } = gridMeta;
-      return gridColor ? gridColor : gridBoardColor;
+      const { color, backgroundColor } = gridMeta;
+      return color ? color : backgroundColor;
     },
     handleMouseMove(this: any, e: any) {
       this.$store.dispatch("canvasModule/SET_END_POINT", { e });
-      if (this.mode === "point") {
+      const {
+        // currentPageIndex,
+        // currentLayerIndex,
+        canvasCtx,
+        color,
+        mode,
+        size,
+        eventPoint: { startPoint, endPoint }
+      } = this.$store.state.canvasModule;
+      if (mode === "pecil") {
         this.draw(e);
       }
-      if (this.mode === "line") {
-        const x1 = Math.floor(
-            this.$store.state.canvasModule.eventPoint.startPoint.e.offsetX /
-              this.board.gridSize
-          ),
-          y1 = Math.floor(
-            this.$store.state.canvasModule.eventPoint.startPoint.e.offsetY /
-              this.board.gridSize
-          ),
-          x2 = Math.floor(
-            this.$store.state.canvasModule.eventPoint.endPoint.e.offsetX /
-              this.board.gridSize
-          ),
-          y2 = Math.floor(
-            this.$store.state.canvasModule.eventPoint.endPoint.e.offsetX /
-              this.board.gridSize
+      if (mode === "line") {
+        const x1 = Math.floor(startPoint.e.offsetX / size),
+          y1 = Math.floor(startPoint.e.offsetY / size),
+          x2 = Math.floor(endPoint.e.offsetX / size),
+          y2 = Math.floor(endPoint.e.offsetY / size);
+        const {
+          x: x3,
+          y: y3
+        } = this.$store.state.canvasModule.eventPoint.lastStartPoint;
+        const {
+          x: x4,
+          y: y4
+        } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
+        if (
+          !isUndefined(x3) &&
+          !isUndefined(y3) &&
+          !isUndefined(x4) &&
+          !isUndefined(y4)
+        ) {
+          this.bresenhamLine(
+            x3,
+            y3,
+            x4,
+            y4,
+            (columnIndex: number, rowIndex: number) => {
+              this.clearGrid(columnIndex, rowIndex);
+            }
           );
-        // const {
-        //   x: x3,
-        //   y: y3
-        // } = this.$store.state.canvasModule.eventPoint.lastStartPoint;
-        // const {
-        //   x: x4,
-        //   y: y4
-        // } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
-        // if (x3 !== null && y3 !== null && x4 !== null && y4 !== null) {
-        //   this.bresenhamLine(x3, y3, x4, y4, this.clearGrid);
-        // }
-        this.$store.state.canvasModule.canvasCtx.fillStyle = "black";
+        }
         this.bresenhamLine(
           x1,
           y1,
@@ -115,12 +165,11 @@ export default {
           y2,
           (columnIndex: number, rowIndex: number) => {
             this.drawGrid(
-              this.$store.state.canvasModule
-                .canvasCtx as CanvasRenderingContext2D,
-              this.board.gridMeta,
+              canvasCtx as CanvasRenderingContext2D,
+              this.$store.state.canvasModule.tempLayer,
               columnIndex,
               rowIndex,
-              "black"
+              color
             );
           }
         );
@@ -142,8 +191,10 @@ export default {
         currentLayerIndex,
         color
       } = this.$store.state.canvasModule;
-      const xIndex = Math.floor(e.offsetX / this.board.gridSize),
-        yIndex = Math.floor(e.offsetY / this.board.gridSize);
+      const xIndex = Math.floor(
+          e.offsetX / this.$store.state.canvasModule.size
+        ),
+        yIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
       this.drawGrid(
         this.$store.state.canvasModule.canvasCtx as CanvasRenderingContext2D,
         this.$store.state.canvasModule.pages[currentPageIndex].layers[

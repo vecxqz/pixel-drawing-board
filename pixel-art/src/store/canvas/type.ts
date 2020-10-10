@@ -7,6 +7,8 @@ export interface CanvasState {
   pages: Array<page> /**画布页存储 */;
   width: number /**画布宽度 */;
   height: number /**画布高度 */;
+  tempLayer: layer/**未松开鼠标前的绘制变量 */;
+  size: number /**格子边长 */;
   canvasCtx?: CanvasRenderingContext2D /**canvas上下文 */;
   eventPoint: eventPoint /**鼠标事件点 */;
 }

@@ -5,13 +5,15 @@ import { CanvasState } from "./type";
 const module: Module<CanvasState, any> = {
   namespaced: true,
   state: () => ({
-    mode: "point",
+    mode: "pecil",
     color: "#000",
     currentLayerIndex: 0,
     currentPageIndex: 0,
     pages: [],
     width: 800,
     height: 800,
+    size: 10,
+    tempLayer: [],
     canvasCtx: undefined,
     eventPoint: {
       startPoint: {

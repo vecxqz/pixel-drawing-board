@@ -161,11 +161,11 @@ export default {
           ),
           x2 = Math.floor(this.board.endPoint.e.offsetX / this.board.gridSize),
           y2 = Math.floor(this.board.endPoint.e.offsetY / this.board.gridSize);
-        const { x: x3, y: y3 } = this.board.lastStartPoint;
-        const { x: x4, y: y4 } = this.board.lastEndPoint;
-        if (x3 !== null && y3 !== null && x4 !== null && y4 !== null) {
-          this.bresenhamLine(x3, y3, x4, y4, this.clearGrid);
-        }
+        // const { x: x3, y: y3 } = this.board.lastStartPoint;
+        // const { x: x4, y: y4 } = this.board.lastEndPoint;
+        // if (x3 !== null && y3 !== null && x4 !== null && y4 !== null) {
+        //   this.bresenhamLine(x3, y3, x4, y4, this.clearGrid);
+        // }
         this.ctx.fillStyle = "black";
         this.bresenhamLine(x1, y1, x2, y2, this.drawGrid);
         this.board.lastStartPoint.x = x1;

@@ -10,6 +10,9 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.CREATE_LAYER]({ commit }): void {
     commit(MutationsTypes.CREATE_LAYER);
   },
+  [ActionsTypes.CREATE_TEMP_LAYER]({ commit }): void {
+    commit(MutationsTypes.CREATE_TEMP_LAYER);
+  },
   [ActionsTypes.CREATE_PAGE]({ commit }): void {
     commit(MutationsTypes.CREATE_PAGE);
   },
