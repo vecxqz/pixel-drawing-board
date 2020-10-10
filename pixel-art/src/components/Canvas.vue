@@ -184,6 +184,9 @@ export default {
           y: y2
         });
       }
+      if (mode === "eraser") {
+        this.eraser(e);
+      }
     },
     draw(this: any, e: any) {
       const {
@@ -234,6 +237,36 @@ export default {
             );
           }
       }, 10);
+    },
+    eraser(this: any, e: MouseEvent) {
+      const {
+        currentPageIndex,
+        currentLayerIndex
+      } = this.$store.state.canvasModule;
+      const xIndex = Math.floor(
+          e.offsetX / this.$store.state.canvasModule.size
+        ),
+        yIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
+      const { backgroundColor: color } = this.$store.state.canvasModule.pages[
+        currentPageIndex
+      ].layers[currentLayerIndex][xIndex][yIndex];
+      this.drawGrid(
+        this.$store.state.canvasModule.canvasCtx as CanvasRenderingContext2D,
+        this.$store.state.canvasModule.pages[currentPageIndex].layers[
+          currentLayerIndex
+        ],
+        xIndex,
+        yIndex,
+        color
+      );
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        currentLayerIndex
+      ][xIndex][yIndex] = {
+        ...this.$store.state.canvasModule.pages[currentPageIndex].layers[
+          currentLayerIndex
+        ][xIndex][yIndex],
+        color
+      };
     },
     bresenhamLine,
     drawGrid
