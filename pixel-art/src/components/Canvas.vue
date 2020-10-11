@@ -30,7 +30,6 @@ export default {
       this.$store.dispatch("canvasModule/SET_START_POINT", { e });
       this.$store.dispatch("canvasModule/SET_LASET_START_POINT", { e });
       this.$store.dispatch("canvasModule/SET_LASET_END_POINT", { e });
-      console.log(this.$store.state.canvasModule);
       this.$refs.canvas.addEventListener("mousemove", (e: MouseEvent) => {
         const { mouseDown }: { mouseDown: Boolean } = this;
         if (mouseDown) {
@@ -116,7 +115,10 @@ export default {
       return color ? color : backgroundColor;
     },
     handleMouseMove(this: any, e: any) {
-      this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+      const columnIndex = Math.floor(
+          e.offsetX / this.$store.state.canvasModule.size
+        ),
+        rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
       const {
         // currentPageIndex,
         // currentLayerIndex,
@@ -126,8 +128,18 @@ export default {
         size,
         eventPoint: { startPoint, endPoint }
       } = this.$store.state.canvasModule;
+      this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+      this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
+      this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       if (mode === "pecil") {
-        this.draw(e);
+        // this.draw(e);
+        this.drawGrid(
+          canvasCtx as CanvasRenderingContext2D,
+          this.$store.state.canvasModule.tempLayer,
+          columnIndex,
+          rowIndex,
+          color
+        );
       }
       if (mode === "line") {
         const x1 = Math.floor(startPoint.e.offsetX / size),

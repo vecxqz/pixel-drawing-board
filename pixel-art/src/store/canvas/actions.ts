@@ -4,7 +4,6 @@ import { ActionTree } from "vuex";
 import { ActionsTypes, MutationsTypes } from "./enum";
 const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.SET_PAINT_MODE]({ commit }, mode: string): void {
-    console.log(mode);
     commit(MutationsTypes.SET_PAINT_MODE, mode);
   },
   [ActionsTypes.CREATE_LAYER]({ commit }): void {
@@ -46,6 +45,12 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
     { e, x, y }: { e: MouseEvent; x: number; y: number }
   ) {
     commit(MutationsTypes.SET_LASET_END_POINT, { e, x, y });
-  }
+  },
+  [ActionsTypes.SET_ROW_INDEX]({ commit }, index: number) {
+    commit(MutationsTypes.SET_ROW_INDEX, index);
+  },
+  [ActionsTypes.SET_COLUMN_INDEX]({ commit }, index: number) {
+    commit(MutationsTypes.SET_COLUMN_INDEX, index);
+  },
 };
 export { CanvasActions };

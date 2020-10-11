@@ -1,5 +1,6 @@
 <template>
   <div class="tools">
+    <div v-if="girdMeta">{{ girdMeta }}</div>
     <div class="color-choose">
       <ul>
         <li
@@ -25,10 +26,15 @@ export default {
       colors: ["red", "yellow", "blue", "green", "black", "white"]
     };
   },
+  computed: {
+    girdMeta(this: any) {
+      return this.$store.getters["canvasModule/currentGridMeta"];
+    }
+  },
   methods: {
     colorSetByChoose(this: any, color: string) {
       this.$store.dispatch("canvasModule/SET_COLOR", color);
-      console.log(this.$store.state)
+      console.log(this.$store.state);
     }
   }
 };

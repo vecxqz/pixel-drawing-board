@@ -26,7 +26,6 @@ const CanvasMutations: MutationTree<CanvasState> = {
     state.pages.push({
       layers: [layer]
     });
-    console.log(state);
   },
   [MutationsTypes.SET_CANVASCTX](
     state: CanvasState,
@@ -93,6 +92,12 @@ const CanvasMutations: MutationTree<CanvasState> = {
     if (!isUndefined(y)) {
       state.eventPoint.lastEndPoint.y = y;
     }
+  },
+  [MutationsTypes.SET_ROW_INDEX](state: CanvasState, index: number) {
+    state.currentRowIndex = index;
+  },
+  [MutationsTypes.SET_COLUMN_INDEX](state: CanvasState, index: number) {
+    state.currentColumnIndex = index;
   }
 };
 export { CanvasMutations };

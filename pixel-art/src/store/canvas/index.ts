@@ -1,5 +1,6 @@
 import { CanvasMutations } from "./mutations";
 import { CanvasActions } from "./actions";
+import { CanvasGetters } from "./getters";
 import { Module } from "vuex";
 import { CanvasState } from "./type";
 const module: Module<CanvasState, any> = {
@@ -9,6 +10,8 @@ const module: Module<CanvasState, any> = {
     color: "#000",
     currentLayerIndex: 0,
     currentPageIndex: 0,
+    currentRowIndex: 0,
+    currentColumnIndex: 0,
     pages: [],
     width: 800,
     height: 800,
@@ -43,6 +46,9 @@ const module: Module<CanvasState, any> = {
   },
   actions: {
     ...CanvasActions
+  },
+  getters: {
+    ...CanvasGetters
   }
 };
 export default module;
