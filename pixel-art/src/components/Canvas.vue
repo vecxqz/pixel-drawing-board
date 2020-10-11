@@ -120,8 +120,8 @@ export default {
         ),
         rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
       const {
-        // currentPageIndex,
-        // currentLayerIndex,
+        currentPageIndex,
+        currentLayerIndex,
         canvasCtx,
         color,
         mode,
@@ -140,6 +140,14 @@ export default {
           rowIndex,
           color
         );
+        this.$store.state.canvasModule.pages[currentPageIndex].layers[
+          currentLayerIndex
+        ][columnIndex][rowIndex] = {
+          ...this.$store.state.canvasModule.pages[currentPageIndex].layers[
+            currentLayerIndex
+          ][columnIndex][rowIndex],
+          color
+        };
       }
       if (mode === "line") {
         const x1 = Math.floor(startPoint.e.offsetX / size),
