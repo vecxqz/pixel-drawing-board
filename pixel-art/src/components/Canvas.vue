@@ -372,10 +372,8 @@ export default {
           x: x4,
           y: y4
         } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
-        const midX1 = Math.floor((x2 + x1) / 2),
-          midY1 = Math.floor((y2 + y1) / 2),
-          midX2 = Math.floor((x3 + x4) / 2),
-          midY2 = Math.floor((y3 + y4) / 2),
+        const midXY1 = Math.floor((x2 + x1) / 2),
+          midXY2 = Math.floor((x3 + x4) / 2),
           r1 = Math.floor((x2-x1)/2),
           r2 = Math.floor((x4-x3)/2)
           // r1 = Math.floor(
@@ -399,8 +397,8 @@ export default {
           !isUndefined(y4)
         ) {
           bresenhamLineCircle(
-            midX2,
-            midY2,
+            midXY2,
+            midXY2,
             r2,
             false,
             (columnIndex: number, rowIndex: number) => {
@@ -409,8 +407,8 @@ export default {
           );
         }
         bresenhamLineCircle(
-          midX1,
-          midY1,
+          midXY1,
+          midXY1,
           r1,
           false,
           (columnIndex: number, rowIndex: number) => {
