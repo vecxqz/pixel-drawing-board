@@ -132,6 +132,30 @@ export default {
             }
         }
       }
+      if (mode === "circle") {
+        const x1 = Math.floor(startPoint.e.offsetX / size),
+          x2 = Math.floor(endPoint.e.offsetX / size);
+        // 此处中点不使用纵轴坐标，使用纵轴坐标一起计算会导致圆形的顶边漂移
+        const midXY1 = Math.floor((x2 + x1) / 2),
+          r1 = Math.abs(Math.floor((x2 - x1) / 2));
+        bresenhamLineCircle(
+          midXY1,
+          midXY1,
+          r1,
+          false,
+          (columnIndex: number, rowIndex: number) => {
+            this.drawGrid(
+              canvasCtx as CanvasRenderingContext2D,
+              this.$store.state.canvasModule.pages[currentPageIndex].layers[
+                currentLayerIndex
+              ],
+              columnIndex,
+              rowIndex,
+              color
+            );
+          }
+        );
+      }
       this.$refs.canvas.removeEventListener("mousemove", (e: MouseEvent) =>
         this.handleMouseMove(e)
       );
@@ -372,24 +396,11 @@ export default {
           x: x4,
           y: y4
         } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
+        // 此处中点不使用纵轴坐标，使用纵轴坐标一起计算会导致圆形的顶边漂移
         const midXY1 = Math.floor((x2 + x1) / 2),
           midXY2 = Math.floor((x3 + x4) / 2),
-          r1 = Math.floor((x2-x1)/2),
-          r2 = Math.floor((x4-x3)/2)
-          // r1 = Math.floor(
-          //   Math.pow(
-          //     Math.pow((x2 - x1) / 2, 2) + Math.pow((y2 - y1) / 2, 2),
-          //     // Math.pow(midX1 - x1, 2) + Math.pow(midY1 - y1, 2),
-          //     1 / 2
-          //   )
-          // ),
-          // r2 = Math.floor(
-          //   Math.pow(
-          //     Math.pow((x3 - x4) / 2, 2) + Math.pow((y3 - y4) / 2, 2),
-          //     // Math.pow(midX2 - x3, 2) + Math.pow(midY2 - y3, 2),
-          //     1 / 2
-          //   )
-          // );
+          r1 = Math.abs(Math.floor((x2 - x1) / 2)),
+          r2 = Math.abs(Math.floor((x4 - x3) / 2));
         if (
           !isUndefined(x3) &&
           !isUndefined(y3) &&
