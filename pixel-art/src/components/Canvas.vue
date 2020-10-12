@@ -11,14 +11,12 @@
 <script lang="ts">
 import { bresenhamLine, bresenhamLineCircle, drawGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
+import { fromEvent, animationFrameScheduler } from "rxjs";
+import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
 export default {
   name: "Canvas",
   data() {
-    return {
-      mouseDown: false,
-      // mode: "line"
-      mode: "point"
-    };
+    return {};
   },
   computed: {
     canvasCtx(this: any) {
@@ -29,20 +27,24 @@ export default {
     const { canvas } = this.$refs;
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
     this.parse();
-    this.$refs.canvas.addEventListener("mousedown", (e: any) => {
-      this.mouseDown = true;
-      this.$store.dispatch("canvasModule/SET_START_POINT", { e });
-      this.$store.dispatch("canvasModule/SET_LASET_START_POINT", { e });
-      this.$store.dispatch("canvasModule/SET_LASET_END_POINT", { e });
-      this.$refs.canvas.addEventListener("mousemove", (e: MouseEvent) => {
-        const { mouseDown }: { mouseDown: Boolean } = this;
-        if (mouseDown) {
-          this.handleMouseMove(e);
-        }
+    const mouseDown = fromEvent(canvas, "mousedown");
+    const mouseMove = fromEvent(canvas, "mousemove");
+    const mouseUp = fromEvent(canvas, "mouseup");
+    mouseDown
+      .pipe(
+        tap(e => {
+          this.$store.dispatch("canvasModule/SET_START_POINT", { e });
+          this.$store.dispatch("canvasModule/SET_LASET_START_POINT", { e });
+          this.$store.dispatch("canvasModule/SET_LASET_END_POINT", { e });
+        }),
+        map(() => mouseMove.pipe(takeUntil(mouseUp))),
+        debounceTime(0, animationFrameScheduler),
+        concatAll()
+      )
+      .subscribe(e => {
+        this.handleMouseMove(e);
       });
-    });
-    this.$refs.canvas.addEventListener("mouseup", () => {
-      this.mouseDown = false;
+    mouseUp.subscribe(() => {
       const {
         currentPageIndex,
         currentLayerIndex,
@@ -156,9 +158,6 @@ export default {
           }
         );
       }
-      this.$refs.canvas.removeEventListener("mousemove", (e: MouseEvent) =>
-        this.handleMouseMove(e)
-      );
     });
   },
   methods: {
