@@ -37,128 +37,163 @@ export default {
           this.$store.dispatch("canvasModule/SET_LASET_START_POINT", { e });
           this.$store.dispatch("canvasModule/SET_LASET_END_POINT", { e });
         }),
-        map(() => mouseMove.pipe(takeUntil(mouseUp))),
+        map(() =>
+          mouseMove.pipe(
+            takeUntil(
+              mouseUp.pipe(
+                tap(e => {
+                  const columnIndex = Math.floor(
+                      e.offsetX / this.$store.state.canvasModule.size
+                    ),
+                    rowIndex = Math.floor(
+                      e.offsetY / this.$store.state.canvasModule.size
+                    );
+                  this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+                  this.$store.dispatch(
+                    "canvasModule/SET_COLUMN_INDEX",
+                    columnIndex
+                  );
+                  this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
+                  const {
+                    currentPageIndex,
+                    currentLayerIndex,
+                    canvasCtx,
+                    color,
+                    mode,
+                    size,
+                    eventPoint: { startPoint, endPoint }
+                  } = this.$store.state.canvasModule;
+                  const x1 = Math.floor(startPoint.e.offsetX / size),
+                    y1 = Math.floor(startPoint.e.offsetY / size),
+                    x2 = Math.floor(endPoint.e.offsetX / size),
+                    y2 = Math.floor(endPoint.e.offsetY / size);
+                  if (mode === "pencil") {
+                    this.drawGrid(
+                      canvasCtx as CanvasRenderingContext2D,
+                      this.$store.state.canvasModule.tempLayer,
+                      columnIndex,
+                      rowIndex,
+                      color
+                    );
+                    this.$store.state.canvasModule.pages[
+                      currentPageIndex
+                    ].layers[currentLayerIndex][columnIndex][rowIndex] = {
+                      ...this.$store.state.canvasModule.pages[currentPageIndex]
+                        .layers[currentLayerIndex][columnIndex][rowIndex],
+                      color
+                    };
+                  }
+                  if (mode === "line") {
+                    this.bresenhamLine(
+                      x1,
+                      y1,
+                      x2,
+                      y2,
+                      (columnIndex: number, rowIndex: number) => {
+                        this.drawGrid(
+                          canvasCtx as CanvasRenderingContext2D,
+                          this.$store.state.canvasModule.pages[currentPageIndex]
+                            .layers[currentLayerIndex],
+                          columnIndex,
+                          rowIndex,
+                          color
+                        );
+                      }
+                    );
+                  }
+                  if (mode === "square") {
+                    if (x1 <= x2 || y1 <= y2) {
+                      for (let startX = x1; startX <= x2; startX++)
+                        for (let startY = y1; startY <= y2; startY++) {
+                          if (
+                            startX === x1 ||
+                            startX === x2 ||
+                            startY === y1 ||
+                            startY === y2
+                          ) {
+                            this.drawGrid(
+                              canvasCtx as CanvasRenderingContext2D,
+                              this.$store.state.canvasModule.pages[
+                                currentPageIndex
+                              ].layers[currentLayerIndex],
+                              startX,
+                              startY,
+                              color
+                            );
+                            this.$store.state.canvasModule.pages[
+                              currentPageIndex
+                            ].layers[currentLayerIndex][startX][startY] = {
+                              ...this.$store.state.canvasModule.pages[
+                                currentPageIndex
+                              ].layers[currentLayerIndex][startX][startY],
+                              color
+                            };
+                          }
+                        }
+                    } else {
+                      for (let startX = x1; startX >= x2; startX--)
+                        for (let startY = y1; startY >= y2; startY--) {
+                          if (
+                            startX === x1 ||
+                            startX === x2 ||
+                            startY === y1 ||
+                            startY === y2
+                          ) {
+                            this.drawGrid(
+                              canvasCtx as CanvasRenderingContext2D,
+                              this.$store.state.canvasModule.pages[
+                                currentPageIndex
+                              ].layers[currentLayerIndex],
+                              startX,
+                              startY,
+                              color
+                            );
+                            this.$store.state.canvasModule.pages[
+                              currentPageIndex
+                            ].layers[currentLayerIndex][startX][startY] = {
+                              ...this.$store.state.canvasModule.pages[
+                                currentPageIndex
+                              ].layers[currentLayerIndex][startX][startY],
+                              color
+                            };
+                          }
+                        }
+                    }
+                  }
+                  if (mode === "circle") {
+                    const x1 = Math.floor(startPoint.e.offsetX / size),
+                      x2 = Math.floor(endPoint.e.offsetX / size);
+                    // 此处中点不使用纵轴坐标，使用纵轴坐标一起计算会导致圆形的顶边漂移
+                    const midXY1 = Math.floor((x2 + x1) / 2),
+                      r1 = Math.abs(Math.floor((x2 - x1) / 2));
+                    bresenhamLineCircle(
+                      midXY1,
+                      midXY1,
+                      r1,
+                      false,
+                      (columnIndex: number, rowIndex: number) => {
+                        this.drawGrid(
+                          canvasCtx as CanvasRenderingContext2D,
+                          this.$store.state.canvasModule.pages[currentPageIndex]
+                            .layers[currentLayerIndex],
+                          columnIndex,
+                          rowIndex,
+                          color
+                        );
+                      }
+                    );
+                  }
+                })
+              )
+            )
+          )
+        ),
         debounceTime(0, animationFrameScheduler),
         concatAll()
       )
       .subscribe(e => {
         this.handleMouseMove(e);
       });
-    mouseUp.subscribe(() => {
-      const {
-        currentPageIndex,
-        currentLayerIndex,
-        canvasCtx,
-        color,
-        mode,
-        size,
-        eventPoint: { startPoint, endPoint }
-      } = this.$store.state.canvasModule;
-      const x1 = Math.floor(startPoint.e.offsetX / size),
-        y1 = Math.floor(startPoint.e.offsetY / size),
-        x2 = Math.floor(endPoint.e.offsetX / size),
-        y2 = Math.floor(endPoint.e.offsetY / size);
-      if (mode === "line") {
-        this.bresenhamLine(
-          x1,
-          y1,
-          x2,
-          y2,
-          (columnIndex: number, rowIndex: number) => {
-            this.drawGrid(
-              canvasCtx as CanvasRenderingContext2D,
-              this.$store.state.canvasModule.pages[currentPageIndex].layers[
-                currentLayerIndex
-              ],
-              columnIndex,
-              rowIndex,
-              color
-            );
-          }
-        );
-      }
-      if (mode === "square") {
-        if (x1 <= x2 || y1 <= y2) {
-          for (let startX = x1; startX <= x2; startX++)
-            for (let startY = y1; startY <= y2; startY++) {
-              if (
-                startX === x1 ||
-                startX === x2 ||
-                startY === y1 ||
-                startY === y2
-              ) {
-                this.drawGrid(
-                  canvasCtx as CanvasRenderingContext2D,
-                  this.$store.state.canvasModule.pages[currentPageIndex].layers[
-                    currentLayerIndex
-                  ],
-                  startX,
-                  startY,
-                  color
-                );
-                this.$store.state.canvasModule.pages[currentPageIndex].layers[
-                  currentLayerIndex
-                ][startX][startY] = {
-                  ...this.$store.state.canvasModule.pages[currentPageIndex]
-                    .layers[currentLayerIndex][startX][startY],
-                  color
-                };
-              }
-            }
-        } else {
-          for (let startX = x1; startX >= x2; startX--)
-            for (let startY = y1; startY >= y2; startY--) {
-              if (
-                startX === x1 ||
-                startX === x2 ||
-                startY === y1 ||
-                startY === y2
-              ) {
-                this.drawGrid(
-                  canvasCtx as CanvasRenderingContext2D,
-                  this.$store.state.canvasModule.pages[currentPageIndex].layers[
-                    currentLayerIndex
-                  ],
-                  startX,
-                  startY,
-                  color
-                );
-                this.$store.state.canvasModule.pages[currentPageIndex].layers[
-                  currentLayerIndex
-                ][startX][startY] = {
-                  ...this.$store.state.canvasModule.pages[currentPageIndex]
-                    .layers[currentLayerIndex][startX][startY],
-                  color
-                };
-              }
-            }
-        }
-      }
-      if (mode === "circle") {
-        const x1 = Math.floor(startPoint.e.offsetX / size),
-          x2 = Math.floor(endPoint.e.offsetX / size);
-        // 此处中点不使用纵轴坐标，使用纵轴坐标一起计算会导致圆形的顶边漂移
-        const midXY1 = Math.floor((x2 + x1) / 2),
-          r1 = Math.abs(Math.floor((x2 - x1) / 2));
-        bresenhamLineCircle(
-          midXY1,
-          midXY1,
-          r1,
-          false,
-          (columnIndex: number, rowIndex: number) => {
-            this.drawGrid(
-              canvasCtx as CanvasRenderingContext2D,
-              this.$store.state.canvasModule.pages[currentPageIndex].layers[
-                currentLayerIndex
-              ],
-              columnIndex,
-              rowIndex,
-              color
-            );
-          }
-        );
-      }
-    });
   },
   methods: {
     setGridColor(this: any, gridMeta: any) {
@@ -213,8 +248,7 @@ export default {
       this.$store.dispatch("canvasModule/SET_END_POINT", { e });
       this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
       this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
-      if (mode === "pecil") {
-        // this.draw(e);
+      if (mode === "pencil") {
         this.drawGrid(
           canvasCtx as CanvasRenderingContext2D,
           this.$store.state.canvasModule.tempLayer,
@@ -442,34 +476,6 @@ export default {
           y: y2
         });
       }
-    },
-    draw(this: any, e: any) {
-      const {
-        currentPageIndex,
-        currentLayerIndex,
-        color
-      } = this.$store.state.canvasModule;
-      const xIndex = Math.floor(
-          e.offsetX / this.$store.state.canvasModule.size
-        ),
-        yIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
-      this.drawGrid(
-        this.canvasCtx as CanvasRenderingContext2D,
-        this.$store.state.canvasModule.pages[currentPageIndex].layers[
-          currentLayerIndex
-        ],
-        xIndex,
-        yIndex,
-        color
-      );
-      this.$store.state.canvasModule.pages[currentPageIndex].layers[
-        currentLayerIndex
-      ][xIndex][yIndex] = {
-        ...this.$store.state.canvasModule.pages[currentPageIndex].layers[
-          currentLayerIndex
-        ][xIndex][yIndex],
-        color
-      };
     },
     parse(this: any) {
       setTimeout(() => {

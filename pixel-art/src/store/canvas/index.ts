@@ -6,7 +6,7 @@ import { CanvasState } from "./type";
 const module: Module<CanvasState, any> = {
   namespaced: true,
   state: () => ({
-    mode: "pecil",
+    mode: "pencil",
     color: "#000",
     currentLayerIndex: 0,
     currentPageIndex: 0,

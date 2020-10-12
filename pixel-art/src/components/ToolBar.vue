@@ -25,9 +25,9 @@ export default {
       toolActiveIndex: 0,
       tools: [
         {
-          id: "tool-pecil",
-          title: "Pecil Tool",
-          mode: "pecil"
+          id: "tool-pencill",
+          title: "Pencill Tool",
+          mode: "pencill"
         },
         {
           id: "tool-eraser",
@@ -150,7 +150,7 @@ export default {
   height: 32px;
   background: url(../assets/set_autumnfire.png);
 }
-#tool-pecil .toolbar-icon {
+#tool-pencil .toolbar-icon {
   background-position: -1px -1px;
 }
 #tool-eraser .toolbar-icon {
