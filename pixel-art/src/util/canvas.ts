@@ -129,4 +129,61 @@ function bresenhamLine(
     callback(x, y);
   }
 }
-export { initLayer, parseLayer, drawGrid, bresenhamLine };
+
+function _draw_circle_8(
+  xc: number,
+  yc: number,
+  x: number,
+  y: number,
+  callback: Function
+) {
+  callback(xc + x, yc + y);
+  callback(xc - x, yc + y);
+  callback(xc + x, yc - y);
+  callback(xc - x, yc - y);
+  callback(xc + y, yc + x);
+  callback(xc - y, yc + x);
+  callback(xc + y, yc - x);
+  callback(xc - y, yc - x);
+}
+
+function bresenhamLineCircle(
+  xc: number,
+  yc: number,
+  r: number,
+  fill: Boolean,
+  callback: Function
+) {
+  let x = 0,
+    y = r,
+    yi,
+    d;
+  d = 3 - 2 * r;
+
+  if (fill) {
+    while (x <= y) {
+      for (yi = x; yi <= y; yi++) _draw_circle_8(xc, yc, x, yi, callback);
+
+      if (d < 0) {
+        d = d + 4 * x + 6;
+      } else {
+        d = d + 4 * (x - y) + 10;
+        y--;
+      }
+      x++;
+    }
+  } else {
+    while (x <= y) {
+      _draw_circle_8(xc, yc, x, y, callback);
+
+      if (d < 0) {
+        d = d + 4 * x + 6;
+      } else {
+        d = d + 4 * (x - y) + 10;
+        y--;
+      }
+      x++;
+    }
+  }
+}
+export { initLayer, parseLayer, drawGrid, bresenhamLine, bresenhamLineCircle };

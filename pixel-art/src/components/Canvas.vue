@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { bresenhamLine, drawGrid } from "../util/canvas";
+import { bresenhamLine, bresenhamLineCircle, drawGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
 export default {
   name: "Canvas",
@@ -348,6 +348,81 @@ export default {
               }
             }
         }
+        this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
+          e,
+          x: x1,
+          y: y1
+        });
+        this.$store.dispatch("canvasModule/SET_LASET_END_POINT", {
+          e,
+          x: x2,
+          y: y2
+        });
+      }
+      if (mode === "circle") {
+        const x1 = Math.floor(startPoint.e.offsetX / size),
+          y1 = Math.floor(startPoint.e.offsetY / size),
+          x2 = Math.floor(endPoint.e.offsetX / size),
+          y2 = Math.floor(endPoint.e.offsetY / size);
+        const {
+          x: x3,
+          y: y3
+        } = this.$store.state.canvasModule.eventPoint.lastStartPoint;
+        const {
+          x: x4,
+          y: y4
+        } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
+        const midX1 = Math.floor((x2 + x1) / 2),
+          midY1 = Math.floor((y2 + y1) / 2),
+          midX2 = Math.floor((x3 + x4) / 2),
+          midY2 = Math.floor((y3 + y4) / 2),
+          r1 = Math.floor((x2-x1)/2),
+          r2 = Math.floor((x4-x3)/2)
+          // r1 = Math.floor(
+          //   Math.pow(
+          //     Math.pow((x2 - x1) / 2, 2) + Math.pow((y2 - y1) / 2, 2),
+          //     // Math.pow(midX1 - x1, 2) + Math.pow(midY1 - y1, 2),
+          //     1 / 2
+          //   )
+          // ),
+          // r2 = Math.floor(
+          //   Math.pow(
+          //     Math.pow((x3 - x4) / 2, 2) + Math.pow((y3 - y4) / 2, 2),
+          //     // Math.pow(midX2 - x3, 2) + Math.pow(midY2 - y3, 2),
+          //     1 / 2
+          //   )
+          // );
+        if (
+          !isUndefined(x3) &&
+          !isUndefined(y3) &&
+          !isUndefined(x4) &&
+          !isUndefined(y4)
+        ) {
+          bresenhamLineCircle(
+            midX2,
+            midY2,
+            r2,
+            false,
+            (columnIndex: number, rowIndex: number) => {
+              this.clearGrid(columnIndex, rowIndex);
+            }
+          );
+        }
+        bresenhamLineCircle(
+          midX1,
+          midY1,
+          r1,
+          false,
+          (columnIndex: number, rowIndex: number) => {
+            this.drawGrid(
+              canvasCtx as CanvasRenderingContext2D,
+              this.$store.state.canvasModule.tempLayer,
+              columnIndex,
+              rowIndex,
+              color
+            );
+          }
+        );
         this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
           e,
           x: x1,
