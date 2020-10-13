@@ -25,9 +25,9 @@ export default {
       toolActiveIndex: 0,
       tools: [
         {
-          id: "tool-pencill",
-          title: "Pencill Tool",
-          mode: "pencill"
+          id: "tool-pencil",
+          title: "Pencil Tool",
+          mode: "pencil"
         },
         {
           id: "tool-eraser",
