@@ -675,7 +675,7 @@ export default {
       );
       this.currentLayer[xIndex][yIndex] = {
         ...this.currentLayer[xIndex][yIndex],
-        color
+        color: undefined
       };
     },
     bresenhamLine
