@@ -5,6 +5,7 @@
 <style>
 html {
   box-sizing: border-box;
+  user-select: none;
 }
 * {
   box-sizing: inherit;

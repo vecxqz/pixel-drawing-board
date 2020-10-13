@@ -9,7 +9,13 @@
 </template>
 
 <script lang="ts">
-import { bresenhamLine, bresenhamLineCircle, drawGrid } from "../util/canvas";
+import {
+  bresenhamLine,
+  bresenhamLineCircle,
+  drawGrid,
+  initGrid,
+  boundaryFill4
+} from "../util/canvas";
 import { isUndefined } from "../util/common";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
@@ -74,11 +80,10 @@ export default {
                     y1 = Math.floor(startPoint.e.offsetY / size),
                     x2 = Math.floor(endPoint.e.offsetX / size),
                     y2 = Math.floor(endPoint.e.offsetY / size);
-                  console.log(mode);
                   if (mode === "pencil") {
-                    this.drawGrid(
+                    drawGrid(
                       canvasCtx as CanvasRenderingContext2D,
-                      this.$store.state.canvasModule.tempLayer,
+                      this.currentLayer,
                       columnIndex,
                       rowIndex,
                       color
@@ -89,19 +94,23 @@ export default {
                     };
                   }
                   if (mode === "line") {
-                    this.bresenhamLine(
+                    bresenhamLine(
                       x1,
                       y1,
                       x2,
                       y2,
                       (columnIndex: number, rowIndex: number) => {
-                        this.drawGrid(
+                        drawGrid(
                           canvasCtx as CanvasRenderingContext2D,
                           this.currentLayer,
                           columnIndex,
                           rowIndex,
                           color
                         );
+                        this.currentLayer[columnIndex][rowIndex] = {
+                          ...this.currentLayer[columnIndex][rowIndex],
+                          color
+                        };
                       }
                     );
                   }
@@ -115,13 +124,17 @@ export default {
                             startY === y1 ||
                             startY === y2
                           ) {
-                            this.drawGrid(
+                            drawGrid(
                               canvasCtx as CanvasRenderingContext2D,
                               this.currentLayer,
                               startX,
                               startY,
                               color
                             );
+                            this.currentLayer[columnIndex][rowIndex] = {
+                              ...this.currentLayer[columnIndex][rowIndex],
+                              color
+                            };
                           }
                         }
                     }
@@ -134,13 +147,17 @@ export default {
                             startY === y1 ||
                             startY === y2
                           ) {
-                            this.drawGrid(
+                            drawGrid(
                               canvasCtx as CanvasRenderingContext2D,
                               this.currentLayer,
                               startX,
                               startY,
                               color
                             );
+                            this.currentLayer[columnIndex][rowIndex] = {
+                              ...this.currentLayer[columnIndex][rowIndex],
+                              color
+                            };
                           }
                         }
                     }
@@ -153,13 +170,17 @@ export default {
                             startY === y1 ||
                             startY === y2
                           ) {
-                            this.drawGrid(
+                            drawGrid(
                               canvasCtx as CanvasRenderingContext2D,
                               this.currentLayer,
                               startX,
                               startY,
                               color
                             );
+                            this.currentLayer[columnIndex][rowIndex] = {
+                              ...this.currentLayer[columnIndex][rowIndex],
+                              color
+                            };
                           }
                         }
                     }
@@ -172,13 +193,17 @@ export default {
                             startY === y1 ||
                             startY === y2
                           ) {
-                            this.drawGrid(
+                            drawGrid(
                               canvasCtx as CanvasRenderingContext2D,
                               this.currentLayer,
                               startX,
                               startY,
                               color
                             );
+                            this.currentLayer[columnIndex][rowIndex] = {
+                              ...this.currentLayer[columnIndex][rowIndex],
+                              color
+                            };
                           }
                         }
                     }
@@ -205,18 +230,47 @@ export default {
                       r1 = Math.abs(Math.floor((ya1 - y1) / 2));
                     }
                     bresenhamLineCircle(
+                      this.currentLayer,
                       midX1,
                       midY1,
                       r1,
                       false,
                       (columnIndex: number, rowIndex: number) => {
-                        this.drawGrid(
+                        drawGrid(
                           canvasCtx as CanvasRenderingContext2D,
                           this.currentLayer,
                           columnIndex,
                           rowIndex,
                           color
                         );
+                        this.currentLayer[columnIndex][rowIndex] = {
+                          ...this.currentLayer[columnIndex][rowIndex],
+                          color
+                        };
+                      }
+                    );
+                  }
+                  if (mode === "bucket") {
+                    console.log(color);
+                    boundaryFill4(
+                      this.currentLayer,
+                      x1,
+                      y1,
+                      this.currentLayer.length,
+                      this.currentLayer[0].length,
+                      color,
+                      (columnIndex: number, rowIndex: number) => {
+                        drawGrid(
+                          canvasCtx as CanvasRenderingContext2D,
+                          this.$store.state.canvasModule.tempLayer,
+                          columnIndex,
+                          rowIndex,
+                          color
+                        );
+                        this.currentLayer[columnIndex][rowIndex] = {
+                          ...this.currentLayer[columnIndex][rowIndex],
+                          color
+                        };
                       }
                     );
                   }
@@ -239,13 +293,17 @@ export default {
     },
     clearGrid(this: any, x: number, y: number) {
       const color = this.getColorToDefalut(x, y);
-      this.drawGrid(
+      drawGrid(
         this.canvasCtx as CanvasRenderingContext2D,
         this.currentLayer,
         x,
         y,
         color
       );
+      this.currentLayer[x][y] = {
+        ...this.currentLayer[x][y],
+        color: undefined
+      };
     },
     getColorToDefalut(this: any, x: any, y: any) {
       return this.getGridColor(this.currentLayer[x][y]);
@@ -270,7 +328,7 @@ export default {
       this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
       this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       if (mode === "pencil") {
-        this.drawGrid(
+        drawGrid(
           canvasCtx as CanvasRenderingContext2D,
           this.$store.state.canvasModule.tempLayer,
           columnIndex,
@@ -301,7 +359,7 @@ export default {
           !isUndefined(x4) &&
           !isUndefined(y4)
         ) {
-          this.bresenhamLine(
+          bresenhamLine(
             x3,
             y3,
             x4,
@@ -311,13 +369,13 @@ export default {
             }
           );
         }
-        this.bresenhamLine(
+        bresenhamLine(
           x1,
           y1,
           x2,
           y2,
           (columnIndex: number, rowIndex: number) => {
-            this.drawGrid(
+            drawGrid(
               canvasCtx as CanvasRenderingContext2D,
               this.$store.state.canvasModule.tempLayer,
               columnIndex,
@@ -421,7 +479,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                this.drawGrid(
+                drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
                   this.$store.state.canvasModule.tempLayer,
                   startX,
@@ -440,11 +498,17 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                this.drawGrid(
+                drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
                   this.$store.state.canvasModule.tempLayer,
                   startX,
                   startY,
+                  color
+                );
+              }
+            }
+        }
+        if (x1 >= x2 || y1 >= y2) {
           for (let startX = x1; startX >= x2; startX--)
             for (let startY = y1; startY >= y2; startY--) {
               if (
@@ -453,7 +517,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                this.drawGrid(
+                drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
                   this.$store.state.canvasModule.tempLayer,
                   startX,
@@ -472,7 +536,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                this.drawGrid(
+                drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
                   this.$store.state.canvasModule.tempLayer,
                   startX,
@@ -540,6 +604,7 @@ export default {
           !isUndefined(y4)
         ) {
           bresenhamLineCircle(
+            this.currentLayer,
             midX2,
             midY2,
             r2,
@@ -550,12 +615,13 @@ export default {
           );
         }
         bresenhamLineCircle(
+          this.currentLayer,
           midX1,
           midY1,
           r1,
           false,
           (columnIndex: number, rowIndex: number) => {
-            this.drawGrid(
+            drawGrid(
               canvasCtx as CanvasRenderingContext2D,
               this.$store.state.canvasModule.tempLayer,
               columnIndex,
@@ -577,13 +643,14 @@ export default {
       }
     },
     parse(this: any) {
+      console.log(this.$store.state);
       setTimeout(() => {
         const layer = this.currentLayer;
         for (let i = 0; i < layer.length; i++)
           for (let j = 0; j < layer.length; j++) {
             const cell = layer[i][j];
             const { color, backgroundColor } = cell;
-            this.drawGrid(
+            initGrid(
               this.canvasCtx,
               layer,
               i,
@@ -599,7 +666,7 @@ export default {
         ),
         yIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
       const { backgroundColor: color } = this.currentLayer[xIndex][yIndex];
-      this.drawGrid(
+      drawGrid(
         this.canvasCtx as CanvasRenderingContext2D,
         this.currentLayer,
         xIndex,
@@ -611,8 +678,7 @@ export default {
         color
       };
     },
-    bresenhamLine,
-    drawGrid
+    bresenhamLine
   }
 };
 </script>

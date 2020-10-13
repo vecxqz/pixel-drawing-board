@@ -69,7 +69,7 @@ function parseLayer(canvas: HTMLCanvasElement, layerMeta: layer): void {
       const color = layerMeta[columnIndex][rowIndex].color
         ? layerMeta[columnIndex][rowIndex].color
         : layerMeta[columnIndex][rowIndex].backgroundColor;
-      drawGrid(canvasCtx, layerMeta, columnIndex, rowIndex, color as string);
+      initGrid(canvasCtx, layerMeta, columnIndex, rowIndex, color as string);
     }
   }
 }
@@ -82,6 +82,17 @@ function drawGrid(
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
   layerMeta[columnIndex][rowIndex].color = color;
+  canvasCtx.fillStyle = color;
+  canvasCtx.fillRect(x, y, size, size);
+}
+function initGrid(
+  canvasCtx: CanvasRenderingContext2D,
+  layerMeta: layer,
+  columnIndex: number,
+  rowIndex: number,
+  color: string
+): void {
+  const { x, y, size } = layerMeta[columnIndex][rowIndex];
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(x, y, size, size);
 }
@@ -136,7 +147,7 @@ function _draw_circle_8(
   x: number,
   y: number,
   callback: Function
-) {
+): void {
   callback(xc + x, yc + y);
   callback(xc - x, yc + y);
   callback(xc + x, yc - y);
@@ -148,18 +159,18 @@ function _draw_circle_8(
 }
 
 function bresenhamLineCircle(
+  layer: layer,
   xc: number,
   yc: number,
   r: number,
   fill: Boolean,
   callback: Function
-) {
+): void {
   let x = 0,
     y = r,
     yi,
     d;
   d = 3 - 2 * r;
-
   if (fill) {
     while (x <= y) {
       for (yi = x; yi <= y; yi++) _draw_circle_8(xc, yc, x, yi, callback);
@@ -186,4 +197,30 @@ function bresenhamLineCircle(
     }
   }
 }
-export { initLayer, parseLayer, drawGrid, bresenhamLine, bresenhamLineCircle };
+function boundaryFill4(
+  layer: layer,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  color: string,
+  callback: Function
+): void {
+  if (layer[x][y].color !== color && layer[x][y].color === undefined) {
+    callback(x, y);
+    if (x + 1 < w) boundaryFill4(layer, x + 1, y, w, h, color, callback);
+    if (x - 1 >= 0) boundaryFill4(layer, x - 1, y, w, h, color, callback);
+    if (y + 1 < h) boundaryFill4(layer, x, y + 1, w, h, color, callback);
+    if (y - 1 >= 0) boundaryFill4(layer, x, y - 1, w, h, color, callback);
+  }
+  // }
+}
+export {
+  initLayer,
+  parseLayer,
+  drawGrid,
+  initGrid,
+  bresenhamLine,
+  bresenhamLineCircle,
+  boundaryFill4
+};
