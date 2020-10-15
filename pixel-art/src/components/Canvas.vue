@@ -16,6 +16,7 @@ import {
   initGrid
   // boundaryFill4
 } from "../util/canvas";
+import { showProcess } from "../util/animatonframe";
 import { ScanLineFill as boundaryFill4 } from "../util/fill";
 import { isUndefined } from "../util/common";
 import { fromEvent, animationFrameScheduler } from "rxjs";
@@ -26,6 +27,10 @@ export default {
     return {};
   },
   computed: {
+    tempLayer(this: any) {
+      return this.$store.state.canvasModule.tempLayer;
+      // return { ...this.currentLayer };
+    },
     canvasCtx(this: any) {
       return this.$store.state.canvasModule.canvasCtx;
     },
@@ -252,7 +257,7 @@ export default {
                     );
                   }
                   if (mode === "bucket") {
-                    let start = performance.now();
+                    const stack: Array<any> = [];
                     boundaryFill4(
                       this.currentLayer,
                       x1,
@@ -264,7 +269,7 @@ export default {
                       (columnIndex: number, rowIndex: number) => {
                         drawGrid(
                           canvasCtx as CanvasRenderingContext2D,
-                          this.$store.state.canvasModule.tempLayer,
+                          this.currentLayer,
                           columnIndex,
                           rowIndex,
                           color
@@ -273,10 +278,29 @@ export default {
                           ...this.currentLayer[columnIndex][rowIndex],
                           color
                         };
+                        stack.push({
+                          columnIndex,
+                          rowIndex,
+                          color
+                        });
                       }
                     );
-                    let end = performance.now();
-                    console.log(end - start);
+                    showProcess(stack, (args: any) => {
+                      // const { columnIndex, rowIndex } = args;
+                      // const color = "#199732";
+                      console.log(args);
+                      // drawGrid(
+                      //   canvasCtx as CanvasRenderingContext2D,
+                      //   this.currentLayer,
+                      //   columnIndex,
+                      //   rowIndex,
+                      //   color
+                      // );
+                      // this.currentLayer[columnIndex][rowIndex] = {
+                      //   ...this.currentLayer[columnIndex][rowIndex],
+                      //   color
+                      // };
+                    });
                   }
                 })
               )
@@ -334,7 +358,7 @@ export default {
       if (mode === "pencil") {
         drawGrid(
           canvasCtx as CanvasRenderingContext2D,
-          this.$store.state.canvasModule.tempLayer,
+          this.tempLayer,
           columnIndex,
           rowIndex,
           color
@@ -381,7 +405,7 @@ export default {
           (columnIndex: number, rowIndex: number) => {
             drawGrid(
               canvasCtx as CanvasRenderingContext2D,
-              this.$store.state.canvasModule.tempLayer,
+              this.tempLayer,
               columnIndex,
               rowIndex,
               color
@@ -485,7 +509,7 @@ export default {
               ) {
                 drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
-                  this.$store.state.canvasModule.tempLayer,
+                  this.tempLayer,
                   startX,
                   startY,
                   color
@@ -504,7 +528,7 @@ export default {
               ) {
                 drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
-                  this.$store.state.canvasModule.tempLayer,
+                  this.tempLayer,
                   startX,
                   startY,
                   color
@@ -523,7 +547,7 @@ export default {
               ) {
                 drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
-                  this.$store.state.canvasModule.tempLayer,
+                  this.tempLayer,
                   startX,
                   startY,
                   color
@@ -542,7 +566,7 @@ export default {
               ) {
                 drawGrid(
                   canvasCtx as CanvasRenderingContext2D,
-                  this.$store.state.canvasModule.tempLayer,
+                  this.tempLayer,
                   startX,
                   startY,
                   color
@@ -627,7 +651,7 @@ export default {
           (columnIndex: number, rowIndex: number) => {
             drawGrid(
               canvasCtx as CanvasRenderingContext2D,
-              this.$store.state.canvasModule.tempLayer,
+              this.tempLayer,
               columnIndex,
               rowIndex,
               color
