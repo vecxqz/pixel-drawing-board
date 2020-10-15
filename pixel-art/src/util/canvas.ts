@@ -197,24 +197,7 @@ function bresenhamLineCircle(
     }
   }
 }
-function boundaryFill4(
-  layer: layer,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  color: string,
-  callback: Function
-): void {
-  if (layer[x][y].color !== color && layer[x][y].color === undefined) {
-    callback(x, y);
-    if (x + 1 < w) boundaryFill4(layer, x + 1, y, w, h, color, callback);
-    if (x - 1 >= 0) boundaryFill4(layer, x - 1, y, w, h, color, callback);
-    if (y + 1 < h) boundaryFill4(layer, x, y + 1, w, h, color, callback);
-    if (y - 1 >= 0) boundaryFill4(layer, x, y - 1, w, h, color, callback);
-  }
-  // }
-}
+
 export {
   initLayer,
   parseLayer,
@@ -222,5 +205,4 @@ export {
   initGrid,
   bresenhamLine,
   bresenhamLineCircle,
-  boundaryFill4
 };

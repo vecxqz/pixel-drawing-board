@@ -1,6 +1,9 @@
 <template>
   <div class="tools">
     <div v-if="girdMeta">{{ girdMeta }}</div>
+    <div class="current-color" :style="currentGirdColor">
+      {{ currentGirdColor }}
+    </div>
     <div class="color-choose">
       <ul>
         <li
@@ -29,6 +32,9 @@ export default {
   computed: {
     girdMeta(this: any) {
       return this.$store.getters["canvasModule/currentGridMeta"];
+    },
+    currentGirdColor(this: any) {
+      return `background:${this.$store.getters["canvasModule/currentGridMeta"].color}`;
     }
   },
   methods: {
@@ -73,5 +79,9 @@ ul {
   border: 1px solid rgba(218, 216, 216, 0.567);
   border-radius: 4px;
   margin-right: 10px;
-}</style
->>
+}
+.current-color {
+  width: 100%;
+  height: 50px;
+}
+</style>

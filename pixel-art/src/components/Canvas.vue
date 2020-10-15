@@ -13,9 +13,10 @@ import {
   bresenhamLine,
   bresenhamLineCircle,
   drawGrid,
-  initGrid,
-  boundaryFill4
+  initGrid
+  // boundaryFill4
 } from "../util/canvas";
+import { ScanLineFill as boundaryFill4 } from "../util/fill";
 import { isUndefined } from "../util/common";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
@@ -251,13 +252,14 @@ export default {
                     );
                   }
                   if (mode === "bucket") {
-                    console.log(color);
+                    let start = performance.now();
                     boundaryFill4(
                       this.currentLayer,
                       x1,
                       y1,
                       this.currentLayer.length,
                       this.currentLayer[0].length,
+                      this.currentLayer[x1][y1].color,
                       color,
                       (columnIndex: number, rowIndex: number) => {
                         drawGrid(
@@ -273,6 +275,8 @@ export default {
                         };
                       }
                     );
+                    let end = performance.now();
+                    console.log(end - start);
                   }
                 })
               )
@@ -643,7 +647,6 @@ export default {
       }
     },
     parse(this: any) {
-      console.log(this.$store.state);
       setTimeout(() => {
         const layer = this.currentLayer;
         for (let i = 0; i < layer.length; i++)
