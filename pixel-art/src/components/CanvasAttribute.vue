@@ -40,7 +40,6 @@ export default {
   methods: {
     colorSetByChoose(this: any, color: string) {
       this.$store.dispatch("canvasModule/SET_COLOR", color);
-      console.log(this.$store.state);
     }
   }
 };
