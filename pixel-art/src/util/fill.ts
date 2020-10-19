@@ -1,4 +1,5 @@
 import { layer } from "types/canvas";
+import { drawGrid } from "./canvas";
 function boundaryFill4( //递归填充
   layer: layer,
   x: number,
@@ -38,15 +39,15 @@ function boundaryFill4( //递归填充
  * @param callback 绘制回调函数
  */
 function ScanLineFill(
+  canvasCtx: CanvasRenderingContext2D,
   layer: layer,
   layerX: number,
   layerY: number,
   w: number,
   h: number,
   oldColor: string,
-  newColor: string,
-  callback: Function
-): void {
+  newColor: string
+): layer {
   let stack = []; // 构造种子点栈
   let point = layer[layerX][layerY]; //1. 种子入栈
   stack.push(point);
@@ -59,30 +60,33 @@ function ScanLineFill(
     yl = y;
     // 3.向左右填充（在当前点所在扫描线扫描）
     if (point.color === oldColor) {
-      callback(x, y); //填充颜色
+      //填充颜色
+      drawGrid(canvasCtx as CanvasRenderingContext2D, layer, x, y, newColor);
+      layer[x][y].color = newColor
+      //填充颜色
       // if (x + 1 < w || x - 1 >= 0 || y + 1 < h || y - 1 >= 0) {
       //   continue;
       // }
       const { x: nxl, y: nyl1 } = Fill(
+        canvasCtx,
         layer,
         xl,
         yl,
         w,
         -1,
         oldColor,
-        newColor,
-        callback
+        newColor
       ); // x--方向填充，并返回边界点
       (xl = nxl), (yl = nyl1);
       const { x: nxr, y: nyl2 } = Fill(
+        canvasCtx,
         layer,
         xr,
         yl,
         w,
         1,
         oldColor,
-        newColor,
-        callback
+        newColor
       ); // x++方向填充，并返回边界点
       (xr = nxr), (yl = nyl2);
       // 4.处理相邻两条扫描新线，并获得新种子入栈
@@ -94,27 +98,30 @@ function ScanLineFill(
       }
     }
   }
+  return layer;
 }
 
 function Fill(
+  canvasCtx: CanvasRenderingContext2D,
   layer: layer,
   x: number,
   y: number,
   w: number,
   drFlg: number,
   oldColor: string,
-  newColor: string,
-  callback: Function
+  newColor: string
 ): any {
   if (drFlg === -1) {
     // x--
     for (; x - 1 >= 0 && layer[x - 1][y].color === oldColor; ) {
-      callback(--x, y); //调用回调，填充该点
+      layer[--x][y].color = newColor;
+      drawGrid(canvasCtx, layer, x, y, newColor);
     }
   } else {
     // x++
     for (; x + 1 < w && layer[x + 1][y].color === oldColor; ) {
-      callback(++x, y);
+      layer[++x][y].color = newColor;
+      drawGrid(canvasCtx, layer, x, y, newColor);
     }
   }
   return { x: x, y: y };

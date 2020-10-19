@@ -16,7 +16,6 @@ import {
   initGrid
   // boundaryFill4
 } from "../util/canvas";
-// import { showProcess } from "../util/animatonframe";
 import { ScanLineFill as boundaryFill4 } from "../util/fill";
 import { isUndefined } from "../util/common";
 import { fromEvent, animationFrameScheduler } from "rxjs";
@@ -46,6 +45,8 @@ export default {
   },
   mounted(this: any) {
     const { canvas } = this.$refs;
+    this.$store.dispatch("canvasModule/CREATE_PAGE");
+    this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
     this.parse();
     const mouseDown = fromEvent(canvas, "mousedown");
@@ -355,88 +356,44 @@ export default {
                     );
                   }
                   if (mode === "bucket") {
-                    const stack: Array<any> = [];
-                    boundaryFill4(
-                      this.$store.state.canvasModule.pages[
-                        this.$store.state.canvasModule.currentPageIndex
-                      ].layers[
-                        this.$store.state.canvasModule.currentLayerIndex
-                      ],
-                      x1,
-                      y1,
-                      this.$store.state.canvasModule.pages[
+                    // const stack: Array<any> = [];
+                    const oldColor = this.$store.state.canvasModule.pages[
+                      this.$store.state.canvasModule.currentPageIndex
+                    ].layers[this.$store.state.canvasModule.currentLayerIndex][
+                      x1
+                    ][y1].color;
+                    const newColor = color;
+                    if (oldColor !== newColor) {
+                      const w = this.$store.state.canvasModule.pages[
                         this.$store.state.canvasModule.currentPageIndex
                       ].layers[this.$store.state.canvasModule.currentLayerIndex]
-                        .length,
-                      this.$store.state.canvasModule.pages[
+                        .length;
+                      const h = this.$store.state.canvasModule.pages[
                         this.$store.state.canvasModule.currentPageIndex
                       ].layers[
                         this.$store.state.canvasModule.currentLayerIndex
-                      ][0].length,
-                      this.$store.state.canvasModule.pages[
-                        this.$store.state.canvasModule.currentPageIndex
-                      ].layers[
-                        this.$store.state.canvasModule.currentLayerIndex
-                      ][x1][y1].color,
-                      color,
-                      (columnIndex: number, rowIndex: number) => {
-                        drawGrid(
-                          canvasCtx as CanvasRenderingContext2D,
-                          this.$store.state.canvasModule.pages[
-                            this.$store.state.canvasModule.currentPageIndex
-                          ].layers[
-                            this.$store.state.canvasModule.currentLayerIndex
-                          ],
-                          columnIndex,
-                          rowIndex,
-                          color
-                        );
-                        this.$store.state.canvasModule.pages[
+                      ][0].length;
+                      // const layer = [...(window as any).layer];
+                      const layer = this.$store.state.canvasModule.pages[
                           this.$store.state.canvasModule.currentPageIndex
                         ].layers[
                           this.$store.state.canvasModule.currentLayerIndex
-                        ][columnIndex][rowIndex] = {
-                          ...this.$store.state.canvasModule.pages[
-                            this.$store.state.canvasModule.currentPageIndex
-                          ].layers[
-                            this.$store.state.canvasModule.currentLayerIndex
-                          ][columnIndex][rowIndex],
-                          color
-                        };
-                        stack.push({
-                          columnIndex,
-                          rowIndex,
-                          color
-                        });
-                      }
-                    );
-                    // showProcess(stack, (args: any) => {
-                    //   const { columnIndex, rowIndex } = args;
-                    //   const color = "#199732";
-                    //   drawGrid(
-                    //     canvasCtx as CanvasRenderingContext2D,
-                    //     this.$store.state.canvasModule.pages[
-                    //       this.$store.state.canvasModule.currentPageIndex
-                    //     ].layers[
-                    //       this.$store.state.canvasModule.currentLayerIndex
-                    //     ],
-                    //     columnIndex,
-                    //     rowIndex,
-                    //     color
-                    //   );
-                    //   this.$store.state.canvasModule.pages[
-                    //     this.$store.state.canvasModule.currentPageIndex
-                    //   ].layers[
-                    //     this.$store.state.canvasModule.currentLayerIndex
-                    //   ][columnIndex][rowIndex] = {
-                    //     ...this.$store.state.canvasModule.pages[
-                    //       this.$store.state.canvasModule.currentPageIndex
-                    //     ].layers[
-                    //       this.$store.state.canvasModule.currentLayerIndex
-                    //     ][columnIndex][rowIndex],
-                    //     color
-                    //   };
-                    // });
+                        ]
+                      this.$store.state.canvasModule.pages[
+                        this.$store.state.canvasModule.currentPageIndex
+                      ].layers[
+                        this.$store.state.canvasModule.currentLayerIndex
+                      ] = boundaryFill4(
+                        this.canvasCtx,
+                        layer,
+                        x1,
+                        y1,
+                        w,
+                        h,
+                        oldColor,
+                        newColor
+                      );
+                    }
                   }
                   if (mode === "coolPicker") {
                     const color = this.$store.state.canvasModule.pages[
@@ -845,23 +802,26 @@ export default {
       }
     },
     parse(this: any) {
-      setTimeout(() => {
-        const layer = this.$store.state.canvasModule.pages[
-          this.$store.state.canvasModule.currentPageIndex
-        ].layers[this.$store.state.canvasModule.currentLayerIndex];
-        for (let i = 0; i < layer.length; i++)
-          for (let j = 0; j < layer.length; j++) {
-            const cell = layer[i][j];
-            const { color, backgroundColor } = cell;
-            initGrid(
-              this.canvasCtx,
-              layer,
-              i,
-              j,
-              color ? color : backgroundColor
-            );
-          }
-      }, 10);
+      const layer = this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers[this.$store.state.canvasModule.currentLayerIndex];
+      for (let i = 0; i < layer.length; i++)
+        for (let j = 0; j < layer.length; j++) {
+          const cell = layer[i][j];
+          const { color, backgroundColor } = cell;
+          initGrid(
+            this.canvasCtx,
+            layer,
+            i,
+            j,
+            color ? color : backgroundColor
+          );
+        }
+      (window as any).layer = this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers[this.$store.state.canvasModule.currentLayerIndex].map((x: any) =>
+        x.map((y: any) => ({ ...y }))
+      );
     },
     eraser(this: any, e: MouseEvent) {
       const xIndex = Math.floor(
