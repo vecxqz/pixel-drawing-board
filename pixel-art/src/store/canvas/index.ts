@@ -18,6 +18,14 @@ const module: Module<CanvasState, any> = {
     size: 10,
     tempLayer: [],
     canvasCtx: undefined,
+    selectArea: {
+      isSet: false,
+      startX: undefined,
+      startY: undefined,
+      endX: undefined,
+      endY: undefined,
+      data: undefined
+    },
     eventPoint: {
       startPoint: {
         e: undefined,

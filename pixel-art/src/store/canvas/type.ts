@@ -1,4 +1,4 @@
-import { page, eventPoint, layer } from "../../../types/canvas";
+import { page, eventPoint, layer, selectArea } from "../../../types/canvas";
 export interface CanvasState {
   mode: string /**当前画笔模式 */;
   color: string;
@@ -13,4 +13,5 @@ export interface CanvasState {
   size: number /**格子边长 */;
   canvasCtx?: CanvasRenderingContext2D /**canvas上下文 */;
   eventPoint: eventPoint /**鼠标事件点 */;
+  selectArea: selectArea /**选中区域 */;
 }

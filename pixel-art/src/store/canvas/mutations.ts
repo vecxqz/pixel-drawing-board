@@ -98,6 +98,26 @@ const CanvasMutations: MutationTree<CanvasState> = {
   },
   [MutationsTypes.SET_COLUMN_INDEX](state: CanvasState, index: number) {
     state.currentColumnIndex = index;
+  },
+  [MutationsTypes.SET_SELECT_AREA_START_COORDINATE](
+    state: CanvasState,
+    { x, y }: { x: number; y: number }
+  ) {
+    state.selectArea.startX = x;
+    state.selectArea.startY = y;
+  },
+  [MutationsTypes.SET_SELECT_AREA_END_COORDINATE](
+    state: CanvasState,
+    { x, y }: { x: number; y: number }
+  ) {
+    state.selectArea.endX = x;
+    state.selectArea.endY = y;
+  },
+  [MutationsTypes.SET_SELECT_AREA_DATA](state: CanvasState, data) {
+    state.selectArea.data = data;
+  },
+  [MutationsTypes.SET_SELECT_AREA_SET_STATUS](state: CanvasState, setStatus) {
+    state.selectArea.isSet = setStatus;
   }
 };
 export { CanvasMutations };

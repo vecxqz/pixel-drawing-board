@@ -211,8 +211,8 @@ function drawGridGroup(
   canvasCtx.fillRect(
     x,
     y,
-    size * (endColumnIndex - startColumnIndex),
-    size * (endRowIndex - startRowIndex)
+    size * (endColumnIndex - startColumnIndex + 1),
+    size * (endRowIndex - startRowIndex + 1)
   );
 }
 

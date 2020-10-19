@@ -411,17 +411,86 @@ export default {
                     this.$store.dispatch("canvasModule/SET_COLOR", color);
                   }
                   if (mode === "select") {
-                    canvasCtx.globalAlpha = 0.2;
-                    drawGridGroup(
-                      canvasCtx as CanvasRenderingContext2D,
-                      this.tempLayer,
-                      x1,
-                      y1,
-                      x2,
-                      y2,
-                      "black"
-                    );
-                    canvasCtx.globalAlpha = 1;
+                    const {
+                      selectArea: { startX, startY, endX, endY, isSet }
+                    } = this.$store.state.canvasModule;
+                    if (!isSet) {
+                      let selectArea: Array<any> = [];
+                      for (let x = startX; x < endX; x++) {
+                        for (let y = startY; y < endY; y++) {
+                          if (!Array.isArray(selectArea[x])) {
+                            selectArea[x] = [];
+                          }
+                          selectArea[x][
+                            y
+                          ] = this.$store.state.canvasModule.pages[
+                            this.$store.state.canvasModule.currentPageIndex
+                          ].layers[
+                            this.$store.state.canvasModule.currentLayerIndex
+                          ][x][y];
+                        }
+                      }
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_DATA",
+                        selectArea
+                      );
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_SET_STATUS",
+                        true
+                      );
+                      console.log(selectArea);
+                    } else {
+                      const {
+                        selectArea: { startX, startY, endX, endY, data }
+                      } = this.$store.state.canvasModule;
+                      console.log(columnIndex, rowIndex);
+                      if (
+                        columnIndex >= startX &&
+                        columnIndex <= endX &&
+                        rowIndex >= startY &&
+                        rowIndex <= endY
+                      ) {
+                        console.log("logic");
+                      } else {
+                        for (let x = 0; x < data.length; x++) {
+                          for (let y = 0; y < data[0].length; y++) {
+                            const {
+                              columnIndex,
+                              rowIndex,
+                              color,
+                              backgroundColor
+                            } = data[x][y];
+                            drawGrid(
+                              this.canvasCtx as CanvasRenderingContext2D,
+                              this.$store.state.canvasModule.pages[
+                                this.$store.state.canvasModule.currentPageIndex
+                              ].layers[
+                                this.$store.state.canvasModule.currentLayerIndex
+                              ],
+                              columnIndex,
+                              rowIndex,
+                              color ? color : backgroundColor
+                            );
+                          }
+                        }
+                        this.$store.dispatch(
+                          "canvasModule/SET_SELECT_AREA_SET_STATUS",
+                          false
+                        );
+                      }
+                      console.log("normal");
+                    }
+                    // canvasCtx.globalAlpha = 0.2;
+                    // drawGridGroup(
+                    //   canvasCtx as CanvasRenderingContext2D,
+                    //   this.tempLayer,
+                    //   x1,
+                    //   y1,
+                    //   x2,
+                    //   y2,
+                    //   "black"
+                    // );
+                    // canvasCtx.globalAlpha = 1;
                   }
                 })
               )
@@ -678,6 +747,14 @@ export default {
           "black"
         );
         canvasCtx.globalAlpha = 1;
+        this.$store.dispatch("canvasModule/SET_SELECT_AREA_START_COORDINATE", {
+          x: x1,
+          y: y1
+        });
+        this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+          x: x2,
+          y: y2
+        });
       }
       this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
         e,

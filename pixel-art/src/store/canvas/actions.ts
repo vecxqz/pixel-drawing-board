@@ -52,5 +52,23 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.SET_COLUMN_INDEX]({ commit }, index: number) {
     commit(MutationsTypes.SET_COLUMN_INDEX, index);
   },
+  [ActionsTypes.SET_SELECT_AREA_START_COORDINATE](
+    { commit },
+    { x, y }: { x: number; y: number }
+  ) {
+    commit(MutationsTypes.SET_SELECT_AREA_START_COORDINATE, { x, y });
+  },
+  [ActionsTypes.SET_SELECT_AREA_END_COORDINATE](
+    { commit },
+    { x, y }: { x: number; y: number }
+  ) {
+    commit(MutationsTypes.SET_SELECT_AREA_END_COORDINATE, { x, y });
+  },
+  [ActionsTypes.SET_SELECT_AREA_DATA]({ commit }, data: Array<any>) {
+    commit(MutationsTypes.SET_SELECT_AREA_DATA, data);
+  },
+  [ActionsTypes.SET_SELECT_AREA_SET_STATUS]({ commit }, setStatus) {
+    commit(MutationsTypes.SET_SELECT_AREA_SET_STATUS, setStatus);
+  }
 };
 export { CanvasActions };
