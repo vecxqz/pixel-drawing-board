@@ -13,8 +13,8 @@ import {
   bresenhamLine,
   bresenhamLineCircle,
   drawGrid,
-  initGrid
-  // boundaryFill4
+  initGrid,
+  drawGridGroup
 } from "../util/canvas";
 import { ScanLineFill as boundaryFill4 } from "../util/fill";
 import { isUndefined } from "../util/common";
@@ -23,7 +23,9 @@ import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
 export default {
   name: "Canvas",
   data() {
-    return {};
+    return {
+      imageData: undefined
+    };
   },
   computed: {
     tempLayer(this: any) {
@@ -64,29 +66,26 @@ export default {
             takeUntil(
               mouseUp.pipe(
                 tap(e => {
-                  const columnIndex = Math.floor(
-                      e.offsetX / this.$store.state.canvasModule.size
-                    ),
-                    rowIndex = Math.floor(
-                      e.offsetY / this.$store.state.canvasModule.size
-                    );
                   this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+                  const {
+                      canvasCtx,
+                      color,
+                      mode,
+                      size,
+                      eventPoint: { startPoint, endPoint }
+                    } = this.$store.state.canvasModule,
+                    columnIndex = Math.floor(e.offsetX / size),
+                    rowIndex = Math.floor(e.offsetY / size),
+                    x1 = Math.floor(startPoint.e.offsetX / size),
+                    y1 = Math.floor(startPoint.e.offsetY / size),
+                    x2 = Math.floor(endPoint.e.offsetX / size),
+                    y2 = Math.floor(endPoint.e.offsetY / size);
                   this.$store.dispatch(
                     "canvasModule/SET_COLUMN_INDEX",
                     columnIndex
                   );
                   this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
-                  const {
-                    canvasCtx,
-                    color,
-                    mode,
-                    size,
-                    eventPoint: { startPoint, endPoint }
-                  } = this.$store.state.canvasModule;
-                  const x1 = Math.floor(startPoint.e.offsetX / size),
-                    y1 = Math.floor(startPoint.e.offsetY / size),
-                    x2 = Math.floor(endPoint.e.offsetX / size),
-                    y2 = Math.floor(endPoint.e.offsetY / size);
+                  this.canvasImageDataSaveClean();
                   if (mode === "pencil") {
                     drawGrid(
                       canvasCtx as CanvasRenderingContext2D,
@@ -375,10 +374,10 @@ export default {
                       ][0].length;
                       // const layer = [...(window as any).layer];
                       const layer = this.$store.state.canvasModule.pages[
-                          this.$store.state.canvasModule.currentPageIndex
-                        ].layers[
-                          this.$store.state.canvasModule.currentLayerIndex
-                        ]
+                        this.$store.state.canvasModule.currentPageIndex
+                      ].layers[
+                        this.$store.state.canvasModule.currentLayerIndex
+                      ];
                       this.$store.state.canvasModule.pages[
                         this.$store.state.canvasModule.currentPageIndex
                       ].layers[
@@ -402,6 +401,27 @@ export default {
                       columnIndex
                     ][rowIndex].color;
                     this.$store.dispatch("canvasModule/SET_COLOR", color);
+                  }
+                  if (mode === "colorPicker") {
+                    const { color } = this.$store.state.canvasModule.pages[
+                      this.$store.state.canvasModule.currentPageIndex
+                    ].layers[this.$store.state.canvasModule.currentLayerIndex][
+                      columnIndex
+                    ][rowIndex];
+                    this.$store.dispatch("canvasModule/SET_COLOR", color);
+                  }
+                  if (mode === "select") {
+                    canvasCtx.globalAlpha = 0.2;
+                    drawGridGroup(
+                      canvasCtx as CanvasRenderingContext2D,
+                      this.tempLayer,
+                      x1,
+                      y1,
+                      x2,
+                      y2,
+                      "black"
+                    );
+                    canvasCtx.globalAlpha = 1;
                   }
                 })
               )
@@ -464,6 +484,9 @@ export default {
           e.offsetX / this.$store.state.canvasModule.size
         ),
         rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
+      this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+      this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
+      this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       const {
         canvasCtx,
         color,
@@ -471,9 +494,10 @@ export default {
         size,
         eventPoint: { startPoint, endPoint }
       } = this.$store.state.canvasModule;
-      this.$store.dispatch("canvasModule/SET_END_POINT", { e });
-      this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
-      this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
+      const x1 = Math.floor(startPoint.e.offsetX / size),
+        y1 = Math.floor(startPoint.e.offsetY / size),
+        x2 = Math.floor(endPoint.e.offsetX / size),
+        y2 = Math.floor(endPoint.e.offsetY / size);
       if (mode === "pencil") {
         drawGrid(
           canvasCtx as CanvasRenderingContext2D,
@@ -496,34 +520,8 @@ export default {
         };
       }
       if (mode === "line") {
-        const x1 = Math.floor(startPoint.e.offsetX / size),
-          y1 = Math.floor(startPoint.e.offsetY / size),
-          x2 = Math.floor(endPoint.e.offsetX / size),
-          y2 = Math.floor(endPoint.e.offsetY / size);
-        const {
-          x: x3,
-          y: y3
-        } = this.$store.state.canvasModule.eventPoint.lastStartPoint;
-        const {
-          x: x4,
-          y: y4
-        } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
-        if (
-          !isUndefined(x3) &&
-          !isUndefined(y3) &&
-          !isUndefined(x4) &&
-          !isUndefined(y4)
-        ) {
-          bresenhamLine(
-            x3,
-            y3,
-            x4,
-            y4,
-            (columnIndex: number, rowIndex: number) => {
-              this.clearGrid(columnIndex, rowIndex);
-            }
-          );
-        }
+        this.canvasImageDataSave();
+        this.canvasImageDataUse();
         bresenhamLine(
           x1,
           y1,
@@ -539,92 +537,13 @@ export default {
             );
           }
         );
-        this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
-          e,
-          x: x1,
-          y: y1
-        });
-        this.$store.dispatch("canvasModule/SET_LASET_END_POINT", {
-          e,
-          x: x2,
-          y: y2
-        });
       }
       if (mode === "eraser") {
         this.eraser(e);
       }
       if (mode === "square") {
-        const x1 = Math.floor(startPoint.e.offsetX / size),
-          y1 = Math.floor(startPoint.e.offsetY / size),
-          x2 = Math.floor(endPoint.e.offsetX / size),
-          y2 = Math.floor(endPoint.e.offsetY / size);
-        const {
-          x: x3,
-          y: y3
-        } = this.$store.state.canvasModule.eventPoint.lastStartPoint;
-        const {
-          x: x4,
-          y: y4
-        } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
-        if (
-          !isUndefined(x3) &&
-          !isUndefined(y3) &&
-          !isUndefined(x4) &&
-          !isUndefined(y4)
-        ) {
-          if (x3 <= x4 || y3 <= y4) {
-            for (let startX = x3; startX <= x4; startX++)
-              for (let startY = y3; startY <= y4; startY++) {
-                if (
-                  startX === x3 ||
-                  startX === x4 ||
-                  startY === y3 ||
-                  startY === y4
-                ) {
-                  this.clearGrid(startX, startY);
-                }
-              }
-          }
-          if (x3 <= x4 || y3 >= y4) {
-            for (let startX = x3; startX <= x4; startX++)
-              for (let startY = y3; startY >= y4; startY--) {
-                if (
-                  startX === x3 ||
-                  startX === x4 ||
-                  startY === y3 ||
-                  startY === y4
-                ) {
-                  this.clearGrid(startX, startY);
-                }
-              }
-          }
-          if (x3 >= x4 || y3 >= y4) {
-            for (let startX = x3; startX >= x4; startX--)
-              for (let startY = y3; startY >= y4; startY--) {
-                if (
-                  startX === x3 ||
-                  startX === x4 ||
-                  startY === y3 ||
-                  startY === y4
-                ) {
-                  this.clearGrid(startX, startY);
-                }
-              }
-          }
-          if (x3 >= x4 || y3 <= y4) {
-            for (let startX = x3; startX >= x4; startX--)
-              for (let startY = y3; startY <= y4; startY++) {
-                if (
-                  startX === x3 ||
-                  startX === x4 ||
-                  startY === y3 ||
-                  startY === y4
-                ) {
-                  this.clearGrid(startX, startY);
-                }
-              }
-          }
-        }
+        this.canvasImageDataSave();
+        this.canvasImageDataUse();
         if (x1 <= x2 || y1 <= y2) {
           for (let startX = x1; startX <= x2; startX++)
             for (let startY = y1; startY <= y2; startY++) {
@@ -701,75 +620,27 @@ export default {
               }
             }
         }
-        this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
-          e,
-          x: x1,
-          y: y1
-        });
-        this.$store.dispatch("canvasModule/SET_LASET_END_POINT", {
-          e,
-          x: x2,
-          y: y2
-        });
       }
       if (mode === "circle") {
-        const x1 = Math.floor(startPoint.e.offsetX / size),
-          y1 = Math.floor(startPoint.e.offsetY / size),
-          x2 = Math.floor(endPoint.e.offsetX / size),
-          y2 = Math.floor(endPoint.e.offsetY / size);
-        const {
-          x: x3,
-          y: y3
-        } = this.$store.state.canvasModule.eventPoint.lastStartPoint;
-        const {
-          x: x4,
-          y: y4
-        } = this.$store.state.canvasModule.eventPoint.lastEndPoint;
+        this.canvasImageDataSave();
+        this.canvasImageDataUse();
         // 防止圆贴着圆心形成的直角坐标系的边飘逸
-        let midX1, midY1, r1, midX2, midY2, r2, ya1, ya2;
+        let midX1, midY1, r1, ya1;
         // 一三象限
         midX1 = Math.floor((x2 + x1) / 2);
-        midX2 = Math.floor((x4 + x3) / 2);
         if ((x2 < x1 && y2 < y1) || (x2 > x1 && y2 > x1)) {
           const k = 1;
           ya1 = (x2 - x1) * k + y1;
-          ya2 = (x4 - x3) * k + y3;
           midY1 = Math.floor((y1 + ya1) / 2);
-          midY2 = Math.floor((y3 + ya2) / 2);
           // r1 = Math.abs(Math.floor((x2 - x1) / 2));
-          // r2 = Math.abs(Math.floor((x4 - x3) / 2));
           r1 = Math.abs(Math.floor((ya1 - y1) / 2));
-          r2 = Math.abs(Math.floor((ya2 - y3) / 2));
         } else {
           // 二四象限
           const k = -1;
           ya1 = (x2 - x1) * k + y1;
-          ya2 = (x4 - x3) * k + y3;
           midY1 = Math.floor((y1 + ya1) / 2);
-          midY2 = Math.floor((y3 + ya2) / 2);
           // r1 = Math.abs(Math.floor((x2 - x1) / 2));
-          // r2 = Math.abs(Math.floor((x4 - x3) / 2));
           r1 = Math.abs(Math.floor((ya1 - y1) / 2));
-          r2 = Math.abs(Math.floor((ya2 - y3) / 2));
-        }
-        if (
-          !isUndefined(x3) &&
-          !isUndefined(y3) &&
-          !isUndefined(x4) &&
-          !isUndefined(y4)
-        ) {
-          bresenhamLineCircle(
-            this.$store.state.canvasModule.pages[
-              this.$store.state.canvasModule.currentPageIndex
-            ].layers[this.$store.state.canvasModule.currentLayerIndex],
-            midX2,
-            midY2,
-            r2,
-            false,
-            (columnIndex: number, rowIndex: number) => {
-              this.clearGrid(columnIndex, rowIndex);
-            }
-          );
         }
         bresenhamLineCircle(
           this.$store.state.canvasModule.pages[
@@ -789,17 +660,35 @@ export default {
             );
           }
         );
-        this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
-          e,
-          x: x1,
-          y: y1
-        });
-        this.$store.dispatch("canvasModule/SET_LASET_END_POINT", {
-          e,
-          x: x2,
-          y: y2
-        });
       }
+      if (mode === "select") {
+        // 存储在进行绘制之前的画布数据
+        this.canvasImageDataSave();
+        this.canvasImageDataUse();
+        canvasCtx.putImageData(this.imageData, 0, 0);
+        // 透明度设置
+        canvasCtx.globalAlpha = 0.2;
+        drawGridGroup(
+          canvasCtx as CanvasRenderingContext2D,
+          this.tempLayer,
+          x1,
+          y1,
+          x2,
+          y2,
+          "black"
+        );
+        canvasCtx.globalAlpha = 1;
+      }
+      this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
+        e,
+        x: x1,
+        y: y1
+      });
+      this.$store.dispatch("canvasModule/SET_LASET_END_POINT", {
+        e,
+        x: x2,
+        y: y2
+      });
     },
     parse(this: any) {
       const layer = this.$store.state.canvasModule.pages[
@@ -855,7 +744,27 @@ export default {
         color: undefined
       };
     },
-    bresenhamLine
+    canvasImageDataSave(this: any) {
+      const { canvasCtx } = this;
+      // 存储在进行绘制之前的画布数据
+      if (isUndefined(this.imageData)) {
+        this.imageData = canvasCtx.getImageData(
+          0,
+          0,
+          this.$store.state.canvasModule.width,
+          this.$store.state.canvasModule.height
+        );
+      }
+    },
+    canvasImageDataUse(this: any) {
+      const { canvasCtx } = this;
+      if (!isUndefined(this.imageData)) {
+        canvasCtx.putImageData(this.imageData, 0, 0);
+      }
+    },
+    canvasImageDataSaveClean(this: any) {
+      this.imageData = undefined;
+    }
   }
 };
 </script>

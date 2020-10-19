@@ -197,6 +197,25 @@ function bresenhamLineCircle(
   }
 }
 
+function drawGridGroup(
+  canvasCtx: CanvasRenderingContext2D,
+  layerMeta: layer,
+  startColumnIndex: number,
+  startRowIndex: number,
+  endColumnIndex: number,
+  endRowIndex: number,
+  color: string
+): void {
+  const { x, y, size } = layerMeta[startColumnIndex][startRowIndex];
+  canvasCtx.fillStyle = color;
+  canvasCtx.fillRect(
+    x,
+    y,
+    size * (endColumnIndex - startColumnIndex),
+    size * (endRowIndex - startRowIndex)
+  );
+}
+
 export {
   initLayer,
   parseLayer,
@@ -204,4 +223,5 @@ export {
   initGrid,
   bresenhamLine,
   bresenhamLineCircle,
+  drawGridGroup
 };
