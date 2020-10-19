@@ -62,7 +62,7 @@ export default {
         {
           id: "tool-color-picker",
           title: "Color Picker Tool",
-          mode: "coolPicker"
+          mode: "colorPicker"
         },
         {
           id: "tool-move",
