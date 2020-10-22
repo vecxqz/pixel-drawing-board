@@ -69,6 +69,12 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   },
   [ActionsTypes.SET_SELECT_AREA_SET_STATUS]({ commit }, setStatus) {
     commit(MutationsTypes.SET_SELECT_AREA_SET_STATUS, setStatus);
-  }
+  },
+  [ActionsTypes.SET_SELECT_AREA_MOVE_STATUS]({ commit }, moveStatus) {
+    commit(MutationsTypes.SET_SELECT_AREA_MOVE_STATUS, moveStatus);
+  },
+  [ActionsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS]({ commit }, outStatus) {
+    commit(MutationsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS, outStatus);
+  },
 };
 export { CanvasActions };

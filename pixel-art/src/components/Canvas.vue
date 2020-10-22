@@ -1,10 +1,30 @@
 <template>
   <div id="canvas">
-    <canvas
-      ref="canvas"
-      :width="$store.state.canvasModule.width"
-      :height="$store.state.canvasModule.height"
-    ></canvas>
+    <div
+      id="canvas-container"
+      class="pos-relative"
+      :style="
+        `width:${$store.state.canvasModule.width}px;height:$[$store.state.canvasModule.height}px`
+      "
+    >
+      <canvas
+        ref="canvas"
+        :width="$store.state.canvasModule.width"
+        :height="$store.state.canvasModule.height"
+      />
+      <canvas
+        class="pos-absoulte pe-none"
+        ref="selectcanvas"
+        :style="{
+          display: selectArea.isSet ? 'block' : 'none',
+          left: selectArea.left,
+          top: selectArea.top
+        }"
+        :width="selectArea.width"
+        :height="selectArea.height"
+      />
+      <div style="color:white">{{ selectArea }}</div>
+    </div>
   </div>
 </template>
 
@@ -14,7 +34,8 @@ import {
   bresenhamLineCircle,
   drawGrid,
   initGrid,
-  drawGridGroup
+  drawGridGroup,
+  drawSelectArea
 } from "../util/canvas";
 import { ScanLineFill as boundaryFill4 } from "../util/fill";
 import { isUndefined } from "../util/common";
@@ -24,13 +45,44 @@ export default {
   name: "Canvas",
   data() {
     return {
-      imageData: undefined
+      imageData: undefined,
+      distance: {
+        startX: undefined,
+        startY: undefined,
+        endX: undefined,
+        endY: undefined,
+        diffX: 0,
+        diffY: 0
+      }
     };
   },
   computed: {
+    selectArea(this: any) {
+      const {
+        selectArea: { startX, startY, endX, endY, isSet },
+        size
+      } = this.$store.state.canvasModule;
+      const {
+        distance: { diffX, diffY }
+      } = this;
+      const left = (startX + diffX) * size;
+      const top = (startY + diffY) * size;
+      return {
+        isSet: isSet,
+        width: (endX - startX + 1) * size,
+        height: (endY - startY + 1) * size,
+        left: `${left + 0}px`,
+        top: `${top + 0}px`,
+        startX,
+        endX,
+        diffX,
+        startY,
+        endY,
+        diffY
+      };
+    },
     tempLayer(this: any) {
       return this.$store.state.canvasModule.tempLayer;
-      // return { ...this.$store.state.canvasModule.pages[this.$store.state.canvasModule.currentPageIndex].layers[this.$store.state.canvasModule.currentLayerIndex] };
     },
     canvasCtx(this: any) {
       return this.$store.state.canvasModule.canvasCtx;
@@ -47,25 +99,81 @@ export default {
   },
   mounted(this: any) {
     const { canvas } = this.$refs;
+    const canvasContainer = window.document.getElementById("canvas-container");
+    console.log(this.$refs);
     this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
     this.parse();
-    const mouseDown = fromEvent(canvas, "mousedown");
-    const mouseMove = fromEvent(canvas, "mousemove");
-    const mouseUp = fromEvent(canvas, "mouseup");
+    const mouseDown = fromEvent(canvasContainer as HTMLElement, "mousedown");
+    const mouseMove = fromEvent(canvasContainer as HTMLElement, "mousemove");
+    const mouseUp = fromEvent(canvasContainer as HTMLElement, "mouseup");
     mouseDown
       .pipe(
-        tap(e => {
+        tap((e: any) => {
           this.$store.dispatch("canvasModule/SET_START_POINT", { e });
           this.$store.dispatch("canvasModule/SET_LASET_START_POINT", { e });
           this.$store.dispatch("canvasModule/SET_LASET_END_POINT", { e });
+          const {
+              // canvasCtx,
+              mode,
+              size
+            } = this.$store.state.canvasModule,
+            columnIndex = Math.floor(e.offsetX / size),
+            rowIndex = Math.floor(e.offsetY / size);
+          if (mode === "select") {
+            this.distance.startX = Math.floor(e.offsetX / size);
+            this.distance.startY = Math.floor(e.offsetY / size);
+            const {
+              selectArea: { startX, startY, endX, endY, isSet }
+            } = this.$store.state.canvasModule;
+            console.log(`columnIndex ${columnIndex}
+                         startX ${startX}
+                         endX ${endX}
+                          `);
+            if (
+              columnIndex >= startX &&
+              columnIndex <= endX &&
+              rowIndex >= startY &&
+              rowIndex <= endY
+            ) {
+              this.distance.endX = Math.floor(e.offsetX / size);
+              this.distance.endY = Math.floor(e.offsetY / size);
+              this.$store.dispatch(
+                "canvasModule/SET_SELECT_AREA_SET_STATUS",
+                true
+              );
+              this.$store.dispatch(
+                "canvasModule/SET_SELECT_AREA_MOVE_STATUS",
+                true
+              );
+            } else {
+              console.log(`isSet ${isSet}`);
+              if (isSet) {
+                this.$store.dispatch(
+                  "canvasModule/SET_SELECT_AREA_CLICK_OUT_STATUS",
+                  true
+                );
+              }
+            }
+            // else {
+            //   // 没有点击在拖拽区域上，重新设置拖拽区域
+            //   this.$store.dispatch(
+            //     "canvasModule/SET_SELECT_AREA_SET_STATUS",
+            //     false
+            //   );
+            //   this.$store.dispatch(
+            //     "canvasModule/SET_SELECT_AREA_MOVE_STATUS",
+            //     false
+            //   );
+            // }
+          }
         }),
         map(() =>
           mouseMove.pipe(
             takeUntil(
               mouseUp.pipe(
-                tap(e => {
+                tap((e: any) => {
                   this.$store.dispatch("canvasModule/SET_END_POINT", { e });
                   const {
                       canvasCtx,
@@ -85,10 +193,10 @@ export default {
                     columnIndex
                   );
                   this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
-                  this.canvasImageDataSaveClean();
                   if (mode === "pencil") {
+                    this.canvasImageDataSaveClean();
                     drawGrid(
-                      canvasCtx as CanvasRenderingContext2D,
+                      canvasCtx,
                       this.$store.state.canvasModule.pages[
                         this.$store.state.canvasModule.currentPageIndex
                       ].layers[
@@ -112,6 +220,7 @@ export default {
                     };
                   }
                   if (mode === "line") {
+                    this.canvasImageDataSaveClean();
                     bresenhamLine(
                       x1,
                       y1,
@@ -119,7 +228,7 @@ export default {
                       y2,
                       (columnIndex: number, rowIndex: number) => {
                         drawGrid(
-                          canvasCtx as CanvasRenderingContext2D,
+                          canvasCtx,
                           this.$store.state.canvasModule.pages[
                             this.$store.state.canvasModule.currentPageIndex
                           ].layers[
@@ -145,6 +254,7 @@ export default {
                     );
                   }
                   if (mode === "square") {
+                    this.canvasImageDataSaveClean();
                     if (x1 <= x2 || y1 <= y2) {
                       for (let startX = x1; startX <= x2; startX++)
                         for (let startY = y1; startY <= y2; startY++) {
@@ -155,7 +265,7 @@ export default {
                             startY === y2
                           ) {
                             drawGrid(
-                              canvasCtx as CanvasRenderingContext2D,
+                              canvasCtx,
                               this.$store.state.canvasModule.pages[
                                 this.$store.state.canvasModule.currentPageIndex
                               ].layers[
@@ -190,7 +300,7 @@ export default {
                             startY === y2
                           ) {
                             drawGrid(
-                              canvasCtx as CanvasRenderingContext2D,
+                              canvasCtx,
                               this.$store.state.canvasModule.pages[
                                 this.$store.state.canvasModule.currentPageIndex
                               ].layers[
@@ -225,7 +335,7 @@ export default {
                             startY === y2
                           ) {
                             drawGrid(
-                              canvasCtx as CanvasRenderingContext2D,
+                              canvasCtx,
                               this.$store.state.canvasModule.pages[
                                 this.$store.state.canvasModule.currentPageIndex
                               ].layers[
@@ -260,7 +370,7 @@ export default {
                             startY === y2
                           ) {
                             drawGrid(
-                              canvasCtx as CanvasRenderingContext2D,
+                              canvasCtx,
                               this.$store.state.canvasModule.pages[
                                 this.$store.state.canvasModule.currentPageIndex
                               ].layers[
@@ -297,6 +407,7 @@ export default {
                     });
                   }
                   if (mode === "circle") {
+                    this.canvasImageDataSaveClean();
                     const x1 = Math.floor(startPoint.e.offsetX / size),
                       x2 = Math.floor(endPoint.e.offsetX / size);
                     // 防止圆贴着圆心形成的直角坐标系的边飘逸
@@ -329,7 +440,7 @@ export default {
                       false,
                       (columnIndex: number, rowIndex: number) => {
                         drawGrid(
-                          canvasCtx as CanvasRenderingContext2D,
+                          canvasCtx,
                           this.$store.state.canvasModule.pages[
                             this.$store.state.canvasModule.currentPageIndex
                           ].layers[
@@ -355,6 +466,7 @@ export default {
                     );
                   }
                   if (mode === "bucket") {
+                    this.canvasImageDataSaveClean();
                     // const stack: Array<any> = [];
                     const oldColor = this.$store.state.canvasModule.pages[
                       this.$store.state.canvasModule.currentPageIndex
@@ -383,7 +495,7 @@ export default {
                       ].layers[
                         this.$store.state.canvasModule.currentLayerIndex
                       ] = boundaryFill4(
-                        this.canvasCtx,
+                        canvasCtx,
                         layer,
                         x1,
                         y1,
@@ -394,14 +506,6 @@ export default {
                       );
                     }
                   }
-                  if (mode === "coolPicker") {
-                    const color = this.$store.state.canvasModule.pages[
-                      this.$store.state.canvasModule.currentPageIndex
-                    ].layers[this.$store.state.canvasModule.currentLayerIndex][
-                      columnIndex
-                    ][rowIndex].color;
-                    this.$store.dispatch("canvasModule/SET_COLOR", color);
-                  }
                   if (mode === "colorPicker") {
                     const { color } = this.$store.state.canvasModule.pages[
                       this.$store.state.canvasModule.currentPageIndex
@@ -411,13 +515,22 @@ export default {
                     this.$store.dispatch("canvasModule/SET_COLOR", color);
                   }
                   if (mode === "select") {
+                    // this.canvasImageDataSaveClean();
                     const {
-                      selectArea: { startX, startY, endX, endY, isSet }
+                      selectArea: {
+                        startX,
+                        startY,
+                        endX,
+                        endY,
+                        isSet,
+                        isMove,
+                        isClickOut
+                      }
                     } = this.$store.state.canvasModule;
                     if (!isSet) {
                       let selectArea: Array<any> = [];
-                      for (let x = startX; x < endX; x++) {
-                        for (let y = startY; y < endY; y++) {
+                      for (let x = 0; x <= endX - startX; x++) {
+                        for (let y = 0; y <= endY - startY; y++) {
                           if (!Array.isArray(selectArea[x])) {
                             selectArea[x] = [];
                           }
@@ -427,9 +540,19 @@ export default {
                             this.$store.state.canvasModule.currentPageIndex
                           ].layers[
                             this.$store.state.canvasModule.currentLayerIndex
-                          ][x][y];
+                          ][x + startX][y + startY];
                         }
                       }
+                      drawSelectArea(
+                        this.canvasCtx,
+                        this.$refs.selectcanvas.getContext("2d"),
+                        this.currentLayer,
+                        x1,
+                        y1,
+                        x2,
+                        y2,
+                        size
+                      );
                       this.$store.dispatch(
                         "canvasModule/SET_SELECT_AREA_DATA",
                         selectArea
@@ -438,66 +561,87 @@ export default {
                         "canvasModule/SET_SELECT_AREA_SET_STATUS",
                         true
                       );
-                      console.log(selectArea);
-                    } else {
-                      const {
-                        selectArea: { startX, startY, endX, endY, data }
-                      } = this.$store.state.canvasModule;
-                      console.log(columnIndex, rowIndex);
-                      if (
-                        columnIndex >= startX &&
-                        columnIndex <= endX &&
-                        rowIndex >= startY &&
-                        rowIndex <= endY
-                      ) {
-                        console.log("logic");
-                      } else {
-                        for (let x = 0; x < data.length; x++) {
-                          for (let y = 0; y < data[0].length; y++) {
-                            const {
-                              columnIndex,
-                              rowIndex,
-                              color,
-                              backgroundColor
-                            } = data[x][y];
-                            drawGrid(
-                              this.canvasCtx as CanvasRenderingContext2D,
-                              this.$store.state.canvasModule.pages[
-                                this.$store.state.canvasModule.currentPageIndex
-                              ].layers[
-                                this.$store.state.canvasModule.currentLayerIndex
-                              ],
-                              columnIndex,
-                              rowIndex,
-                              color ? color : backgroundColor
-                            );
-                          }
-                        }
-                        this.$store.dispatch(
-                          "canvasModule/SET_SELECT_AREA_SET_STATUS",
-                          false
-                        );
-                      }
-                      console.log("normal");
                     }
-                    // canvasCtx.globalAlpha = 0.2;
-                    // drawGridGroup(
-                    //   canvasCtx as CanvasRenderingContext2D,
-                    //   this.tempLayer,
-                    //   x1,
-                    //   y1,
-                    //   x2,
-                    //   y2,
-                    //   "black"
-                    // );
-                    // canvasCtx.globalAlpha = 1;
+                    if (isClickOut) {
+                      this.distance.startX = undefined;
+                      this.distance.startY = undefined;
+                      this.distance.endX = undefined;
+                      this.distance.endY = undefined;
+                      this.distance.diffX = 0;
+                      this.distance.diffY = 0;
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_SET_STATUS",
+                        false
+                      );
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_START_COORDINATE",
+                        {
+                          x: 0,
+                          y: 0
+                        }
+                      );
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_END_COORDINATE",
+                        {
+                          x: 0,
+                          y: 0
+                        }
+                      );
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_CLICK_OUT_STATUS",
+                        false
+                      );
+                    }
+
+                    if (isMove) {
+                      // 拖拽选择区域结束
+                      console.log("拖拽结束了");
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_SET_STATUS",
+                        true
+                      );
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_MOVE_STATUS",
+                        false
+                      );
+                      console.log(`
+                      startX ${startX}
+                      startY ${startY}
+                      this.distance.diffX ${this.distance.diffX}
+                      this.distance.diffY ${this.distance.diffY}
+                      startX + this.distance.diffX ${startX +
+                        this.distance.diffX}
+                      startY + this.distance.diffY ${startY +
+                        this.distance.diffY}
+                      `);
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_START_COORDINATE",
+                        {
+                          x: startX + this.distance.diffX,
+                          y: startY + this.distance.diffY
+                        }
+                      );
+                      this.$store.dispatch(
+                        "canvasModule/SET_SELECT_AREA_END_COORDINATE",
+                        {
+                          x: endX + this.distance.diffX,
+                          y: endY + this.distance.diffY
+                        }
+                      );
+                      this.distance.startX = undefined;
+                      this.distance.startY = undefined;
+                      this.distance.endX = undefined;
+                      this.distance.endY = undefined;
+                      this.distance.diffX = 0;
+                      this.distance.diffY = 0;
+                    }
                   }
                 })
               )
             )
           )
         ),
-        debounceTime(0, animationFrameScheduler),
+        debounceTime(16, animationFrameScheduler),
         concatAll()
       )
       .subscribe(e => {
@@ -512,7 +656,7 @@ export default {
     clearGrid(this: any, x: number, y: number) {
       const { color, colorDef } = this.getColorToDefalut(x, y);
       drawGrid(
-        this.canvasCtx as CanvasRenderingContext2D,
+        this.canvasCtx,
         this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers[this.$store.state.canvasModule.currentLayerIndex],
@@ -568,13 +712,7 @@ export default {
         x2 = Math.floor(endPoint.e.offsetX / size),
         y2 = Math.floor(endPoint.e.offsetY / size);
       if (mode === "pencil") {
-        drawGrid(
-          canvasCtx as CanvasRenderingContext2D,
-          this.tempLayer,
-          columnIndex,
-          rowIndex,
-          color
-        );
+        drawGrid(canvasCtx, this.tempLayer, columnIndex, rowIndex, color);
         this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers[this.$store.state.canvasModule.currentLayerIndex][columnIndex][
@@ -597,13 +735,7 @@ export default {
           x2,
           y2,
           (columnIndex: number, rowIndex: number) => {
-            drawGrid(
-              canvasCtx as CanvasRenderingContext2D,
-              this.tempLayer,
-              columnIndex,
-              rowIndex,
-              color
-            );
+            drawGrid(canvasCtx, this.tempLayer, columnIndex, rowIndex, color);
           }
         );
       }
@@ -622,13 +754,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                drawGrid(
-                  canvasCtx as CanvasRenderingContext2D,
-                  this.tempLayer,
-                  startX,
-                  startY,
-                  color
-                );
+                drawGrid(canvasCtx, this.tempLayer, startX, startY, color);
               }
             }
         }
@@ -641,13 +767,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                drawGrid(
-                  canvasCtx as CanvasRenderingContext2D,
-                  this.tempLayer,
-                  startX,
-                  startY,
-                  color
-                );
+                drawGrid(canvasCtx, this.tempLayer, startX, startY, color);
               }
             }
         }
@@ -660,13 +780,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                drawGrid(
-                  canvasCtx as CanvasRenderingContext2D,
-                  this.tempLayer,
-                  startX,
-                  startY,
-                  color
-                );
+                drawGrid(canvasCtx, this.tempLayer, startX, startY, color);
               }
             }
         }
@@ -679,13 +793,7 @@ export default {
                 startY === y1 ||
                 startY === y2
               ) {
-                drawGrid(
-                  canvasCtx as CanvasRenderingContext2D,
-                  this.tempLayer,
-                  startX,
-                  startY,
-                  color
-                );
+                drawGrid(canvasCtx, this.tempLayer, startX, startY, color);
               }
             }
         }
@@ -720,41 +828,39 @@ export default {
           r1,
           false,
           (columnIndex: number, rowIndex: number) => {
-            drawGrid(
-              canvasCtx as CanvasRenderingContext2D,
-              this.tempLayer,
-              columnIndex,
-              rowIndex,
-              color
-            );
+            drawGrid(canvasCtx, this.tempLayer, columnIndex, rowIndex, color);
           }
         );
       }
       if (mode === "select") {
-        // 存储在进行绘制之前的画布数据
+        const {
+          selectArea: { isSet, isMove }
+        } = this.$store.state.canvasModule;
         this.canvasImageDataSave();
         this.canvasImageDataUse();
-        canvasCtx.putImageData(this.imageData, 0, 0);
-        // 透明度设置
-        canvasCtx.globalAlpha = 0.2;
-        drawGridGroup(
-          canvasCtx as CanvasRenderingContext2D,
-          this.tempLayer,
-          x1,
-          y1,
-          x2,
-          y2,
-          "black"
-        );
-        canvasCtx.globalAlpha = 1;
-        this.$store.dispatch("canvasModule/SET_SELECT_AREA_START_COORDINATE", {
-          x: x1,
-          y: y1
-        });
-        this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
-          x: x2,
-          y: y2
-        });
+        if (!isSet) {
+          // 透明度设置
+          canvasCtx.globalAlpha = 0.2;
+          drawGridGroup(canvasCtx, this.tempLayer, x1, y1, x2, y2, "black");
+          canvasCtx.globalAlpha = 1;
+          this.$store.dispatch(
+            "canvasModule/SET_SELECT_AREA_START_COORDINATE",
+            {
+              x: x1,
+              y: y1
+            }
+          );
+          this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+            x: x2,
+            y: y2
+          });
+        }
+        if (isMove) {
+          this.distance.endX = Math.floor(e.offsetX / size);
+          this.distance.endY = Math.floor(e.offsetY / size);
+          this.distance.diffX = this.distance.endX - this.distance.startX;
+          this.distance.diffY = this.distance.endY - this.distance.startY;
+        }
       }
       this.$store.dispatch("canvasModule/SET_LASET_START_POINT", {
         e,
@@ -800,7 +906,7 @@ export default {
         yIndex
       ];
       drawGrid(
-        this.canvasCtx as CanvasRenderingContext2D,
+        this.canvasCtx,
         this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers[this.$store.state.canvasModule.currentLayerIndex],
@@ -850,5 +956,14 @@ export default {
 #canvas {
   border-top: 1px solid rgba(0, 0, 0, 0.5);
   background-color: #141518;
+}
+.pe-none {
+  pointer-events: none;
+}
+.pos-absoulte {
+  position: absolute;
+}
+.pos-relative {
+  position: relative;
 }
 </style>

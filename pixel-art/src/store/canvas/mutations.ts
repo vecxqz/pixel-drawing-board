@@ -118,6 +118,12 @@ const CanvasMutations: MutationTree<CanvasState> = {
   },
   [MutationsTypes.SET_SELECT_AREA_SET_STATUS](state: CanvasState, setStatus) {
     state.selectArea.isSet = setStatus;
+  },
+  [MutationsTypes.SET_SELECT_AREA_MOVE_STATUS](state: CanvasState, moveStatus) {
+    state.selectArea.isMove = moveStatus;
+  },
+  [MutationsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS](state: CanvasState, outStatus) {
+    state.selectArea.isClickOut = outStatus;
   }
 };
 export { CanvasMutations };

@@ -215,7 +215,50 @@ function drawGridGroup(
     size * (endRowIndex - startRowIndex + 1)
   );
 }
-
+function drawSelectArea(
+  canvasCtx: CanvasRenderingContext2D,
+  selectCanvasCtx: CanvasRenderingContext2D,
+  layer: layer,
+  startColumnIndex: number,
+  startRowIndex: number,
+  endColumnIndex: number,
+  endRowIndex: number,
+  size: number
+): void {
+  const width: number = size * (endColumnIndex - startColumnIndex + 1),
+    height: number = size * (endRowIndex - startRowIndex + 1);
+  const { x, y } = layer[startColumnIndex][startRowIndex];
+  // 获取左上角坐标
+  let stepX = undefined;
+  let stepY = undefined;
+  for (let startX = startColumnIndex; startX <= endColumnIndex; startX++) {
+    for (let startY = startRowIndex; startY <= endRowIndex; startY++) {
+      const { x, y, color, size } = layer[startX][startY];
+      if (stepX === undefined && stepY === undefined) {
+        [stepX, stepY] = [x, y];
+      }
+      if (color) {
+        selectCanvasCtx.fillStyle = color as string;
+        selectCanvasCtx.fillRect(
+          x - (stepX as number),
+          y - (stepY as number),
+          size,
+          size
+        );
+      } else {
+        selectCanvasCtx.globalAlpha = 0.2;
+        selectCanvasCtx.fillStyle = "red";
+        selectCanvasCtx.fillRect(
+          x - (stepX as number),
+          y - (stepY as number),
+          size,
+          size
+        );
+        selectCanvasCtx.globalAlpha = 1;
+      }
+    }
+  }
+}
 export {
   initLayer,
   parseLayer,
@@ -223,5 +266,6 @@ export {
   initGrid,
   bresenhamLine,
   bresenhamLineCircle,
-  drawGridGroup
+  drawGridGroup,
+  drawSelectArea
 };

@@ -54,4 +54,6 @@ export interface selectArea {
   endY?: number;
   data?: layer;
   isSet?: Boolean;
+  isMove?: Boolean;
+  isClickOut?: Boolean;
 }
