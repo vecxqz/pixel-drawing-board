@@ -245,9 +245,18 @@ function drawSelectArea(
           size,
           size
         );
+        selectCanvasCtx.globalAlpha = 0.3;
+        selectCanvasCtx.fillStyle = "#e2e2e2";
+        selectCanvasCtx.fillRect(
+          x - (stepX as number),
+          y - (stepY as number),
+          size,
+          size
+        );
+        selectCanvasCtx.globalAlpha = 1;
       } else {
-        selectCanvasCtx.globalAlpha = 0.2;
-        selectCanvasCtx.fillStyle = "red";
+        selectCanvasCtx.globalAlpha = 0.3;
+        selectCanvasCtx.fillStyle = "#e2e2e2";
         selectCanvasCtx.fillRect(
           x - (stepX as number),
           y - (stepY as number),

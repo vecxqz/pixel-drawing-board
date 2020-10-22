@@ -100,7 +100,6 @@ export default {
   mounted(this: any) {
     const { canvas } = this.$refs;
     const canvasContainer = window.document.getElementById("canvas-container");
-    console.log(this.$refs);
     this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
@@ -127,10 +126,6 @@ export default {
             const {
               selectArea: { startX, startY, endX, endY, isSet }
             } = this.$store.state.canvasModule;
-            console.log(`columnIndex ${columnIndex}
-                         startX ${startX}
-                         endX ${endX}
-                          `);
             if (
               columnIndex >= startX &&
               columnIndex <= endX &&
@@ -148,7 +143,6 @@ export default {
                 true
               );
             } else {
-              console.log(`isSet ${isSet}`);
               if (isSet) {
                 this.$store.dispatch(
                   "canvasModule/SET_SELECT_AREA_CLICK_OUT_STATUS",
@@ -156,17 +150,6 @@ export default {
                 );
               }
             }
-            // else {
-            //   // 没有点击在拖拽区域上，重新设置拖拽区域
-            //   this.$store.dispatch(
-            //     "canvasModule/SET_SELECT_AREA_SET_STATUS",
-            //     false
-            //   );
-            //   this.$store.dispatch(
-            //     "canvasModule/SET_SELECT_AREA_MOVE_STATUS",
-            //     false
-            //   );
-            // }
           }
         }),
         map(() =>
@@ -515,7 +498,7 @@ export default {
                     this.$store.dispatch("canvasModule/SET_COLOR", color);
                   }
                   if (mode === "select") {
-                    // this.canvasImageDataSaveClean();
+                    this.canvasImageDataSaveClean();
                     const {
                       selectArea: {
                         startX,
@@ -524,7 +507,8 @@ export default {
                         endY,
                         isSet,
                         isMove,
-                        isClickOut
+                        isClickOut,
+                        data
                       }
                     } = this.$store.state.canvasModule;
                     if (!isSet) {
@@ -553,6 +537,12 @@ export default {
                         y2,
                         size
                       );
+                      for (let x = 0; x < selectArea.length; x++) {
+                        for (let y = 0; y < selectArea[x].length; y++) {
+                          const { columnIndex, rowIndex } = selectArea[x][y];
+                          this.clearGrid(columnIndex, rowIndex);
+                        }
+                      }
                       this.$store.dispatch(
                         "canvasModule/SET_SELECT_AREA_DATA",
                         selectArea
@@ -563,6 +553,31 @@ export default {
                       );
                     }
                     if (isClickOut) {
+                      for (let x = 0; x < data.length; x++) {
+                        for (let y = 0; y < data[x].length; y++) {
+                          const { color } = data[x][y];
+                          if (color) {
+                            drawGrid(
+                              this.canvasCtx,
+                              this.$store.state.canvasModule.pages[
+                                this.$store.state.canvasModule.currentPageIndex
+                              ].layers[
+                                this.$store.state.canvasModule.currentLayerIndex
+                              ],
+                              this.selectArea.startX + x,
+                              this.selectArea.startY + y,
+                              color
+                            );
+                            this.$store.state.canvasModule.pages[
+                              this.$store.state.canvasModule.currentPageIndex
+                            ].layers[
+                              this.$store.state.canvasModule.currentLayerIndex
+                            ][this.selectArea.startX + x][
+                              this.selectArea.startY + y
+                            ].color = color;
+                          }
+                        }
+                      }
                       this.distance.startX = undefined;
                       this.distance.startY = undefined;
                       this.distance.endX = undefined;
@@ -595,7 +610,6 @@ export default {
 
                     if (isMove) {
                       // 拖拽选择区域结束
-                      console.log("拖拽结束了");
                       this.$store.dispatch(
                         "canvasModule/SET_SELECT_AREA_SET_STATUS",
                         true
@@ -604,16 +618,6 @@ export default {
                         "canvasModule/SET_SELECT_AREA_MOVE_STATUS",
                         false
                       );
-                      console.log(`
-                      startX ${startX}
-                      startY ${startY}
-                      this.distance.diffX ${this.distance.diffX}
-                      this.distance.diffY ${this.distance.diffY}
-                      startX + this.distance.diffX ${startX +
-                        this.distance.diffX}
-                      startY + this.distance.diffY ${startY +
-                        this.distance.diffY}
-                      `);
                       this.$store.dispatch(
                         "canvasModule/SET_SELECT_AREA_START_COORDINATE",
                         {
@@ -654,7 +658,9 @@ export default {
       this.canvasCtx.fillStyle = gridColor ? gridColor : gridBoardColor;
     },
     clearGrid(this: any, x: number, y: number) {
-      const { color, colorDef } = this.getColorToDefalut(x, y);
+      const { backgroundColor } = this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers[this.$store.state.canvasModule.currentLayerIndex][x][y];
       drawGrid(
         this.canvasCtx,
         this.$store.state.canvasModule.pages[
@@ -662,7 +668,7 @@ export default {
         ].layers[this.$store.state.canvasModule.currentLayerIndex],
         x,
         y,
-        color
+        backgroundColor
       );
       this.$store.state.canvasModule.pages[
         this.$store.state.canvasModule.currentPageIndex
@@ -670,27 +676,8 @@ export default {
         ...this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers[this.$store.state.canvasModule.currentLayerIndex][x][y],
-        color: colorDef ? color : undefined
+        color: undefined
       };
-    },
-    getColorToDefalut(this: any, x: any, y: any) {
-      return this.getGridColor(
-        this.$store.state.canvasModule.pages[
-          this.$store.state.canvasModule.currentPageIndex
-        ].layers[this.$store.state.canvasModule.currentLayerIndex][x][y]
-      );
-    },
-    getGridColor(this: any, gridMeta: any) {
-      const { color, backgroundColor } = gridMeta;
-      return color
-        ? {
-            color: color,
-            colorDef: true
-          }
-        : {
-            color: backgroundColor,
-            colorDef: false
-          };
     },
     handleMouseMove(this: any, e: any) {
       const columnIndex = Math.floor(
@@ -840,8 +827,8 @@ export default {
         this.canvasImageDataUse();
         if (!isSet) {
           // 透明度设置
-          canvasCtx.globalAlpha = 0.2;
-          drawGridGroup(canvasCtx, this.tempLayer, x1, y1, x2, y2, "black");
+          canvasCtx.globalAlpha = .3;
+          drawGridGroup(canvasCtx, this.tempLayer, x1, y1, x2, y2, "#e2e2e2");
           canvasCtx.globalAlpha = 1;
           this.$store.dispatch(
             "canvasModule/SET_SELECT_AREA_START_COORDINATE",
