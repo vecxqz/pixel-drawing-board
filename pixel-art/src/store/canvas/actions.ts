@@ -19,6 +19,10 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_CANVASCTX, canvasCtx);
   },
+  [ActionsTypes.SET_SELECTCANVASCTX]({ commit }, canvas: HTMLCanvasElement): void {
+    const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+    commit(MutationsTypes.SET_SELECTCANVASCTX, canvasCtx);
+  },
   [ActionsTypes.SET_COLOR]({ commit }, color: string): void {
     commit(MutationsTypes.SET_COLOR, color);
   },
@@ -76,5 +80,19 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS]({ commit }, outStatus) {
     commit(MutationsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS, outStatus);
   },
+  [ActionsTypes.SET_LAYER_GRID_DATA](
+    { commit },
+    {
+      columnIndex,
+      rowIndex,
+      data
+    }: { columnIndex: number; rowIndex: number; data: any }
+  ) {
+    commit(MutationsTypes.SET_LAYER_GRID_DATA, {
+      columnIndex,
+      rowIndex,
+      data
+    });
+  }
 };
 export { CanvasActions };

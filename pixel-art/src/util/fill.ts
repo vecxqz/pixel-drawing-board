@@ -13,7 +13,6 @@ function boundaryFill4( //递归填充
   if (
     layer[x][y].color !== newColor &&
     layer[x][y].color === oldColor
-    // && layer[x][y].color === undefined
   ) {
     const oldColor = layer[x][y].color;
     callback(x, y);
@@ -63,11 +62,7 @@ function ScanLineFill(
       //填充颜色
       drawGrid(canvasCtx as CanvasRenderingContext2D, layer, x, y, newColor);
       layer[x][y].color = newColor
-      //填充颜色
-      // if (x + 1 < w || x - 1 >= 0 || y + 1 < h || y - 1 >= 0) {
-      //   continue;
-      // }
-      const { x: nxl, y: nyl1 } = Fill(
+        const { x: nxl, y: nyl1 } = Fill(
         canvasCtx,
         layer,
         xl,

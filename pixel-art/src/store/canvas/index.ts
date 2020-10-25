@@ -18,6 +18,7 @@ const module: Module<CanvasState, any> = {
     size: 10,
     tempLayer: [],
     canvasCtx: undefined,
+    selectCanvasCtx: undefined,
     selectArea: {
       isSet: false,
       isMove: false,

@@ -2,7 +2,7 @@ import { MutationTree } from "vuex";
 import { CanvasState } from "./type";
 import { Mutation } from "vuex";
 import { MutationsTypes } from "./enum";
-import { cell, layer, page } from "types/canvas";
+import { canvasData, cell, layer, page } from "types/canvas";
 import { initLayer } from "../../util/canvas";
 import { isUndefined } from "../../util/common";
 
@@ -32,6 +32,12 @@ const CanvasMutations: MutationTree<CanvasState> = {
     canvasCtx: CanvasRenderingContext2D
   ) {
     state.canvasCtx = canvasCtx;
+  },
+  [MutationsTypes.SET_SELECTCANVASCTX](
+    state: CanvasState,
+    canvasCtx: CanvasRenderingContext2D
+  ) {
+    state.selectCanvasCtx = canvasCtx;
   },
   [MutationsTypes.SET_COLOR](state: CanvasState, color: string) {
     console.log(color);
@@ -122,8 +128,29 @@ const CanvasMutations: MutationTree<CanvasState> = {
   [MutationsTypes.SET_SELECT_AREA_MOVE_STATUS](state: CanvasState, moveStatus) {
     state.selectArea.isMove = moveStatus;
   },
-  [MutationsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS](state: CanvasState, outStatus) {
+  [MutationsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS](
+    state: CanvasState,
+    outStatus
+  ) {
     state.selectArea.isClickOut = outStatus;
+  },
+  [MutationsTypes.SET_LAYER_GRID_DATA](
+    state: CanvasState,
+    {
+      columnIndex,
+      rowIndex,
+      data
+    }: { columnIndex: number; rowIndex: number; data: any }
+  ) {
+    const { currentPageIndex, currentLayerIndex } = state;
+    state.pages[currentPageIndex].layers[currentLayerIndex][columnIndex][
+      rowIndex
+    ] = {
+      ...state.pages[currentPageIndex].layers[currentLayerIndex][columnIndex][
+        rowIndex
+      ],
+      ...data
+    };
   }
 };
 export { CanvasMutations };
