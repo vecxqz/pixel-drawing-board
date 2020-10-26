@@ -206,6 +206,7 @@ function drawGridGroup(
   endRowIndex: number,
   color: string
 ): void {
+  canvasCtx.globalAlpha = 0.2;
   const { x, y, size } = layerMeta[startColumnIndex][startRowIndex];
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(
@@ -214,6 +215,7 @@ function drawGridGroup(
     size * (endColumnIndex - startColumnIndex + 1),
     size * (endRowIndex - startRowIndex + 1)
   );
+  canvasCtx.globalAlpha = 1;
 }
 function drawSelectArea(
   canvasCtx: CanvasRenderingContext2D,
@@ -223,7 +225,8 @@ function drawSelectArea(
   startRowIndex: number,
   endColumnIndex: number,
   endRowIndex: number,
-  size: number
+  size: number,
+  coverColor: string
 ): void {
   const width: number = size * (endColumnIndex - startColumnIndex + 1),
     height: number = size * (endRowIndex - startRowIndex + 1);
@@ -246,7 +249,7 @@ function drawSelectArea(
           size
         );
         selectCanvasCtx.globalAlpha = 0.3;
-        selectCanvasCtx.fillStyle = "#black";
+        selectCanvasCtx.fillStyle = "#000000";
         selectCanvasCtx.fillRect(
           x - (stepX as number),
           y - (stepY as number),
@@ -256,7 +259,7 @@ function drawSelectArea(
         selectCanvasCtx.globalAlpha = 1;
       } else {
         selectCanvasCtx.globalAlpha = 0.3;
-        selectCanvasCtx.fillStyle = "#black";
+        selectCanvasCtx.fillStyle = "#000000";
         selectCanvasCtx.fillRect(
           x - (stepX as number),
           y - (stepY as number),

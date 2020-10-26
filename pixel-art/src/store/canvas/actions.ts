@@ -1,5 +1,6 @@
 import { CanvasState } from "./type";
 import { RootState } from "../type";
+import { layer } from "../../../types/canvas";
 import { ActionTree } from "vuex";
 import { ActionsTypes, MutationsTypes } from "./enum";
 const CanvasActions: ActionTree<CanvasState, RootState> = {
@@ -19,7 +20,10 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_CANVASCTX, canvasCtx);
   },
-  [ActionsTypes.SET_SELECTCANVASCTX]({ commit }, canvas: HTMLCanvasElement): void {
+  [ActionsTypes.SET_SELECTCANVASCTX](
+    { commit },
+    canvas: HTMLCanvasElement
+  ): void {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_SELECTCANVASCTX, canvasCtx);
   },
@@ -68,7 +72,33 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   ) {
     commit(MutationsTypes.SET_SELECT_AREA_END_COORDINATE, { x, y });
   },
-  [ActionsTypes.SET_SELECT_AREA_DATA]({ commit }, data: Array<any>) {
+  [ActionsTypes.SET_SELECT_AREA_DATA](
+    { commit },
+    {
+      currentLayer,
+      startX,
+      startY,
+      endX,
+      endY
+    }: {
+      currentLayer: layer;
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
+    }
+  ) {
+    let data: Array<any> = [];
+    for (let x = startX; x <= endX; x++) {
+      for (let y = startY; y <= endY; y++) {
+        const dataIndexX = x - startX;
+        const dataIndexY = y - startY;
+        if (!Array.isArray(data[dataIndexX])) {
+          data[dataIndexX] = [];
+        }
+        data[dataIndexX][dataIndexY] = currentLayer[x][y];
+      }
+    }
     commit(MutationsTypes.SET_SELECT_AREA_DATA, data);
   },
   [ActionsTypes.SET_SELECT_AREA_SET_STATUS]({ commit }, setStatus) {

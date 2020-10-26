@@ -14,7 +14,6 @@ export function useMousePosition() {
       x: columnIndex,
       y: rowIndex
     });
-    console.log("select mouseDown");
   }
   function mouseMove(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
@@ -24,7 +23,6 @@ export function useMousePosition() {
       x: columnIndex,
       y: rowIndex
     });
-    console.log("select mouseMove");
   }
   function mouseUp(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
@@ -34,7 +32,6 @@ export function useMousePosition() {
       x: columnIndex,
       y: rowIndex
     });
-    console.log("select mouseUp");
   }
   return {
     mouseDown,
