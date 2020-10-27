@@ -30,6 +30,12 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.SET_COLOR]({ commit }, color: string): void {
     commit(MutationsTypes.SET_COLOR, color);
   },
+  [ActionsTypes.SET_PRIMARY_COLOR]({ commit }, color: string): void {
+    commit(MutationsTypes.SET_PRIMARY_COLOR, color);
+  },
+  [ActionsTypes.SET_SECONDARY_COLOR]({ commit }, color: string): void {
+    commit(MutationsTypes.SET_SECONDARY_COLOR, color);
+  },
   [ActionsTypes.SET_START_POINT](
     { commit },
     { e, x, y }: { e: MouseEvent; x: number; y: number }

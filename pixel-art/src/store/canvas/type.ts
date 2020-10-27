@@ -2,6 +2,8 @@ import { page, eventPoint, layer, selectArea } from "../../../types/canvas";
 export interface CanvasState {
   mode: string /**当前画笔模式 */;
   color: string;
+  primaryColor: string;
+  secondaryColor: string;
   currentPageIndex: number /**当前页数下标 */;
   currentLayerIndex: number /**当前层数下标 */;
   currentRowIndex: number /**当前行下标 */;

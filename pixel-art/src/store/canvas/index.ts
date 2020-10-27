@@ -7,7 +7,9 @@ const module: Module<CanvasState, any> = {
   namespaced: true,
   state: () => ({
     mode: "pencil",
-    color: "black",
+    color: "",
+    primaryColor: "black",
+    secondaryColor: "white",
     currentLayerIndex: 0,
     currentPageIndex: 0,
     currentRowIndex: 0,

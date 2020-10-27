@@ -40,8 +40,13 @@ const CanvasMutations: MutationTree<CanvasState> = {
     state.selectCanvasCtx = canvasCtx;
   },
   [MutationsTypes.SET_COLOR](state: CanvasState, color: string) {
-    console.log(color);
     state.color = color;
+  },
+  [MutationsTypes.SET_PRIMARY_COLOR](state: CanvasState, color: string) {
+    state.primaryColor = color;
+  },
+  [MutationsTypes.SET_SECONDARY_COLOR](state: CanvasState, color: string) {
+    state.secondaryColor = color;
   },
   [MutationsTypes.SET_START_POINT](
     state: CanvasState,

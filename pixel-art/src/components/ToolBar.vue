@@ -14,12 +14,17 @@
         <div class="toolbar-icon"></div>
       </li>
     </ul>
+    <colorPreview />
   </div>
 </template>
 
 <script>
+import colorPreview from "./colorPreview";
 export default {
   name: "ToolBar",
+  components: {
+    colorPreview
+  },
   data() {
     return {
       toolActiveIndex: 0,

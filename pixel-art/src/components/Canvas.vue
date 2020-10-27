@@ -29,6 +29,7 @@
 </template>
 
 <script lang="ts">
+import { useColor } from "../composition/useColor";
 import { usePencil } from "../composition/usePencil";
 import { useBucket } from "../composition/useBucket";
 import { useLine } from "../composition/useLine";
@@ -90,6 +91,7 @@ export default {
       mouseMove: recordMouseMovePosition,
       mouseUp: recordMouseUpPosition
     } = useMousePosition();
+    const { setCurrentColor } = useColor();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -117,7 +119,8 @@ export default {
       recordMouseUpPosition,
       selectMouseDown,
       selectMouseMove,
-      selectMouseUp
+      selectMouseUp,
+      setCurrentColor
     };
   },
   data() {
@@ -183,6 +186,10 @@ export default {
     }
   },
   mounted(this: any) {
+    // 屏蔽右键菜单
+    window.oncontextmenu = function(e: MouseEvent) {
+      e.preventDefault();
+    };
     const { canvas, selectcanvas } = this.$refs;
     const canvasContainer = window.document.getElementById("canvas-container");
     this.$store.dispatch("canvasModule/CREATE_PAGE");
@@ -197,6 +204,7 @@ export default {
       .pipe(
         tap((e: any) => {
           const { mode } = this.$store.state.canvasModule;
+          this.setCurrentColor(e);
           this.recordMouseDownPosition(e);
           if (mode === "pencil") {
             this.pencilMouseDown(e);
