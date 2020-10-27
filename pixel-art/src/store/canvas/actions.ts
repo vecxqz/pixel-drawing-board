@@ -66,18 +66,6 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
   [ActionsTypes.SET_COLUMN_INDEX]({ commit }, index: number) {
     commit(MutationsTypes.SET_COLUMN_INDEX, index);
   },
-  [ActionsTypes.SET_SELECT_AREA_START_COORDINATE](
-    { commit },
-    { x, y }: { x: number; y: number }
-  ) {
-    commit(MutationsTypes.SET_SELECT_AREA_START_COORDINATE, { x, y });
-  },
-  [ActionsTypes.SET_SELECT_AREA_END_COORDINATE](
-    { commit },
-    { x, y }: { x: number; y: number }
-  ) {
-    commit(MutationsTypes.SET_SELECT_AREA_END_COORDINATE, { x, y });
-  },
   [ActionsTypes.SET_SELECT_AREA_DATA](
     { commit },
     {
@@ -106,19 +94,10 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
         if (!Array.isArray(data[dataIndexX])) {
           data[dataIndexX] = [];
         }
-        data[dataIndexX][dataIndexY] = currentLayer[x][y];
+        data[dataIndexX][dataIndexY] = { ...currentLayer[x][y] };
       }
     }
     commit(MutationsTypes.SET_SELECT_AREA_DATA, data);
-  },
-  [ActionsTypes.SET_SELECT_AREA_SET_STATUS]({ commit }, setStatus) {
-    commit(MutationsTypes.SET_SELECT_AREA_SET_STATUS, setStatus);
-  },
-  [ActionsTypes.SET_SELECT_AREA_MOVE_STATUS]({ commit }, moveStatus) {
-    commit(MutationsTypes.SET_SELECT_AREA_MOVE_STATUS, moveStatus);
-  },
-  [ActionsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS]({ commit }, outStatus) {
-    commit(MutationsTypes.SET_SELECT_AREA_CLICK_OUT_STATUS, outStatus);
   },
   [ActionsTypes.SET_LAYER_GRID_DATA](
     { commit },

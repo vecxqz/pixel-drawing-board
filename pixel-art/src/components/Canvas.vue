@@ -84,7 +84,8 @@ export default {
     const {
       mouseDown: selectMouseDown,
       mouseMove: selectMouseMove,
-      mouseUp: selectMouseUp
+      mouseUp: selectMouseUp,
+      selectArea: selectAreaData
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
@@ -120,28 +121,19 @@ export default {
       selectMouseDown,
       selectMouseMove,
       selectMouseUp,
+      selectAreaData,
       setCurrentColor
     };
   },
   data() {
     return {
-      imageData: undefined,
-      distance: {
-        startX: undefined,
-        startY: undefined,
-        endX: undefined,
-        endY: undefined,
-        diffX: 0,
-        diffY: 0
-      }
+      imageData: undefined
     };
   },
   computed: {
     selectArea(this: any) {
-      const {
-        selectArea: { startX, startY, endX, endY, isSet },
-        size
-      } = this.$store.state.canvasModule;
+      const { size } = this.$store.state.canvasModule;
+      const { startX, startY, endX, endY, isSet } = this.selectAreaData;
       let left = 0,
         top = 0,
         width = 0,

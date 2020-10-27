@@ -11,12 +11,32 @@ export function useSelect(this: any) {
     diffX: 0,
     diffY: 0,
     move: {
-      startX: 0,
-      startY: 0,
-      endX: 0,
-      endY: 0,
-      moveFlag: true
+      // 存储移动时产生的数据
+      startX: 0, // 开始移动时鼠标x坐标
+      startY: 0, // 开始移动时鼠标y轴坐标
+      endX: 0, // 移动过程中以以及移动结束时鼠标y轴坐标
+      endY: 0, // 移动过程中以以及移动结束时鼠标y轴坐标
+      moveFlag: true // 标志
     }
+  });
+  const selectArea: {
+    isSet: boolean;
+    isMove: boolean;
+    isClickOutSide: boolean;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+    data: Array<any>;
+  } = reactive({
+    isSet: false,
+    isMove: false,
+    isClickOutSide: false,
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+    data: []
   });
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
@@ -32,20 +52,59 @@ export function useSelect(this: any) {
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
         .layers[store.state.canvasModule.currentLayerIndex]
   );
-  const startX = computed(() =>
-    Math.floor(store.state.canvasModule.selectArea.startX)
-  );
-  const startY = computed(() =>
-    Math.floor(store.state.canvasModule.selectArea.startY)
-  );
-  const endX = computed(() =>
-    Math.floor(store.state.canvasModule.selectArea.endX)
-  );
-  const endY = computed(() =>
-    Math.floor(store.state.canvasModule.selectArea.endY)
-  );
+  const startX = computed(() => Math.floor(selectArea.startX));
+  const startY = computed(() => Math.floor(selectArea.startY));
+  const endX = computed(() => Math.floor(selectArea.endX));
+  const endY = computed(() => Math.floor(selectArea.endY));
 
-  const selectAreaAttr = computed(() => store.state.canvasModule.selectArea);
+  function setCoordinateStart({ x, y }: { x: number; y: number }) {
+    selectArea.startX = x;
+    selectArea.startY = y;
+  }
+  function setCoordinateEnd({ x, y }: { x: number; y: number }) {
+    selectArea.endX = x;
+    selectArea.endY = y;
+  }
+  function setSetStatus(status: boolean) {
+    selectArea.isSet = status;
+  }
+  function setMoveStatus(status: boolean) {
+    selectArea.isMove = status;
+  }
+  function setClickOutSideStatus(status: boolean) {
+    selectArea.isClickOutSide = status;
+  }
+
+  function setSelectAreaData({
+    currentLayer,
+    startX,
+    startY,
+    endX,
+    endY
+  }: {
+    currentLayer: layer;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  }) {
+    const minX = Math.min(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxX = Math.max(startX, endX);
+    const maxY = Math.max(startY, endY);
+    let data: Array<any> = [];
+    for (let x = minX; x <= maxX; x++) {
+      for (let y = minY; y <= maxY; y++) {
+        const dataIndexX = x - minX;
+        const dataIndexY = y - minY;
+        if (!Array.isArray(data[dataIndexX])) {
+          data[dataIndexX] = [];
+        }
+        data[dataIndexX][dataIndexY] = { ...currentLayer[x][y] };
+      }
+    }
+    selectArea.data = data;
+  }
   function isInSelectArea(
     x: number,
     y: number,
@@ -67,7 +126,24 @@ export function useSelect(this: any) {
   function mouseDown(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    const { data, isSet, isMove } = selectAreaAttr.value;
+    const {
+      data,
+      isSet,
+      isMove,
+      isClickOutSide
+    }: {
+      data: Array<any>;
+      isSet: boolean;
+      isMove: boolean;
+      isClickOutSide: boolean;
+    } = selectArea;
+    // console.log("开始绘制");
+    // console.log(`
+    // down
+    //   isSet:${isSet},
+    //   isMove:${isMove},
+    //   isClickOutSide:${isClickOutSide}
+    // `);
     // 没有创建选择区域，则创建选择区域
     if (isSet) {
       // 说明点击的是选择区域内部，
@@ -81,19 +157,16 @@ export function useSelect(this: any) {
           endY.value
         )
       ) {
-        // console.log("点击的是已创建的区域，内部");
+        // console.log("进入拖拽状态");
         // 设置为可拖拽状态
-        store.dispatch("canvasModule/SET_SELECT_AREA_MOVE_STATUS", true);
+        setMoveStatus(true);
         // 设置拖拽起点
         distance.startX = columnIndex;
         distance.startY = rowIndex;
       } else {
         // console.log("点击的是已创建的区域，外部,再次拖拽绘制新选择区域");
         // 说明点击的是区域外部,取消选择区域
-        this.$store.dispatch(
-          "canvasModule/SET_SELECT_AREA_CLICK_OUT_STATUS",
-          true
-        );
+        setClickOutSideStatus(true);
         // data数组了只存了有color属性的格子信息
         const minX = Math.min(startX.value, endX.value);
         const minY = Math.min(startY.value, endY.value);
@@ -101,6 +174,7 @@ export function useSelect(this: any) {
           for (let y = 0; y < data[x].length; y++) {
             const { color } = data[x][y];
             if (color) {
+              // console.log(minX + x, minY + y, color);
               drawGrid(
                 canvasCtx.value,
                 currentLayer.value,
@@ -118,13 +192,12 @@ export function useSelect(this: any) {
             }
           }
         }
-        store.dispatch("canvasModule/SET_SELECT_AREA_SET_STATUS", false);
-        store.dispatch("canvasModule/SET_SELECT_AREA_CLICK_OUT_STATUS", false);
-        this.$store.dispatch("canvasModule/SET_SELECT_AREA_START_COORDINATE", {
+        setSetStatus(false);
+        setCoordinateStart({
           x: columnIndex,
           y: rowIndex
         });
-        this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+        setCoordinateEnd({
           x: 0,
           y: 0
         });
@@ -144,7 +217,8 @@ export function useSelect(this: any) {
       }
     } else {
       // console.log("创建新区域，设置起始坐标");
-      this.$store.dispatch("canvasModule/SET_SELECT_AREA_START_COORDINATE", {
+      setClickOutSideStatus(false);
+      setCoordinateStart({
         x: columnIndex,
         y: rowIndex
       });
@@ -154,8 +228,15 @@ export function useSelect(this: any) {
     // console.log("select mouseMove");
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    const { data, isSet, isMove, isClickOut } = selectAreaAttr.value;
+    const { data, isSet, isMove, isClickOutSide } = selectArea;
     // 如果设置了,则是拖拽事件
+    // console.log("绘制中");
+    // console.log(`
+    // move
+    //   isSet:${isSet},
+    //   isMove:${isMove},
+    //   isClickOutSide:${isClickOutSide}
+    // `);
     if (isMove) {
       distance.endX = columnIndex;
       distance.endY = rowIndex;
@@ -169,11 +250,11 @@ export function useSelect(this: any) {
         distance.move.endY = endY.value;
         distance.move.moveFlag = false;
       }
-      this.$store.dispatch("canvasModule/SET_SELECT_AREA_START_COORDINATE", {
+      setCoordinateStart({
         x: distance.move.startX + distance.diffX,
         y: distance.move.startY + distance.diffY
       });
-      this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+      setCoordinateEnd({
         x: distance.move.endX + distance.diffX,
         y: distance.move.endY + distance.diffY
       });
@@ -193,7 +274,7 @@ export function useSelect(this: any) {
         "black"
       );
       // 在这里设置，就可以把mouseUp里的nextTick去掉
-      this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+      setCoordinateEnd({
         x: endX,
         y: endY
       });
@@ -203,23 +284,41 @@ export function useSelect(this: any) {
     // console.log("select mouseUp");
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    const { data, isSet, isMove, isClickOut } = selectAreaAttr.value;
-    if (isMove) {
-      this.$store.dispatch("canvasModule/SET_SELECT_AREA_START_COORDINATE", {
+    const { data, isSet, isMove, isClickOutSide } = selectArea;
+    // console.log("绘制完成");
+    // console.log(`
+    // up
+    //   isSet:${isSet},
+    //   isMove:${isMove},
+    //   isClickOutSide:${isClickOutSide}
+    //   distance.move.startX + distance.diffX ${distance.move.startX +
+    //     distance.diffX}
+    //   `);
+    if (
+      (isMove && distance.move.startX + distance.diffX !== 0) ||
+      distance.move.startY + distance.diffY !== 0
+    ) {
+      // distance.move.startX + distance.diffX === 0
+      // distance.move.startY + distance.diffY === 0
+      // 说明没有移动过，则也不进入该的逻辑
+      setCoordinateStart({
         x: distance.move.startX + distance.diffX,
         y: distance.move.startY + distance.diffY
       });
-      this.$store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+      setCoordinateEnd({
         x: distance.move.endX + distance.diffX,
         y: distance.move.endY + distance.diffY
       });
       distance.move.moveFlag = true;
-      store.dispatch("canvasModule/SET_SELECT_AREA_MOVE_STATUS", false);
+      setMoveStatus(false);
     }
     if (!isSet) {
+      const { isSet, isMove, isClickOutSide } = selectArea;
+      // console.log(isClickOutSide);
       // 绘制完成
-      store.dispatch("canvasModule/SET_SELECT_AREA_SET_STATUS", true);
-      store.dispatch("canvasModule/SET_SELECT_AREA_END_COORDINATE", {
+      setClickOutSideStatus(false);
+      setSetStatus(true);
+      setCoordinateEnd({
         x: columnIndex,
         y: rowIndex
       });
@@ -239,15 +338,15 @@ export function useSelect(this: any) {
         "black"
       );
       // });
-      store.dispatch("canvasModule/SET_SELECT_AREA_SET_STATUS", true);
-      store.dispatch("canvasModule/SET_SELECT_AREA_DATA", {
+      setSetStatus(true);
+      setSelectAreaData({
         currentLayer: currentLayer.value,
         startX: startX.value,
         startY: startY.value,
         endX: endX.value,
         endY: endY.value
       });
-      const { data } = selectAreaAttr.value;
+      const { data }: { data: Array<any> } = selectArea;
       // 暂时清除真实画布上的该选择区域的像素
       const minX = Math.min(startX.value, endX.value);
       const minY = Math.min(startY.value, endY.value);
@@ -263,6 +362,18 @@ export function useSelect(this: any) {
               color
             );
             // 提升性能
+            // store.state.canvasModule.pages[
+            //   store.state.canvasModule.currentPageIndex
+            // ].layers[store.state.canvasModule.currentLayerIndex][minX + x][
+            //   minY + y
+            // ] = {
+            //   ...store.state.canvasModule.pages[
+            //     store.state.canvasModule.currentPageIndex
+            //   ].layers[store.state.canvasModule.currentLayerIndex][minX + x][
+            //     minY + y
+            //   ],
+            //   color: undefined
+            // };
             currentLayerRaw[minX + x][minY + y].color = undefined;
             // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
             //   columnIndex: minX + x,
@@ -277,5 +388,5 @@ export function useSelect(this: any) {
     }
   }
 
-  return { mouseDown, mouseMove, mouseUp };
+  return { mouseDown, mouseMove, mouseUp, selectArea };
 }
