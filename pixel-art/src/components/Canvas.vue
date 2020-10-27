@@ -83,8 +83,7 @@ export default {
     const {
       mouseDown: selectMouseDown,
       mouseMove: selectMouseMove,
-      mouseUp: selectMouseUp,
-      distance: selectDistance
+      mouseUp: selectMouseUp
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
@@ -118,8 +117,7 @@ export default {
       recordMouseUpPosition,
       selectMouseDown,
       selectMouseMove,
-      selectMouseUp,
-      selectDistance
+      selectMouseUp
     };
   },
   data() {

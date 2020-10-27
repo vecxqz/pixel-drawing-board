@@ -88,11 +88,15 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
       endY: number;
     }
   ) {
+    const minX = Math.min(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxX = Math.max(startX, endX);
+    const maxY = Math.max(startY, endY);
     let data: Array<any> = [];
-    for (let x = startX; x <= endX; x++) {
-      for (let y = startY; y <= endY; y++) {
-        const dataIndexX = x - startX;
-        const dataIndexY = y - startY;
+    for (let x = minX; x <= maxX; x++) {
+      for (let y = minY; y <= maxY; y++) {
+        const dataIndexX = x - minX;
+        const dataIndexY = y - minY;
         if (!Array.isArray(data[dataIndexX])) {
           data[dataIndexX] = [];
         }

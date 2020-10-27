@@ -53,7 +53,11 @@ export function useSelect(this: any) {
     endX: number,
     endY: number
   ): Boolean {
-    if (x >= startX && x <= endX && y >= startY && y <= endY) {
+    const minX = Math.min(startX, endX);
+    const minY = Math.min(startY, endY);
+    const maxX = Math.max(startX, endX);
+    const maxY = Math.max(startY, endY);
+    if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
       return true;
     }
     return false;
@@ -146,9 +150,8 @@ export function useSelect(this: any) {
         y: endY
       });
     }
-    if (isClickOut) {
-      console.log(`isClickOut${isClickOut}`);
-    }
+    // if (isClickOut) {
+    // }
   }
   function mouseUp(this: any, e: MouseEvent) {
     console.log("select mouseUp");
@@ -199,6 +202,8 @@ export function useSelect(this: any) {
       });
       const { data } = selectAreaAttr.value;
       // 暂时清除真实画布上的该选择区域的像素
+      const minX = Math.min(startX.value, endX.value);
+      const minY = Math.min(startY.value, endY.value);
       for (let x = 0; x < data.length; x++) {
         for (let y = 0; y < data[x].length; y++) {
           const { backgroundColor: color } = data[x][y];
@@ -206,13 +211,13 @@ export function useSelect(this: any) {
             drawGrid(
               canvasCtx.value,
               currentLayer.value,
-              startX.value + x,
-              startY.value + y,
+              minX + x,
+              minY + y,
               color
             );
             store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-              columnIndex: startX.value + x,
-              rowIndex: startY.value + y,
+              columnIndex: minX + x,
+              rowIndex: minY + y,
               data: {
                 color: undefined
               }
@@ -223,6 +228,8 @@ export function useSelect(this: any) {
     }
     if (isClickOut) {
       // data数组了只存了有color属性的格子信息
+      const minX = Math.min(startX.value, endX.value);
+      const minY = Math.min(startY.value, endY.value);
       for (let x = 0; x < data.length; x++) {
         for (let y = 0; y < data[x].length; y++) {
           const { color } = data[x][y];
@@ -230,13 +237,13 @@ export function useSelect(this: any) {
             drawGrid(
               canvasCtx.value,
               currentLayer.value,
-              startX.value + x,
-              startY.value + y,
+              minX + x,
+              minY + y,
               color
             );
             store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-              columnIndex: startX.value + x,
-              rowIndex: startY.value + y,
+              columnIndex: minX + x,
+              rowIndex: minY + y,
               data: {
                 color
               }
@@ -270,5 +277,5 @@ export function useSelect(this: any) {
     }
   }
 
-  return { mouseDown, mouseMove, mouseUp, distance };
+  return { mouseDown, mouseMove, mouseUp };
 }

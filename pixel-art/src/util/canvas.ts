@@ -207,13 +207,17 @@ function drawGridGroup(
   color: string
 ): void {
   canvasCtx.globalAlpha = 0.2;
-  const { x, y, size } = layerMeta[startColumnIndex][startRowIndex];
+  const minX = Math.min(startColumnIndex, endColumnIndex);
+  const minY = Math.min(startRowIndex, endRowIndex);
+  const maxX = Math.max(startColumnIndex, endColumnIndex);
+  const maxY = Math.max(startRowIndex, endRowIndex);
+  const { x, y, size } = layerMeta[minX][minY];
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(
     x,
     y,
-    size * (endColumnIndex - startColumnIndex + 1),
-    size * (endRowIndex - startRowIndex + 1)
+    size * (maxX - minX + 1),
+    size * (maxY - minY + 1)
   );
   canvasCtx.globalAlpha = 1;
 }
@@ -234,8 +238,12 @@ function drawSelectArea(
   // 获取左上角坐标
   let stepX = undefined;
   let stepY = undefined;
-  for (let startX = startColumnIndex; startX <= endColumnIndex; startX++) {
-    for (let startY = startRowIndex; startY <= endRowIndex; startY++) {
+  const minX = Math.min(startColumnIndex, endColumnIndex);
+  const minY = Math.min(startRowIndex, endRowIndex);
+  const maxX = Math.max(startColumnIndex, endColumnIndex);
+  const maxY = Math.max(startRowIndex, endRowIndex);
+  for (let startX = minX; startX <= maxX; startX++) {
+    for (let startY = minY; startY <= maxY; startY++) {
       const { x, y, color, size } = layer[startX][startY];
       if (stepX === undefined && stepY === undefined) {
         [stepX, stepY] = [x, y];
