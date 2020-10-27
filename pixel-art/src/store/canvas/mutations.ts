@@ -33,6 +33,12 @@ const CanvasMutations: MutationTree<CanvasState> = {
   ) {
     state.canvasCtx = canvasCtx;
   },
+  [MutationsTypes.SET_SHDOW_LAYER_CANVASCTX](
+    state: CanvasState,
+    canvasCtx: CanvasRenderingContext2D
+  ) {
+    state.shadowLayerCanvasCtx = canvasCtx;
+  },
   [MutationsTypes.SET_SELECTCANVASCTX](
     state: CanvasState,
     canvasCtx: CanvasRenderingContext2D

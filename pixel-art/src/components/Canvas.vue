@@ -23,6 +23,12 @@
         :width="selectArea.width"
         :height="selectArea.height"
       />
+      <canvas
+        class="pos-absoulte pe-none shadow-layer"
+        ref="layerShandowCanvas"
+        :width="$store.state.canvasModule.width"
+        :height="$store.state.canvasModule.height"
+      />
       <div style="color:white">{{ selectArea }}</div>
     </div>
   </div>
@@ -182,11 +188,12 @@ export default {
     window.oncontextmenu = function(e: MouseEvent) {
       e.preventDefault();
     };
-    const { canvas, selectcanvas } = this.$refs;
+    const { canvas, selectcanvas,layerShandowCanvas } = this.$refs;
     const canvasContainer = window.document.getElementById("canvas-container");
     this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
+    this.$store.dispatch("canvasModule/SET_SHDOW_LAYER_CANVASCTX", layerShandowCanvas);
     this.$store.dispatch("canvasModule/SET_SELECTCANVASCTX", selectcanvas);
     this.parse();
     const mouseDown = fromEvent(canvasContainer as HTMLElement, "mousedown");
@@ -410,5 +417,9 @@ export default {
 }
 .visb-hidden {
   visibility: hidden;
+}
+.shadow-layer {
+  top: 0;
+  left: 0;
 }
 </style>

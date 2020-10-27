@@ -15,6 +15,7 @@ export interface CanvasState {
   size: number /**格子边长 */;
   canvasCtx?: CanvasRenderingContext2D /**canvas上下文 */;
   selectCanvasCtx?: CanvasRenderingContext2D /**选择区域 */;
+  shadowLayerCanvasCtx?: CanvasRenderingContext2D /**不同层的合成 */;
   eventPoint: eventPoint /**鼠标事件点 */;
   selectArea: selectArea /**选中区域 */;
 }

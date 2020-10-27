@@ -4,6 +4,9 @@ import { useStore } from "./useStore";
 export function usePencil(this: any) {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
+  const shadowLayerCanvasCtx = computed(
+    () => store.state.canvasModule.shadowLayerCanvasCtx
+  );
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
     return store.state.canvasModule.size;
