@@ -43,6 +43,12 @@ export function useSelect(this: any) {
   const selectCanvasCtx = computed(
     () => store.state.canvasModule.selectCanvasCtx
   );
+  const width = computed(
+    () => store.state.canvasModule.width / store.state.canvasModule.size
+  );
+  const height = computed(
+    () => store.state.canvasModule.height / store.state.canvasModule.size
+  );
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
     return store.state.canvasModule.size;
@@ -173,7 +179,13 @@ export function useSelect(this: any) {
         for (let x = 0; x < data.length; x++) {
           for (let y = 0; y < data[x].length; y++) {
             const { color } = data[x][y];
-            if (color) {
+            if (
+              color &&
+              minX + x >= 0 &&
+              minX + x < width.value &&
+              minY + y >= 0 &&
+              minY + y < height.value
+            ) {
               // console.log(minX + x, minY + y, color);
               drawGrid(
                 canvasCtx.value,
@@ -300,7 +312,7 @@ export function useSelect(this: any) {
     ) {
       // distance.move.startX + distance.diffX === 0
       // distance.move.startY + distance.diffY === 0
-      // 说明没有移动过，则也不进入该的逻辑
+      // 说明没有移动过，则也不进入该逻辑
       setCoordinateStart({
         x: distance.move.startX + distance.diffX,
         y: distance.move.startY + distance.diffY

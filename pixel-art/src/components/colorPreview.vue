@@ -33,7 +33,10 @@ export default {
         this.primaryColor
       ];
       this.$store.dispatch("canvasModule/SET_PRIMARY_COLOR", newPrimaryColor);
-      this.$store.dispatch("canvasModule/SET_SECONDARY_COLOR", newSecondaryColor);
+      this.$store.dispatch(
+        "canvasModule/SET_SECONDARY_COLOR",
+        newSecondaryColor
+      );
     }
   }
 };
@@ -62,7 +65,7 @@ export default {
   }
   &-ps-exchange {
     position: relative;
-    bottom: 24px;
+    bottom: 26px;
     left: -22px;
     width: 24px;
     transform: rotate(45deg);
