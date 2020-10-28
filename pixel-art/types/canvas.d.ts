@@ -14,9 +14,14 @@ export interface layer {
   [index: number]: Array<cell> /** 存储格子数据 */;
   length: number;
 }
+export interface layerMeta {
+  layer: layer;
+  layerName: string;
+  key: string | number;
+}
 /** 单页数据类型*/
 export interface page {
-  layers: Array<layer>;
+  layers: Array<layerMeta>;
 }
 export interface canvasData {
   title?: string;

@@ -24,7 +24,13 @@ const CanvasMutations: MutationTree<CanvasState> = {
     const { width, height, size } = state;
     const layer: layer = initLayer(width, height, size);
     state.pages.push({
-      layers: [layer]
+      layers: [
+        {
+          layer: layer,
+          layerName: `layer0`,
+          key: "0"
+        }
+      ]
     });
   },
   [MutationsTypes.SET_CANVASCTX](
@@ -128,12 +134,12 @@ const CanvasMutations: MutationTree<CanvasState> = {
     }: { columnIndex: number; rowIndex: number; data: any }
   ) {
     const { currentPageIndex, currentLayerIndex } = state;
-    state.pages[currentPageIndex].layers[currentLayerIndex][columnIndex][
+    state.pages[currentPageIndex].layers[currentLayerIndex].layer[columnIndex][
       rowIndex
     ] = {
-      ...state.pages[currentPageIndex].layers[currentLayerIndex][columnIndex][
-        rowIndex
-      ],
+      ...state.pages[currentPageIndex].layers[currentLayerIndex].layer[
+        columnIndex
+      ][rowIndex],
       ...data
     };
   }

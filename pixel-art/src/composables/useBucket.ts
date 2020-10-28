@@ -12,7 +12,7 @@ export function useBucket(this: any) {
   const currentLayer = computed(
     () =>
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex]
+        .layers[store.state.canvasModule.currentLayerIndex].layer
   );
   const width = computed(() => {
     return store.state.canvasModule.width;
@@ -34,7 +34,7 @@ export function useBucket(this: any) {
       newColor = color.value;
     const layer = JSON.parse(
       JSON.stringify(
-        currentPaesRaw[currentPageIndexRaw].layers[currentLayerIndexRaw]
+        currentPaesRaw[currentPageIndexRaw].layers[currentLayerIndexRaw].layer
       )
     );
     // 传入的是原始对象,提高算法性能
@@ -43,7 +43,7 @@ export function useBucket(this: any) {
       const boundaryHeight = height.value / size.value;
       store.state.canvasModule.pages[
         store.state.canvasModule.currentPageIndex
-      ].layers[store.state.canvasModule.currentLayerIndex] = ScanLineFill(
+      ].layers[store.state.canvasModule.currentLayerIndex].layer = ScanLineFill(
         canvasCtx.value,
         layer,
         columnIndex,

@@ -15,9 +15,9 @@ const CanvasGetters: GetterTree<CanvasState, RootState> = {
     let cell: cell | object;
     if (pages[currentPageIndex]?.layers) {
       cell =
-        pages[currentPageIndex].layers[currentLayerIndex][currentColumnIndex][
-          currentRowIndex
-        ];
+        pages[currentPageIndex].layers[currentLayerIndex].layer[
+          currentColumnIndex
+        ][currentRowIndex];
     } else {
       cell = {};
     }

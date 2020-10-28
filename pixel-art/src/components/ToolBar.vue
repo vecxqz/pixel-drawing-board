@@ -18,16 +18,16 @@
   </div>
 </template>
 
-<script>
-import colorPreview from "./colorPreview";
+<script lang="ts">
+import colorPreview from "./colorPreview.vue";
 export default {
   name: "ToolBar",
   components: {
     colorPreview
   },
   computed: {
-    activeTools() {
-      return this.tools.filter(tool => tool.active);
+    activeTools(this: any) {
+      return this.tools.filter((tool: any) => tool.active);
     }
   },
   data() {
@@ -140,7 +140,7 @@ export default {
     };
   },
   methods: {
-    toolSelect(index) {
+    toolSelect(this: any, index: number) {
       this.toolActiveIndex = index;
       this.$store.dispatch(
         "canvasModule/SET_PAINT_MODE",

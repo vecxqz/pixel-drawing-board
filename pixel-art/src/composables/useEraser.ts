@@ -10,7 +10,7 @@ export function useEraser(this: any) {
   const currentLayer = computed(
     () =>
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex]
+        .layers[store.state.canvasModule.currentLayerIndex].layer
   );
 
   function mouseDown(this: any, e: MouseEvent) {

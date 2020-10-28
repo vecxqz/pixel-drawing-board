@@ -11,7 +11,7 @@ export function useCircle(this: any) {
   const currentLayer = computed(
     () =>
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex]
+        .layers[store.state.canvasModule.currentLayerIndex].layer
   );
   const startX = computed(() =>
     Math.floor(

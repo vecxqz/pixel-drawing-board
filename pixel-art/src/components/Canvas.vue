@@ -362,7 +362,7 @@ export default {
     parse(this: any) {
       const layer = this.$store.state.canvasModule.pages[
         this.$store.state.canvasModule.currentPageIndex
-      ].layers[this.$store.state.canvasModule.currentLayerIndex];
+      ].layers[this.$store.state.canvasModule.currentLayerIndex].layer;
       for (let i = 0; i < layer.length; i++)
         for (let j = 0; j < layer.length; j++) {
           const cell = layer[i][j];
@@ -377,9 +377,9 @@ export default {
         }
       (window as any).layer = this.$store.state.canvasModule.pages[
         this.$store.state.canvasModule.currentPageIndex
-      ].layers[this.$store.state.canvasModule.currentLayerIndex].map((x: any) =>
-        x.map((y: any) => ({ ...y }))
-      );
+      ].layers[
+        this.$store.state.canvasModule.currentLayerIndex
+      ].layer.map((x: any) => x.map((y: any) => ({ ...y })));
     },
     canvasImageDataSave(this: any) {
       const { canvasCtx } = this;

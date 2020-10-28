@@ -17,7 +17,7 @@ export function useMirrorPencil(this: any) {
   const currentLayer = computed(
     () =>
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex]
+        .layers[store.state.canvasModule.currentLayerIndex].layer
   );
   const mode = ref("pen");
   const mouseMoveStart = reactive({
@@ -231,6 +231,12 @@ export function useMirrorPencil(this: any) {
           mouseMoveStart.currentY,
           (columnIndex: number, rowIndex: number) => {
             const mirrorColumnIndex = width.value - columnIndex - 1;
+            const { backgroundColor: color } = currentLayer.value[columnIndex][
+              rowIndex
+            ];
+            const { backgroundColor: mirrorColor } = currentLayer.value[
+              mirrorColumnIndex
+            ][rowIndex];
             drawGrid(
               canvasCtx.value,
               currentLayer.value,

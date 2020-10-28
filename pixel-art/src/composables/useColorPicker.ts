@@ -11,7 +11,7 @@ export function useColorPicker(this: any) {
   const currentLayer = computed(
     () =>
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex]
+        .layers[store.state.canvasModule.currentLayerIndex].layer
   );
 
   function mouseDown(this: any, e: MouseEvent) {
@@ -19,7 +19,9 @@ export function useColorPicker(this: any) {
       rowIndex = Math.floor(e.offsetY / size.value);
     const { color } = store.state.canvasModule.pages[
       store.state.canvasModule.currentPageIndex
-    ].layers[store.state.canvasModule.currentLayerIndex][columnIndex][rowIndex];
+    ].layers[store.state.canvasModule.currentLayerIndex].layer[columnIndex][
+      rowIndex
+    ];
     store.dispatch("canvasModule/SET_COLOR", color);
   }
 
@@ -28,7 +30,9 @@ export function useColorPicker(this: any) {
       rowIndex = Math.floor(e.offsetY / size.value);
     const { color } = store.state.canvasModule.pages[
       store.state.canvasModule.currentPageIndex
-    ].layers[store.state.canvasModule.currentLayerIndex][columnIndex][rowIndex];
+    ].layers[store.state.canvasModule.currentLayerIndex].layer[columnIndex][
+      rowIndex
+    ];
     store.dispatch("canvasModule/SET_COLOR", color);
   }
   function mouseUp(this: any, e: MouseEvent) {
@@ -36,7 +40,9 @@ export function useColorPicker(this: any) {
       rowIndex = Math.floor(e.offsetY / size.value);
     const { color } = store.state.canvasModule.pages[
       store.state.canvasModule.currentPageIndex
-    ].layers[store.state.canvasModule.currentLayerIndex][columnIndex][rowIndex];
+    ].layers[store.state.canvasModule.currentLayerIndex].layer[columnIndex][
+      rowIndex
+    ];
     store.dispatch("canvasModule/SET_COLOR", color);
   }
   return { mouseDown, mouseMove, mouseUp };

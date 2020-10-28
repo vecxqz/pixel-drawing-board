@@ -3,12 +3,15 @@
     <div class="image-preview-container">
       <img :src="previewUrl" alt="" class="image-preview" />
     </div>
-    <div class="info-layer">
+    <div class="attribute-box">
       <div class="title">画布信息</div>
       <div class="info-layer-size">{{ width }} * {{ height }}</div>
       <div v-if="girdMeta">
         x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }}
       </div>
+    </div>
+    <div class="attribute-box">
+      <layer />
     </div>
     <!-- <div class="current-color" :style="currentGirdColor">
       {{ currentGirdColor }}
@@ -31,8 +34,12 @@
 </template>
 
 <script lang="ts">
+import layer from "./Layer.vue";
 export default {
   name: "CanvasAttribute",
+  components: {
+    layer
+  },
   data() {
     return {
       colors: ["red", "yellow", "blue", "green", "black", "white"]
@@ -116,7 +123,7 @@ ul {
   width: 200px;
   height: 200px;
 }
-.info-layer {
+.attribute-box {
   .title {
     font-size: 16px;
   }
