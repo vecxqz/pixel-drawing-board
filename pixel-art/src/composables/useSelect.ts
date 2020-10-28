@@ -359,33 +359,33 @@ export function useSelect(this: any) {
         endY: endY.value
       });
 
-      // const { data }: { data: Array<any> } = selectArea;
-      // // 暂时清除真实画布上的该选择区域的像素
-      // const minX = Math.min(startX.value, endX.value);
-      // const minY = Math.min(startY.value, endY.value);
-      // for (let x = 0; x < data.length; x++) {
-      //   for (let y = 0; y < data[x].length; y++) {
-      //     const { backgroundColor: color } = data[x][y];
-      //     if (color) {
-      //       drawGrid(
-      //         canvasCtx.value,
-      //         currentLayer.value,
-      //         minX + x,
-      //         minY + y,
-      //         color
-      //       );
-      //       // 提升性能
-      //       currentLayerRaw[minX + x][minY + y].color = undefined;
-      //       // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-      //       //   columnIndex: minX + x,
-      //       //   rowIndex: minY + y,
-      //       //   data: {
-      //       //     color: undefined
-      //       //   }
-      //       // });
-      //     }
-      //   }
-      // }
+      const { data }: { data: Array<any> } = selectArea;
+      // 暂时清除真实画布上的该选择区域的像素
+      const minX = Math.min(startX.value, endX.value);
+      const minY = Math.min(startY.value, endY.value);
+      for (let x = 0; x < data.length; x++) {
+        for (let y = 0; y < data[x].length; y++) {
+          const { backgroundColor: color } = data[x][y];
+          if (color) {
+            drawGrid(
+              canvasCtx.value,
+              currentLayer.value,
+              minX + x,
+              minY + y,
+              color
+            );
+            // 提升性能
+            currentLayerRaw[minX + x][minY + y].color = undefined;
+            // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
+            //   columnIndex: minX + x,
+            //   rowIndex: minY + y,
+            //   data: {
+            //     color: undefined
+            //   }
+            // });
+          }
+        }
+      }
     }
   }
 

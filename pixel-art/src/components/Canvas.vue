@@ -37,6 +37,7 @@
 <script lang="ts">
 import { useColor } from "../composables/useColor";
 import { usePencil } from "../composables/usePencil";
+import { useMirrorPencil } from "../composables/useMirrorPencil";
 import { useBucket } from "../composables/useBucket";
 import { useLine } from "../composables/useLine";
 import { useSquare } from "../composables/useSquare";
@@ -58,6 +59,11 @@ export default {
       mouseMove: pencilMouseMove,
       mouseUp: pencilMouseUp
     } = usePencil();
+    const {
+      mouseDown: mirrorPencilMouseDown,
+      mouseMove: mirrorPencilMouseMove,
+      mouseUp: mirrorPencilMouseUp
+    } = useMirrorPencil();
     const {
       mouseDown: bucketMouseDown,
       mouseMove: bucketMouseMove,
@@ -131,7 +137,10 @@ export default {
       selectMouseUp,
       selectAreaData,
       setCurrentColor,
-      setCanvasPreview
+      setCanvasPreview,
+      mirrorPencilMouseDown,
+      mirrorPencilMouseMove,
+      mirrorPencilMouseUp
     };
   },
   data() {
@@ -236,6 +245,9 @@ export default {
           if (mode === "select") {
             this.selectMouseDown(e);
           }
+          if (mode === "mirrorPencil") {
+            this.mirrorPencilMouseDown(e);
+          }
         }),
         map(() =>
           mouseMove.pipe(
@@ -283,6 +295,10 @@ export default {
                   if (mode === "select") {
                     this.canvasImageDataSaveClean();
                     this.selectMouseUp(e);
+                  }
+                  if (mode === "mirrorPencil") {
+                    this.canvasImageDataSaveClean();
+                    this.mirrorPencilMouseUp(e);
                   }
                   this.setCanvasPreview(this.canvasCtx);
                 })
@@ -338,6 +354,9 @@ export default {
         this.canvasImageDataSave();
         this.canvasImageDataUse();
         this.selectMouseMove(e);
+      }
+      if (mode === "mirrorPencil") {
+        this.mirrorPencilMouseMove(e);
       }
     },
     parse(this: any) {

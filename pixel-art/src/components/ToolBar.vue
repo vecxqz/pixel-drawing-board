@@ -41,6 +41,12 @@ export default {
           active: true
         },
         {
+          id: "tool-mirror-pencil",
+          title: "Mirror Tool",
+          mode: "mirrorPencil",
+          active: true
+        },
+        {
           id: "tool-eraser",
           title: "Eraser Tool",
           mode: "eraser",
