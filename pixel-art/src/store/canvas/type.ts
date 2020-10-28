@@ -18,4 +18,5 @@ export interface CanvasState {
   shadowLayerCanvasCtx?: CanvasRenderingContext2D /**不同层的合成 */;
   eventPoint: eventPoint /**鼠标事件点 */;
   selectArea: selectArea /**选中区域 */;
+  previewUrl: string /**预览图片url */;
 }

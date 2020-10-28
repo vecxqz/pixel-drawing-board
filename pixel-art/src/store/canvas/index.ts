@@ -14,6 +14,7 @@ const module: Module<CanvasState, any> = {
     currentPageIndex: 0,
     currentRowIndex: 0,
     currentColumnIndex: 0,
+    previewUrl:'',
     pages: [],
     width: 800,
     height: 800,

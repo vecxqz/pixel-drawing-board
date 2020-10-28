@@ -213,12 +213,7 @@ function drawGridGroup(
   const maxY = Math.max(startRowIndex, endRowIndex);
   const { x, y, size } = layerMeta[minX][minY];
   canvasCtx.fillStyle = color;
-  canvasCtx.fillRect(
-    x,
-    y,
-    size * (maxX - minX + 1),
-    size * (maxY - minY + 1)
-  );
+  canvasCtx.fillRect(x, y, size * (maxX - minX + 1), size * (maxY - minY + 1));
   canvasCtx.globalAlpha = 1;
 }
 function drawSelectArea(

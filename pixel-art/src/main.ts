@@ -2,7 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import { provideStore } from "./composition/useStore";
+import { provideStore } from "./composables/useStore";
 createApp({
   ...App,
   setup() {

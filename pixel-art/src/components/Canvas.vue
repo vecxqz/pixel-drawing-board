@@ -35,17 +35,18 @@
 </template>
 
 <script lang="ts">
-import { useColor } from "../composition/useColor";
-import { usePencil } from "../composition/usePencil";
-import { useBucket } from "../composition/useBucket";
-import { useLine } from "../composition/useLine";
-import { useSquare } from "../composition/useSquare";
-import { useColorPicker } from "../composition/useColorPicker";
-import { useCircle } from "../composition/useCircle";
-import { useEraser } from "../composition/useEraser";
-import { useSelect } from "../composition/useSelect";
-import { useMousePosition } from "../composition/usePosition";
-import { drawGrid, initGrid } from "../util/canvas";
+import { useColor } from "../composables/useColor";
+import { usePencil } from "../composables/usePencil";
+import { useBucket } from "../composables/useBucket";
+import { useLine } from "../composables/useLine";
+import { useSquare } from "../composables/useSquare";
+import { useColorPicker } from "../composables/useColorPicker";
+import { useCircle } from "../composables/useCircle";
+import { useEraser } from "../composables/useEraser";
+import { useSelect } from "../composables/useSelect";
+import { useMousePosition } from "../composables/usePosition";
+import { userPreview } from "../composables/userPreview";
+import { initGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
@@ -99,6 +100,7 @@ export default {
       mouseUp: recordMouseUpPosition
     } = useMousePosition();
     const { setCurrentColor } = useColor();
+    const { setCanvasPreview } = userPreview();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -128,7 +130,8 @@ export default {
       selectMouseMove,
       selectMouseUp,
       selectAreaData,
-      setCurrentColor
+      setCurrentColor,
+      setCanvasPreview
     };
   },
   data() {
@@ -188,14 +191,18 @@ export default {
     window.oncontextmenu = function(e: MouseEvent) {
       e.preventDefault();
     };
-    const { canvas, selectcanvas,layerShandowCanvas } = this.$refs;
+    const { canvas, selectcanvas, layerShandowCanvas } = this.$refs;
     const canvasContainer = window.document.getElementById("canvas-container");
     this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
-    this.$store.dispatch("canvasModule/SET_SHDOW_LAYER_CANVASCTX", layerShandowCanvas);
+    this.$store.dispatch(
+      "canvasModule/SET_SHDOW_LAYER_CANVASCTX",
+      layerShandowCanvas
+    );
     this.$store.dispatch("canvasModule/SET_SELECTCANVASCTX", selectcanvas);
     this.parse();
+    this.setCanvasPreview(this.canvasCtx);
     const mouseDown = fromEvent(canvasContainer as HTMLElement, "mousedown");
     const mouseMove = fromEvent(canvasContainer as HTMLElement, "mousemove");
     const mouseUp = fromEvent(canvasContainer as HTMLElement, "mouseup");
@@ -277,6 +284,7 @@ export default {
                     this.canvasImageDataSaveClean();
                     this.selectMouseUp(e);
                   }
+                  this.setCanvasPreview(this.canvasCtx);
                 })
               )
             )
@@ -290,28 +298,6 @@ export default {
       });
   },
   methods: {
-    clearGrid(this: any, x: number, y: number) {
-      const { backgroundColor } = this.$store.state.canvasModule.pages[
-        this.$store.state.canvasModule.currentPageIndex
-      ].layers[this.$store.state.canvasModule.currentLayerIndex][x][y];
-      drawGrid(
-        this.canvasCtx,
-        this.$store.state.canvasModule.pages[
-          this.$store.state.canvasModule.currentPageIndex
-        ].layers[this.$store.state.canvasModule.currentLayerIndex],
-        x,
-        y,
-        backgroundColor
-      );
-      this.$store.state.canvasModule.pages[
-        this.$store.state.canvasModule.currentPageIndex
-      ].layers[this.$store.state.canvasModule.currentLayerIndex][x][y] = {
-        ...this.$store.state.canvasModule.pages[
-          this.$store.state.canvasModule.currentPageIndex
-        ].layers[this.$store.state.canvasModule.currentLayerIndex][x][y],
-        color: undefined
-      };
-    },
     handleMouseMove(this: any, e: any) {
       const columnIndex = Math.floor(
           e.offsetX / this.$store.state.canvasModule.size

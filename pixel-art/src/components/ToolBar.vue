@@ -5,7 +5,7 @@
       <li
         class="toolbar-item"
         :class="{ active: toolActiveIndex === index }"
-        v-for="(tool, index) in tools"
+        v-for="(tool, index) in activeTools"
         :title="tool.title"
         :id="tool.id"
         :key="tool.id"
@@ -25,6 +25,11 @@ export default {
   components: {
     colorPreview
   },
+  computed: {
+    activeTools() {
+      return this.tools.filter(tool => tool.active);
+    }
+  },
   data() {
     return {
       toolActiveIndex: 0,
@@ -32,82 +37,98 @@ export default {
         {
           id: "tool-pencil",
           title: "Pencil Tool",
-          mode: "pencil"
+          mode: "pencil",
+          active: true
         },
         {
           id: "tool-eraser",
           title: "Eraser Tool",
-          mode: "eraser"
+          mode: "eraser",
+          active: true
         },
         {
           id: "tool-brush",
           title: "Brush Tool",
-          mode: "brush"
+          mode: "brush",
+          active: false
         },
         {
           id: "tool-line",
           title: "Line Tool",
-          mode: "line"
+          mode: "line",
+          active: true
         },
         {
           id: "tool-square",
           title: "Square Tool",
-          mode: "square"
+          mode: "square",
+          active: true
         },
         {
           id: "tool-circle",
           title: "Circle Tool",
-          mode: "circle"
+          mode: "circle",
+          active: true
         },
         {
           id: "tool-bucket",
           title: "Bucket Tool",
-          mode: "bucket"
+          mode: "bucket",
+          active: true
         },
         {
           id: "tool-color-picker",
           title: "Color Picker Tool",
-          mode: "colorPicker"
+          mode: "colorPicker",
+          active: true
         },
         {
           id: "tool-move",
           title: "Move Tool",
-          mode: "move"
+          mode: "move",
+          active: true
         },
         {
           id: "tool-select",
           title: "Select Tool",
-          mode: "select"
+          mode: "select",
+          active: true
         },
         {
           id: "tool-text",
           title: "Text Tool",
-          mode: "text"
+          mode: "text",
+          active: false
         },
         {
           id: "tool-lighten-darken",
           title: "Lighten/Darken Tool",
-          mode: "lighten/darken"
+          mode: "lighten/darken",
+          active: false
         },
         {
           id: "tool-dithering",
           title: "Dithering Tool",
-          mode: "dithering"
+          mode: "dithering",
+          active: false
         },
         {
           id: "tool-stamp",
           title: "Stamp Tool",
-          mode: "stamp"
+          mode: "stamp",
+          active: false
         },
         {
           id: "tool-crop",
           title: "Crop Tool - Resize Drawing Canvas",
-          mode: "crop"
+          mode: "crop",
+          active: false
         },
         {
           id: "tool-gradient",
           title: "Gradient Tool",
-          mode: "gradient"
+          mode: "gradient",
+          active: false
         }
       ]
     };
@@ -117,7 +138,7 @@ export default {
       this.toolActiveIndex = index;
       this.$store.dispatch(
         "canvasModule/SET_PAINT_MODE",
-        this.tools[index].mode
+        this.activeTools[index].mode
       );
     }
   }

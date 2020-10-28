@@ -16,13 +16,13 @@ const CanvasMutations: MutationTree<CanvasState> = {
     const page = state.pages[currentPageIndex];
   },
   [MutationsTypes.CREATE_TEMP_LAYER](state: CanvasState) {
-    const { width, height } = state;
-    const layer: layer = initLayer(width, height, 10);
+    const { width, height, size } = state;
+    const layer: layer = initLayer(width, height, size);
     state.tempLayer = layer;
   },
   [MutationsTypes.CREATE_PAGE](state: CanvasState) {
-    const { width, height } = state;
-    const layer: layer = initLayer(width, height, 10);
+    const { width, height, size } = state;
+    const layer: layer = initLayer(width, height, size);
     state.pages.push({
       layers: [layer]
     });
