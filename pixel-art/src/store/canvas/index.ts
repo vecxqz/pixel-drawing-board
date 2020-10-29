@@ -23,6 +23,7 @@ const module: Module<CanvasState, any> = {
     canvasCtx: undefined,
     selectCanvasCtx: undefined,
     shadowLayerCanvasCtx: undefined,
+    backgroundCanvasCtx: undefined,
     canvasImageData: undefined,
     selectArea: {
       isSet: false,

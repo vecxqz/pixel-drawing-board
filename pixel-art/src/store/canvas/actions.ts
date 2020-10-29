@@ -19,9 +19,19 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_CANVASCTX, canvasCtx);
   },
-  [ActionsTypes.SET_SHDOW_LAYER_CANVASCTX]({ commit }, canvas: HTMLCanvasElement): void {
+  [ActionsTypes.SET_SHDOW_LAYER_CANVASCTX](
+    { commit },
+    canvas: HTMLCanvasElement
+  ): void {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_SHDOW_LAYER_CANVASCTX, canvasCtx);
+  },
+  [ActionsTypes.SET_BACKGROUND_CANVAS_CANVASCTX](
+    { commit },
+    canvas: HTMLCanvasElement
+  ): void {
+    const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+    commit(MutationsTypes.SET_BACKGROUND_CANVAS_CANVASCTX, canvasCtx);
   },
   [ActionsTypes.SET_SELECTCANVASCTX](
     { commit },

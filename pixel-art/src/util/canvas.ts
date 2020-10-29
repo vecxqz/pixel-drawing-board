@@ -82,6 +82,15 @@ function drawGrid(
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(x, y, size, size);
 }
+function clearGrid(
+  canvasCtx: CanvasRenderingContext2D,
+  layerMeta: layer,
+  columnIndex: number,
+  rowIndex: number,
+): void {
+  const { x, y, size } = layerMeta[columnIndex][rowIndex];
+  canvasCtx.clearRect(x, y, size, size);
+}
 function initGrid(
   canvasCtx: CanvasRenderingContext2D,
   layerMeta: layer,
@@ -302,5 +311,6 @@ export {
   bresenhamLineCircle,
   drawGridGroup,
   drawSelectArea,
-  drawSquare
+  drawSquare,
+  clearGrid
 };

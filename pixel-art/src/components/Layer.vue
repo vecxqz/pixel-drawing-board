@@ -72,7 +72,7 @@ export default {
     choose(this: any, key: string) {
       const { key: layerKey } = this.$store.state.canvasModule.pages[
         this.$store.state.canvasModule.currentPageIndex
-      ].layers.find((layerMeta: layerMeta) => layerMeta.key === key);
+      ].layers.find((layerMeta: any) => layerMeta.key === key);
       this.$store.state.canvasModule.currentLayerIndex = +layerKey;
     }
   }

@@ -1,4 +1,9 @@
-import { drawSelectArea, drawGrid, drawGridGroup } from "../util/canvas";
+import {
+  drawSelectArea,
+  drawGrid,
+  clearGrid,
+  drawGridGroup
+} from "../util/canvas";
 import { computed, reactive, nextTick, toRaw } from "vue";
 import { useStore } from "./useStore";
 export function useSelect(this: any) {
@@ -364,25 +369,17 @@ export function useSelect(this: any) {
       const minY = Math.min(startY.value, endY.value);
       for (let x = 0; x < data.length; x++) {
         for (let y = 0; y < data[x].length; y++) {
-          const { backgroundColor: color } = data[x][y];
-          if (color) {
-            drawGrid(
-              canvasCtx.value,
-              currentLayer.value,
-              minX + x,
-              minY + y,
-              color
-            );
-            // 提升性能
-            currentLayerRaw[minX + x][minY + y].color = undefined;
-            // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-            //   columnIndex: minX + x,
-            //   rowIndex: minY + y,
-            //   data: {
-            //     color: undefined
-            //   }
-            // });
-          }
+          const { color } = data[x][y];
+          clearGrid(canvasCtx.value, currentLayer.value, minX + x, minY + y);
+          // 提升性能
+          currentLayerRaw[minX + x][minY + y].color = undefined;
+          // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
+          //   columnIndex: minX + x,
+          //   rowIndex: minY + y,
+          //   data: {
+          //     color: undefined
+          //   }
+          // });
         }
       }
     }

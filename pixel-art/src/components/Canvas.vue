@@ -4,10 +4,18 @@
       id="canvas-container"
       class="pos-relative"
       :style="
-        `width:${$store.state.canvasModule.width}px;height:$[$store.state.canvasModule.height}px`
+        `width:${$store.state.canvasModule.width}px;
+        height:${$store.state.canvasModule.height}px`
       "
     >
       <canvas
+        class="pos-absoulte pe-none layer-shadow"
+        ref="backgroundCanvas"
+        :width="$store.state.canvasModule.width"
+        :height="$store.state.canvasModule.height"
+      />
+      <canvas
+        class="pos-absoulte layer-main"
         ref="canvas"
         :width="$store.state.canvasModule.width"
         :height="$store.state.canvasModule.height"
@@ -24,8 +32,9 @@
         :height="selectArea.height"
       />
       <canvas
-        class="pos-absoulte pe-none shadow-layer"
+        class="pos-absoulte pe-none layer-shadow"
         ref="layerShandowCanvas"
+        style="visibility: hidden"
         :width="$store.state.canvasModule.width"
         :height="$store.state.canvasModule.height"
       />
@@ -185,6 +194,12 @@ export default {
     canvasCtx(this: any) {
       return this.$store.state.canvasModule.canvasCtx;
     },
+    backgroundCanvasCtx(this: any) {
+      return this.$store.state.canvasModule.backgroundCanvasCtx;
+    },
+    shadowCanvasCtx(this: any) {
+      return this.$store.state.canvasModule.shadowLayerCanvasCtx;
+    },
     currentLayer(this: any) {
       const {
         currentPageIndex,
@@ -200,18 +215,32 @@ export default {
     window.oncontextmenu = function(e: MouseEvent) {
       e.preventDefault();
     };
-    const { canvas, selectcanvas, layerShandowCanvas } = this.$refs;
+    const {
+      canvas,
+      selectcanvas,
+      layerShandowCanvas,
+      backgroundCanvas
+    } = this.$refs;
     const canvasContainer = window.document.getElementById("canvas-container");
     this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
     this.$store.dispatch(
+      "canvasModule/SET_BACKGROUND_CANVAS_CANVASCTX",
+      backgroundCanvas
+    );
+    this.$store.dispatch(
       "canvasModule/SET_SHDOW_LAYER_CANVASCTX",
       layerShandowCanvas
     );
     this.$store.dispatch("canvasModule/SET_SELECTCANVASCTX", selectcanvas);
-    this.parse();
-    this.setCanvasPreview(this.canvasCtx);
+    this.parseBackground();
+    this.$nextTick(() => {
+      this.setCanvasPreview(
+        [this.backgroundCanvasCtx, this.canvasCtx],
+        this.shadowCanvasCtx
+      );
+    });
     const mouseDown = fromEvent(canvasContainer as HTMLElement, "mousedown");
     const mouseMove = fromEvent(canvasContainer as HTMLElement, "mousemove");
     const mouseUp = fromEvent(canvasContainer as HTMLElement, "mouseup");
@@ -300,7 +329,10 @@ export default {
                     this.canvasImageDataSaveClean();
                     this.mirrorPencilMouseUp(e);
                   }
-                  this.setCanvasPreview(this.canvasCtx);
+                  this.setCanvasPreview(
+                    [this.backgroundCanvasCtx, this.canvasCtx],
+                    this.shadowCanvasCtx
+                  );
                 })
               )
             )
@@ -359,27 +391,33 @@ export default {
         this.mirrorPencilMouseMove(e);
       }
     },
-    parse(this: any) {
+    // parse(this: any) {
+    //   const layer = this.$store.state.canvasModule.pages[
+    //     this.$store.state.canvasModule.currentPageIndex
+    //   ].layers[this.$store.state.canvasModule.currentLayerIndex].layer;
+    //   for (let i = 0; i < layer.length; i++)
+    //     for (let j = 0; j < layer.length; j++) {
+    //       const cell = layer[i][j];
+    //       const { color, backgroundColor } = cell;
+    //       initGrid(
+    //         this.canvasCtx,
+    //         layer,
+    //         i,
+    //         j,
+    //         color ? color : backgroundColor
+    //       );
+    //     }
+    // },
+    parseBackground(this: any) {
       const layer = this.$store.state.canvasModule.pages[
         this.$store.state.canvasModule.currentPageIndex
       ].layers[this.$store.state.canvasModule.currentLayerIndex].layer;
       for (let i = 0; i < layer.length; i++)
         for (let j = 0; j < layer.length; j++) {
           const cell = layer[i][j];
-          const { color, backgroundColor } = cell;
-          initGrid(
-            this.canvasCtx,
-            layer,
-            i,
-            j,
-            color ? color : backgroundColor
-          );
+          const { backgroundColor } = cell;
+          initGrid(this.backgroundCanvasCtx, layer, i, j, backgroundColor);
         }
-      (window as any).layer = this.$store.state.canvasModule.pages[
-        this.$store.state.canvasModule.currentPageIndex
-      ].layers[
-        this.$store.state.canvasModule.currentLayerIndex
-      ].layer.map((x: any) => x.map((y: any) => ({ ...y })));
     },
     canvasImageDataSave(this: any) {
       const { canvasCtx } = this;
@@ -423,7 +461,11 @@ export default {
 .visb-hidden {
   visibility: hidden;
 }
-.shadow-layer {
+.layer-shadow {
+  top: 0;
+  left: 0;
+}
+.layer-main {
   top: 0;
   left: 0;
 }

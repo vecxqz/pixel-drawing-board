@@ -16,6 +16,7 @@ export interface CanvasState {
   canvasCtx?: CanvasRenderingContext2D /**canvas上下文 */;
   selectCanvasCtx?: CanvasRenderingContext2D /**选择区域 */;
   shadowLayerCanvasCtx?: CanvasRenderingContext2D /**不同层的合成 */;
+  backgroundCanvasCtx?: CanvasRenderingContext2D /**背景层 */;
   eventPoint: eventPoint /**鼠标事件点 */;
   selectArea: selectArea /**选中区域 */;
   previewUrl: string /**预览图片url */;

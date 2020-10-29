@@ -1,4 +1,4 @@
-import { drawGrid, bresenhamLine } from "../util/canvas";
+import { drawGrid, clearGrid, bresenhamLine } from "../util/canvas";
 import { computed, reactive, ref } from "vue";
 import { useStore } from "./useStore";
 export function useMirrorPencil(this: any) {
@@ -64,19 +64,7 @@ export function useMirrorPencil(this: any) {
     }
     if (e.button === 2) {
       mode.value = "clear";
-      const { backgroundColor: color } = currentLayer.value[columnIndex][
-        rowIndex
-      ];
-      const { backgroundColor: mirrorColor } = currentLayer.value[
-        mirrorColumnIndex
-      ][rowIndex];
-      drawGrid(
-        canvasCtx.value,
-        currentLayer.value,
-        columnIndex,
-        rowIndex,
-        color
-      );
+      clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
       store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
         columnIndex,
         rowIndex,
@@ -84,12 +72,11 @@ export function useMirrorPencil(this: any) {
           color: undefined
         }
       });
-      drawGrid(
+      clearGrid(
         canvasCtx.value,
         currentLayer.value,
         mirrorColumnIndex,
-        rowIndex,
-        mirrorColor
+        rowIndex
       );
       store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
         columnIndex: mirrorColumnIndex,
@@ -184,24 +171,12 @@ export function useMirrorPencil(this: any) {
       }
     }
     if (mode.value === "clear") {
-      const { backgroundColor: color } = currentLayer.value[columnIndex][
-        rowIndex
-      ];
-      const { backgroundColor: mirrorColor } = currentLayer.value[
-        mirrorColumnIndex
-      ][rowIndex];
       // 如果是缓慢移动鼠标就不使用布雷森汉姆直线算法
       if (
         Math.abs(mouseMoveStart.lastX - mouseMoveStart.currentX) <= 1 &&
         Math.abs(mouseMoveStart.lastY - mouseMoveStart.currentY) <= 1
       ) {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
-          columnIndex,
-          rowIndex,
-          color
-        );
+        clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
         store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
           columnIndex,
           rowIndex,
@@ -209,12 +184,11 @@ export function useMirrorPencil(this: any) {
             color: undefined
           }
         });
-        drawGrid(
+        clearGrid(
           canvasCtx.value,
           currentLayer.value,
           mirrorColumnIndex,
-          rowIndex,
-          mirrorColor
+          rowIndex
         );
         store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
           columnIndex: mirrorColumnIndex,
@@ -231,18 +205,11 @@ export function useMirrorPencil(this: any) {
           mouseMoveStart.currentY,
           (columnIndex: number, rowIndex: number) => {
             const mirrorColumnIndex = width.value - columnIndex - 1;
-            const { backgroundColor: color } = currentLayer.value[columnIndex][
-              rowIndex
-            ];
-            const { backgroundColor: mirrorColor } = currentLayer.value[
-              mirrorColumnIndex
-            ][rowIndex];
-            drawGrid(
+            clearGrid(
               canvasCtx.value,
               currentLayer.value,
               columnIndex,
-              rowIndex,
-              color
+              rowIndex
             );
             store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
               columnIndex,
@@ -251,12 +218,11 @@ export function useMirrorPencil(this: any) {
                 color: undefined
               }
             });
-            drawGrid(
+            clearGrid(
               canvasCtx.value,
               currentLayer.value,
               mirrorColumnIndex,
-              rowIndex,
-              mirrorColor
+              rowIndex
             );
             store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
               columnIndex: mirrorColumnIndex,
