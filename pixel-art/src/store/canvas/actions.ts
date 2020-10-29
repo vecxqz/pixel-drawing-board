@@ -1,6 +1,5 @@
 import { CanvasState } from "./type";
 import { RootState } from "../type";
-import { layer } from "../../../types/canvas";
 import { ActionTree } from "vuex";
 import { ActionsTypes, MutationsTypes } from "./enum";
 const CanvasActions: ActionTree<CanvasState, RootState> = {

@@ -1,4 +1,3 @@
-import { layer } from "types/canvas";
 import { drawGrid } from "./canvas";
 function boundaryFill4( //递归填充
   layer: layer,

@@ -14,7 +14,7 @@ const module: Module<CanvasState, any> = {
     currentPageIndex: 0,
     currentRowIndex: 0,
     currentColumnIndex: 0,
-    previewUrl:'',
+    previewUrl: "",
     pages: [],
     width: 800,
     height: 800,
@@ -23,6 +23,7 @@ const module: Module<CanvasState, any> = {
     canvasCtx: undefined,
     selectCanvasCtx: undefined,
     shadowLayerCanvasCtx: undefined,
+    canvasImageData: undefined,
     selectArea: {
       isSet: false,
       isMove: false,

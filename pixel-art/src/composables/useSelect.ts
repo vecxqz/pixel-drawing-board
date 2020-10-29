@@ -1,6 +1,5 @@
 import { drawSelectArea, drawGrid, drawGridGroup } from "../util/canvas";
 import { computed, reactive, nextTick, toRaw } from "vue";
-import { layer } from "types/canvas";
 import { useStore } from "./useStore";
 export function useSelect(this: any) {
   const distance = reactive({

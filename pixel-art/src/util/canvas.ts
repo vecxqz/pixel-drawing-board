@@ -1,5 +1,3 @@
-import { cell, layer } from "types/canvas";
-
 function initLayer(width: number, height: number, gridSize: number): layer {
   const gridMeta: layer = [];
   for (let column = 0; column < Math.floor(width / gridSize); column += 1) {

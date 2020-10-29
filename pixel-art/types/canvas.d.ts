@@ -1,4 +1,4 @@
-export interface cell {
+declare interface cell {
   columnIndex: number /**横轴下标 */;
   rowIndex: number /**纵轴下标 */;
   x: number /** 横轴坐标*/;
@@ -10,26 +10,27 @@ export interface cell {
   backgroundColor: string /** 格子默认背景色 */;
 }
 
-export interface layer {
+declare interface layer {
   [index: number]: Array<cell> /** 存储格子数据 */;
   length: number;
 }
-export interface layerMeta {
+declare interface layerMeta {
   layer: layer;
   layerName: string;
+  canvaImageData!: CanvasImageData;
   key: string | number;
 }
 /** 单页数据类型*/
-export interface page {
+declare interface page {
   layers: Array<layerMeta>;
 }
-export interface canvasData {
+declare interface canvasData {
   title?: string;
   createTtme?: string;
   layer: layer;
 }
 
-export interface eventPoint {
+declare interface eventPoint {
   startPoint: {
     e?: MouseEvent;
     x?: number;
@@ -52,7 +53,7 @@ export interface eventPoint {
   };
 }
 
-export interface selectArea {
+declare interface selectArea {
   startX?: number;
   startY?: number;
   endX?: number;

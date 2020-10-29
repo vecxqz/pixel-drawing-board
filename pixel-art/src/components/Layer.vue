@@ -22,8 +22,7 @@
 </template>
 
 <script lang="ts">
-import { canvasData, cell, layer, page } from "../../types/canvas";
-import { initLayer, drawGrid } from "../util/canvas";
+import { initLayer } from "../util/canvas";
 export default {
   data() {
     return {
@@ -71,19 +70,10 @@ export default {
       }
     },
     choose(this: any, key: string) {
-      const { canvasCtx } = this.$store.state.canvasModule;
-      const { layer, key: layerKey } = this.$store.state.canvasModule.pages[
+      const { key: layerKey } = this.$store.state.canvasModule.pages[
         this.$store.state.canvasModule.currentPageIndex
-      ].layers.find((layer: any) => layer.key === key);
+      ].layers.find((layerMeta: layerMeta) => layerMeta.key === key);
       this.$store.state.canvasModule.currentLayerIndex = +layerKey;
-      // for (let x = 0; x < layer.length; x++) {
-      //   for (let y = 0; y < layer[x].length; y++) {
-      //     const { color } = layer[x][y];
-      //     if (color) {
-      //       drawGrid(canvasCtx, layer, x, y, color);
-      //     }
-      //   }
-      // }
     }
   }
 };

@@ -1,7 +1,6 @@
 import { GetterTree } from "vuex";
 import { CanvasState } from "./type";
 import { RootState } from "../type";
-import { cell } from "../../../types/canvas";
 
 const CanvasGetters: GetterTree<CanvasState, RootState> = {
   currentGridMeta: (state: CanvasState): cell => {

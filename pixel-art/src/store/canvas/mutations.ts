@@ -2,7 +2,6 @@ import { MutationTree } from "vuex";
 import { CanvasState } from "./type";
 import { Mutation } from "vuex";
 import { MutationsTypes } from "./enum";
-import { canvasData, cell, layer, page } from "types/canvas";
 import { initLayer } from "../../util/canvas";
 import { isUndefined } from "../../util/common";
 
