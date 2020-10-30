@@ -19,6 +19,20 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_CANVASCTX, canvasCtx);
   },
+  [ActionsTypes.SET_BELOW_CANVASCTX](
+    { commit },
+    canvas: HTMLCanvasElement
+  ): void {
+    const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+    commit(MutationsTypes.SET_BELOW_CANVASCTX, canvasCtx);
+  },
+  [ActionsTypes.SET_ABOVE_CANVASCTX](
+    { commit },
+    canvas: HTMLCanvasElement
+  ): void {
+    const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+    commit(MutationsTypes.SET_ABOVE_CANVASCTX, canvasCtx);
+  },
   [ActionsTypes.SET_SHDOW_LAYER_CANVASCTX](
     { commit },
     canvas: HTMLCanvasElement
@@ -33,12 +47,19 @@ const CanvasActions: ActionTree<CanvasState, RootState> = {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
     commit(MutationsTypes.SET_BACKGROUND_CANVAS_CANVASCTX, canvasCtx);
   },
-  [ActionsTypes.SET_SELECTCANVASCTX](
+  [ActionsTypes.SET_SELECT_CANVASCTX](
     { commit },
     canvas: HTMLCanvasElement
   ): void {
     const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
-    commit(MutationsTypes.SET_SELECTCANVASCTX, canvasCtx);
+    commit(MutationsTypes.SET_SELECT_CANVASCTX, canvasCtx);
+  },
+  [ActionsTypes.SET_TEMP_LAYER_CANVASCTX](
+    { commit },
+    canvas: HTMLCanvasElement
+  ): void {
+    const canvasCtx: CanvasRenderingContext2D = canvas.getContext("2d")!;
+    commit(MutationsTypes.SET_TEMP_LAYER_CANVASCTX, canvasCtx);
   },
   [ActionsTypes.SET_COLOR]({ commit }, color: string): void {
     commit(MutationsTypes.SET_COLOR, color);

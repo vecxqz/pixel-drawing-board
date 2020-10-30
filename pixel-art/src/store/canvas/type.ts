@@ -15,8 +15,11 @@ export interface CanvasState {
   size: number /**格子边长 */;
   canvasCtx?: CanvasRenderingContext2D /**canvas上下文 */;
   selectCanvasCtx?: CanvasRenderingContext2D /**选择区域 */;
-  shadowLayerCanvasCtx?: CanvasRenderingContext2D /**不同层的合成 */;
+  belowCanvasCtx?: CanvasRenderingContext2D /**当前层之下的层*/;
   backgroundCanvasCtx?: CanvasRenderingContext2D /**背景层 */;
+  aboveCanvasCtx?: CanvasRenderingContext2D /**当前层之上的层 */;
+  shadowLayerCanvasCtx?: CanvasRenderingContext2D;
+  tempCanvasCtx?: CanvasRenderingContext2D;
   eventPoint: eventPoint /**鼠标事件点 */;
   selectArea: selectArea /**选中区域 */;
   previewUrl: string /**预览图片url */;

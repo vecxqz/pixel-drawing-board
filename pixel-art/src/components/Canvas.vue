@@ -9,8 +9,14 @@
       "
     >
       <canvas
-        class="pos-absoulte pe-none layer-shadow"
+        class="pos-absoulte pe-none layer-shadow layer-background"
         ref="backgroundCanvas"
+        :width="$store.state.canvasModule.width"
+        :height="$store.state.canvasModule.height"
+      />
+      <canvas
+        class="pos-absoulte pe-none layer-shadow layer-below"
+        ref="belowCanvas"
         :width="$store.state.canvasModule.width"
         :height="$store.state.canvasModule.height"
       />
@@ -21,7 +27,13 @@
         :height="$store.state.canvasModule.height"
       />
       <canvas
-        class="pos-absoulte pe-none"
+        class="pos-absoulte pe-none layer-shadow layer-above"
+        ref="aboveCanvas"
+        :width="$store.state.canvasModule.width"
+        :height="$store.state.canvasModule.height"
+      />
+      <canvas
+        class="pos-absoulte pe-none layer-select"
         :class="{ 'visb-hidden': !selectArea.isSet }"
         ref="selectcanvas"
         :style="{
@@ -34,6 +46,13 @@
       <canvas
         class="pos-absoulte pe-none layer-shadow"
         ref="layerShandowCanvas"
+        style="visibility: hidden"
+        :width="$store.state.canvasModule.width"
+        :height="$store.state.canvasModule.height"
+      />
+      <canvas
+        class="pos-absoulte pe-none layer-shadow layer-temp"
+        ref="tempCanvas"
         style="visibility: hidden"
         :width="$store.state.canvasModule.width"
         :height="$store.state.canvasModule.height"
@@ -115,7 +134,7 @@ export default {
       mouseUp: recordMouseUpPosition
     } = useMousePosition();
     const { setCurrentColor } = useColor();
-    const { setCanvasPreview } = userPreview();
+    const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -147,6 +166,7 @@ export default {
       selectAreaData,
       setCurrentColor,
       setCanvasPreview,
+      setCanvasPreviewByImageData,
       mirrorPencilMouseDown,
       mirrorPencilMouseMove,
       mirrorPencilMouseUp
@@ -200,6 +220,15 @@ export default {
     shadowCanvasCtx(this: any) {
       return this.$store.state.canvasModule.shadowLayerCanvasCtx;
     },
+    tempCanvasCtx(this: any) {
+      return this.$store.state.canvasModule.tempCanvasCtx;
+    },
+    belowCanvasCtx(this: any): CanvasRenderingContext2D {
+      return this.$store.state.canvasModule.belowCanvasCtx;
+    },
+    aboveCanvasCtx(this: any): CanvasRenderingContext2D {
+      return this.$store.state.canvasModule.aboveCanvasCtx;
+    },
     currentLayer(this: any) {
       const {
         currentPageIndex,
@@ -219,7 +248,10 @@ export default {
       canvas,
       selectcanvas,
       layerShandowCanvas,
-      backgroundCanvas
+      backgroundCanvas,
+      aboveCanvas,
+      belowCanvas,
+      tempCanvas
     } = this.$refs;
     const canvasContainer = window.document.getElementById("canvas-container");
     this.$store.dispatch("canvasModule/CREATE_PAGE");
@@ -233,7 +265,10 @@ export default {
       "canvasModule/SET_SHDOW_LAYER_CANVASCTX",
       layerShandowCanvas
     );
-    this.$store.dispatch("canvasModule/SET_SELECTCANVASCTX", selectcanvas);
+    this.$store.dispatch("canvasModule/SET_SELECT_CANVASCTX", selectcanvas);
+    this.$store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas);
+    this.$store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas);
+    this.$store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas);
     this.parseBackground();
     this.$nextTick(() => {
       this.setCanvasPreview(
@@ -329,10 +364,11 @@ export default {
                     this.canvasImageDataSaveClean();
                     this.mirrorPencilMouseUp(e);
                   }
-                  this.setCanvasPreview(
-                    [this.backgroundCanvasCtx, this.canvasCtx],
-                    this.shadowCanvasCtx
-                  );
+                  this.mergeCanvas();
+                  // this.setCanvasPreview(
+                  //   [this.backgroundCanvasCtx, this.canvasCtx],
+                  //   this.shadowCanvasCtx
+                  // );
                 })
               )
             )
@@ -346,6 +382,41 @@ export default {
       });
   },
   methods: {
+    mergeCanvas(this: any) {
+      const { width, height } = this.$store.state.canvasModule;
+      this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers[
+        this.$store.state.canvasModule.currentLayerIndex
+      ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+      const backgroundMeta = {
+        layerName: "background",
+        canvaImageData: this.backgroundCanvasCtx.getImageData(
+          0,
+          0,
+          width,
+          height
+        )
+      };
+      const belowMeta = {
+        layerName: "below",
+        canvaImageData: this.belowCanvasCtx.getImageData(0, 0, width, height)
+      };
+      const aboveMeta = {
+        layerName: "above",
+        canvaImageData: this.aboveCanvasCtx.getImageData(0, 0, width, height)
+      };
+      const currentMeta = {
+        layerName: "current",
+        canvaImageData: this.canvasCtx.getImageData(0, 0, width, height)
+      };
+      const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
+      this.setCanvasPreviewByImageData(
+        canvasArray,
+        this.tempCanvasCtx,
+        this.shadowCanvasCtx
+      );
+    },
     handleMouseMove(this: any, e: any) {
       const columnIndex = Math.floor(
           e.offsetX / this.$store.state.canvasModule.size
@@ -420,6 +491,7 @@ export default {
         }
     },
     canvasImageDataSave(this: any) {
+      console.log("canvasImageDataSave");
       const { canvasCtx } = this;
       // 存储在进行绘制之前的画布数据
       if (isUndefined(this.imageData)) {
@@ -432,6 +504,7 @@ export default {
       }
     },
     canvasImageDataUse(this: any) {
+      console.log("canvasImageDataUse");
       const { canvasCtx } = this;
       if (!isUndefined(this.imageData)) {
         canvasCtx.putImageData(this.imageData, 0, 0);
