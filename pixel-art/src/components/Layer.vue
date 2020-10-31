@@ -142,13 +142,13 @@ export default {
     choose(this: any, index: number) {
       const {
         width,
-        height,
-        currentPageIndex,
-        currentLayerIndex
+        height
+        // currentPageIndex,
+        // currentLayerIndex
       } = this.$store.state.canvasModule;
-      this.$store.state.canvasModule.pages[currentPageIndex].layers[
-        currentLayerIndex
-      ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+      // this.$store.state.canvasModule.pages[currentPageIndex].layers[
+      //   currentLayerIndex
+      // ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
       this.canvasCtx.clearRect(0, 0, width, height);
       this.belowCanvasCtx.clearRect(0, 0, width, height);
       this.aboveCanvasCtx.clearRect(0, 0, width, height);
@@ -169,12 +169,14 @@ export default {
           this.tempCanvasCtx.clearRect(0, 0, width, height);
           if (canvaImageData) {
             this.canvasCtx.putImageData(canvaImageData, 0, 0);
+            console.log(this.canvasCtx.canvas.toDataURL("image/png"));
           }
         }
         if (i > index) {
           console.log(`${layerName} 合到上层`);
           this.tempCanvasCtx.putImageData(canvaImageData, 0, 0);
           const { canvas } = this.tempCanvasCtx;
+          console.log(canvas.toDataURL("image/png"));
           this.aboveCanvasCtx.drawImage(canvas, 0, 0);
         }
       }
@@ -204,6 +206,54 @@ export default {
     },
     down(this: any, index: number) {
       if (this.currentLayerIndex !== 0) {
+        // 此处先把要交换的下层canvas imagedata取出，并绘制到当前画布
+        // 不这么做的话在下面进行数据交换之后，在choose函数内，执行
+        // this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        //   currentLayerIndex
+        // ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);会导致数据异常
+        // 实际上，是把当前的画布信息写入了 被交换前的下层canvas imagedata中
+        // 举例 执行down(1)
+        //  当前index 1 ,canvasCtx里的图像是1
+        // |index| layer| 绘制图像|
+        // |1    |  1   |  1     |
+        // |0    |  0   |  0     |
+        // 将layer 1 下移到layer 0
+        //  当前index是 1 ,canvasCtx里的图像是0
+        // |index| layer| 绘制图像|
+        // |1    |  1   |  1     |
+        // |0    |  1   |  0     |
+        // 执行choose(0)
+        // 这时的currentLayerIndex还是1
+        // 执行
+        // this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        //   currentLayerIndex
+        // ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+        // 后，当前index是 1, 所以
+        // |index| layer| 绘制图像 |
+        // |0    |  1   |  1      |
+        // |1    |  0   |  0 ->  1|
+        // 修复
+        // 会导致绘制异常,所以在交换两层数据之前，手动把要被交换的那一层的数据先绘制到当前画布
+        // const { currentPageIndex } = this.$store.state.canvasModule;
+        // const { canvaImageData } = this.$store.state.canvasModule.pages[
+        //   currentPageIndex
+        // ].layers[index - 1];
+        // this.canvasCtx.putImageData(canvaImageData, 0, 0);
+        //  当前index是 1 ,canvasCtx里的图像 1->0
+        // |index| layer| 绘制图像|
+        // |1    |  1   |  1     |
+        // |0    |  1   |  0     |
+        // 执行choose(0)
+        // 这时的currentLayerIndex还是1
+        // 执行
+        // this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        //   currentLayerIndex
+        // ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+        // 后，当前index是 1, canvasCtx里的图像是0 所以
+        // |index| layer| 绘制图像 |
+        // |0    |  1   |  1      |
+        // |1    |  0   |  0 ->  0|
+        // 数据就对了
         const { currentPageIndex } = this.$store.state.canvasModule;
         const { canvaImageData } = this.$store.state.canvasModule.pages[
           currentPageIndex
