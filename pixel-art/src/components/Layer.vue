@@ -142,13 +142,13 @@ export default {
     choose(this: any, index: number) {
       const {
         width,
-        height
-        // currentPageIndex,
-        // currentLayerIndex
+        height,
+        currentPageIndex,
+        currentLayerIndex
       } = this.$store.state.canvasModule;
-      // this.$store.state.canvasModule.pages[currentPageIndex].layers[
-      //   currentLayerIndex
-      // ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        currentLayerIndex
+      ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
       this.canvasCtx.clearRect(0, 0, width, height);
       this.belowCanvasCtx.clearRect(0, 0, width, height);
       this.aboveCanvasCtx.clearRect(0, 0, width, height);
