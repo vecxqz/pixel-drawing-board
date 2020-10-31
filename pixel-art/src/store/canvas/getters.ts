@@ -13,10 +13,14 @@ const CanvasGetters: GetterTree<CanvasState, RootState> = {
     } = state;
     let cell: cell | object;
     if (pages[currentPageIndex]?.layers) {
-      cell =
+      if(pages[currentPageIndex].layers[currentLayerIndex]){
+        cell =
         pages[currentPageIndex].layers[currentLayerIndex].layer[
           currentColumnIndex
         ][currentRowIndex];
+      }else{
+      cell = {};
+      }
     } else {
       cell = {};
     }

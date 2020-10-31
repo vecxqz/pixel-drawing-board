@@ -169,14 +169,14 @@ export default {
           this.tempCanvasCtx.clearRect(0, 0, width, height);
           if (canvaImageData) {
             this.canvasCtx.putImageData(canvaImageData, 0, 0);
-            console.log(this.canvasCtx.canvas.toDataURL("image/png"));
+            // console.log(this.canvasCtx.canvas.toDataURL("image/png"));
           }
         }
         if (i > index) {
           console.log(`${layerName} 合到上层`);
           this.tempCanvasCtx.putImageData(canvaImageData, 0, 0);
           const { canvas } = this.tempCanvasCtx;
-          console.log(canvas.toDataURL("image/png"));
+          // console.log(canvas.toDataURL("image/png"));
           this.aboveCanvasCtx.drawImage(canvas, 0, 0);
         }
       }
@@ -275,7 +275,53 @@ export default {
       }
     },
     deleteLayer(this: any, index: number) {
-      console.log(index);
+      const { currentPageIndex } = this.$store.state.canvasModule;
+      const length = this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers.length;
+      if (length === 1) {
+        return;
+      }
+      this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers.splice(index, 1);
+      const newLength = this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].layers.length;
+      if (index !== 0) {
+        if (newLength === 1) {
+          const { canvaImageData } = this.$store.state.canvasModule.pages[
+            currentPageIndex
+          ].layers[0];
+          this.canvasCtx.putImageData(canvaImageData, 0, 0);
+          this.$store.state.canvasModule.currentLayerIndex = 0;
+          this.choose(0);
+        } else {
+          const { canvaImageData } = this.$store.state.canvasModule.pages[
+            currentPageIndex
+          ].layers[index - 1];
+          this.canvasCtx.putImageData(canvaImageData, 0, 0);
+          this.$store.state.canvasModule.currentLayerIndex = index - 1;
+          this.choose(index - 1);
+        }
+      } else {
+        if (newLength === 1) {
+          const { canvaImageData } = this.$store.state.canvasModule.pages[
+            currentPageIndex
+          ].layers[0];
+          this.canvasCtx.putImageData(canvaImageData, 0, 0);
+          this.$store.state.canvasModule.currentLayerIndex = 0;
+          this.choose(0);
+        } else {
+          const { canvaImageData } = this.$store.state.canvasModule.pages[
+            currentPageIndex
+          ].layers[index + 1];
+          this.canvasCtx.putImageData(canvaImageData, 0, 0);
+          this.$store.state.canvasModule.currentLayerIndex = index + 1;
+          this.choose(index + 1);
+        }
+      }
+      this.setPreview();
     },
     setPreview(this: any) {
       const { width, height } = this.$store.state.canvasModule;
