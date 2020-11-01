@@ -27,6 +27,18 @@
     <span class="btn-layer-operate" @click="down(this.currentLayerIndex)">
       <img src="../assets/arrow.svg" class="layer-down" />
     </span>
+    <span class="btn-layer-operate" @click="down(this.currentLayerIndex)">
+      <img src="../assets/rename.svg" class="layer-rename" />
+    </span>
+    <span class="btn-layer-operate" @click="down(this.currentLayerIndex)">
+      <img src="../assets/copy.svg" class="layer-copy" />
+    </span>
+    <span class="btn-layer-operate" @click="mergeUp(this.currentLayerIndex)">
+      <img src="../assets/merge.svg" class="layer-merge-up" />
+    </span>
+    <span class="btn-layer-operate" @click="mergeDown(this.currentLayerIndex)">
+      <img src="../assets/merge.svg" class="layer-merge-down" />
+    </span>
     <span
       @click="deleteLayer(this.currentLayerIndex)"
       class="btn-layer-operate"
@@ -183,7 +195,7 @@ export default {
       this.tempCanvasCtx.clearRect(0, 0, width, height);
     },
     up(this: any, index: number) {
-      if (this.currentLayerIndex !== this.layerReverse.length - 1) {
+      if (this.currentLayerIndex !== this.layers.length - 1) {
         const { currentPageIndex } = this.$store.state.canvasModule;
         const { canvaImageData } = this.$store.state.canvasModule.pages[
           currentPageIndex
@@ -323,6 +335,120 @@ export default {
       }
       this.setPreview();
     },
+    mergeUp(this: any, index: number) {
+      if (index === this.layers.length - 1) {
+        return;
+      }
+      const {
+        width,
+        height,
+        currentPageIndex,
+        canvasCtx
+      } = this.$store.state.canvasModule;
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index
+      ].canvaImageData = canvasCtx.getImageData(0, 0, width, height);
+      const { canvaImageData } = this.$store.state.canvasModule.pages[
+        currentPageIndex
+      ].layers[index];
+      const {
+        canvaImageData: upImageData
+      } = this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index + 1
+      ];
+      canvasCtx.clearRect(0, 0, width, height);
+      this.tempCanvasCtx.clearRect(0, 0, width, height);
+      this.tempCanvasCtx.putImageData(upImageData, 0, 0);
+      canvasCtx.drawImage(this.tempCanvasCtx.canvas, 0, 0);
+      this.tempCanvasCtx.clearRect(0, 0, width, height);
+      this.tempCanvasCtx.putImageData(canvaImageData, 0, 0);
+      canvasCtx.drawImage(this.tempCanvasCtx.canvas, 0, 0);
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index + 1
+      ].canvaImageData = canvasCtx.getImageData(0, 0, width, height);
+      for (
+        let x = 0;
+        x <
+        this.$store.state.canvasModule.pages[currentPageIndex].layers[index + 1]
+          .layer.length;
+        x++
+      )
+        for (
+          let y = 0;
+          y <
+          this.$store.state.canvasModule.pages[currentPageIndex].layers[
+            index + 1
+          ].layer[x].length;
+          y++
+        ) {
+          const { color } = this.$store.state.canvasModule.pages[
+            currentPageIndex
+          ].layers[index].layer[x][y];
+          if (color) {
+            this.$store.state.canvasModule.pages[currentPageIndex].layers[
+              index + 1
+            ].layer[x][y].color = color;
+          }
+        }
+      this.deleteLayer(index);
+    },
+    mergeDown(this: any, index: number) {
+      if (index === 0) {
+        return;
+      }
+      const {
+        width,
+        height,
+        currentPageIndex,
+        canvasCtx
+      } = this.$store.state.canvasModule;
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index
+      ].canvaImageData = canvasCtx.getImageData(0, 0, width, height);
+      const { canvaImageData } = this.$store.state.canvasModule.pages[
+        currentPageIndex
+      ].layers[index];
+      const {
+        canvaImageData: downImageData
+      } = this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index - 1
+      ];
+      canvasCtx.clearRect(0, 0, width, height);
+      this.tempCanvasCtx.clearRect(0, 0, width, height);
+      this.tempCanvasCtx.putImageData(downImageData, 0, 0);
+      canvasCtx.drawImage(this.tempCanvasCtx.canvas, 0, 0);
+      this.tempCanvasCtx.clearRect(0, 0, width, height);
+      this.tempCanvasCtx.putImageData(canvaImageData, 0, 0);
+      canvasCtx.drawImage(this.tempCanvasCtx.canvas, 0, 0);
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index - 1
+      ].canvaImageData = canvasCtx.getImageData(0, 0, width, height);
+      for (
+        let x = 0;
+        x <
+        this.$store.state.canvasModule.pages[currentPageIndex].layers[index - 1]
+          .layer.length;
+        x++
+      )
+        for (
+          let y = 0;
+          y <
+          this.$store.state.canvasModule.pages[currentPageIndex].layers[
+            index - 1
+          ].layer[x].length;
+          y++
+        ) {
+          const { color } = this.$store.state.canvasModule.pages[
+            currentPageIndex
+          ].layers[index].layer[x][y];
+          if (color) {
+            this.$store.state.canvasModule.pages[currentPageIndex].layers[
+              index - 1
+            ].layer[x][y].color = color;
+          }
+        }
+      this.deleteLayer(index);
+    },
     setPreview(this: any) {
       const { width, height } = this.$store.state.canvasModule;
       const backgroundMeta = {
@@ -367,6 +493,9 @@ export default {
 .layer-up {
   transform: rotate(180deg);
 }
+.layer-merge-down {
+  transform: rotate(180deg);
+}
 .btn-layer-operate {
   cursor: pointer;
   img {
@@ -375,9 +504,12 @@ export default {
 }
 .btn-group {
   display: flex;
+  flex-wrap: wrap;
   span {
+    padding: 10px;
     display: flex;
     align-content: center;
+    width: 25%;
   }
 }
 </style>

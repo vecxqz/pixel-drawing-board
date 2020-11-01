@@ -542,4 +542,7 @@ export default {
   top: 0;
   left: 0;
 }
+#canvas-container {
+  margin: 0 auto;
+}
 </style>
