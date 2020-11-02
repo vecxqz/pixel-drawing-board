@@ -7,7 +7,9 @@
       <div class="title">画布信息</div>
       <div class="info-layer-size">{{ width }} * {{ height }}</div>
       <div v-if="girdMeta">
-        x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }}
+        x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }} color:{{
+          girdMeta.color
+        }}
       </div>
     </div>
     <div class="attribute-box">

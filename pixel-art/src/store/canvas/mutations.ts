@@ -50,11 +50,29 @@ const CanvasMutations: MutationTree<CanvasState> = {
   ) {
     state.shadowLayerCanvasCtx = canvasCtx;
   },
-  [MutationsTypes.SET_SELECTCANVASCTX](
+  [MutationsTypes.SET_BELOW_CANVASCTX](
+    state: CanvasState,
+    canvasCtx: CanvasRenderingContext2D
+  ) {
+    state.belowCanvasCtx = canvasCtx;
+  },
+  [MutationsTypes.SET_SELECT_CANVASCTX](
     state: CanvasState,
     canvasCtx: CanvasRenderingContext2D
   ) {
     state.selectCanvasCtx = canvasCtx;
+  },
+  [MutationsTypes.SET_ABOVE_CANVASCTX](
+    state: CanvasState,
+    canvasCtx: CanvasRenderingContext2D
+  ) {
+    state.aboveCanvasCtx = canvasCtx;
+  },
+  [MutationsTypes.SET_TEMP_LAYER_CANVASCTX](
+    state: CanvasState,
+    canvasCtx: CanvasRenderingContext2D
+  ) {
+    state.tempCanvasCtx = canvasCtx;
   },
   [MutationsTypes.SET_COLOR](state: CanvasState, color: string) {
     state.color = color;
