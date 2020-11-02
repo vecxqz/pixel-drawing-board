@@ -20,40 +20,38 @@
     <span class="btn-layer-operate">
       <img
         src="../assets/arrow.svg"
-        @click="up(this.currentLayerIndex)"
+        @click="up(currentLayerIndex)"
         class="layer-up"
       />
     </span>
-    <span class="btn-layer-operate" @click="down(this.currentLayerIndex)">
+    <span class="btn-layer-operate" @click="down(currentLayerIndex)">
       <img src="../assets/arrow.svg" class="layer-down" />
     </span>
-    <span class="btn-layer-operate" @click="down(this.currentLayerIndex)">
+    <span class="btn-layer-operate" @click="down(currentLayerIndex)">
       <img src="../assets/rename.svg" class="layer-rename" />
     </span>
-    <span class="btn-layer-operate" @click="down(this.currentLayerIndex)">
+    <span class="btn-layer-operate" @click="copy(currentLayerIndex)">
       <img src="../assets/copy.svg" class="layer-copy" />
     </span>
-    <span class="btn-layer-operate" @click="mergeUp(this.currentLayerIndex)">
+    <span class="btn-layer-operate" @click="mergeUp(currentLayerIndex)">
       <img src="../assets/merge.svg" class="layer-merge-up" />
     </span>
-    <span class="btn-layer-operate" @click="mergeDown(this.currentLayerIndex)">
+    <span class="btn-layer-operate" @click="mergeDown(currentLayerIndex)">
       <img src="../assets/merge.svg" class="layer-merge-down" />
     </span>
-    <span
-      @click="deleteLayer(this.currentLayerIndex)"
-      class="btn-layer-operate"
-    >
+    <span @click="deleteLayer(currentLayerIndex)" class="btn-layer-operate">
       <img src="../assets/trash.svg" />
     </span>
   </div>
   <ul>
     <li
       v-for="(layer, index) in layerReverse"
+      @dblclick="rename(currentLayerIndex)"
       :class="{
         highlight: +currentLayerIndex === layerReverse.length - index - 1
       }"
       :key="layer.key"
-      @click="choose(layerReverse.length - 1 - index)"
+      @click="choose(layerReverse.length - index - 1)"
     >
       {{ layer.layerName }}
     </li>
@@ -62,6 +60,8 @@
 
 <script lang="ts">
 import { initLayer } from "../util/canvas";
+import clone from "lodash/clone";
+import { toRaw } from "vue";
 import { userPreview } from "../composables/userPreview";
 export default {
   setup(this: any) {
@@ -448,6 +448,44 @@ export default {
           }
         }
       this.deleteLayer(index);
+    },
+    copy(this: any, index: number) {
+      const {
+        currentPageIndex,
+        width,
+        height
+      } = this.$store.state.canvasModule;
+      let newLayerData = clone(
+        toRaw(
+          this.$store.state.canvasModule.pages[currentPageIndex].layers[index]
+        )
+      );
+      let layer: Array<any> = [];
+      for (let x = 0; x < newLayerData.layer.length; x++)
+        for (let y = 0; y < newLayerData.layer[x].length; y++) {
+          if (!Array.isArray(layer[x])) {
+            layer[x] = [];
+          }
+          layer[x][y] = { ...newLayerData.layer[x][y] };
+        }
+      newLayerData.layer = layer;
+      newLayerData.key = `${newLayerData.key}_copy_${Math.random() * 100}`;
+      newLayerData.layerName = `${newLayerData.layerName}_copy`;
+      newLayerData.canvaImageData = this.canvasCtx.getImageData(
+        0,
+        0,
+        width,
+        height
+      );
+      this.$store.state.canvasModule.pages[currentPageIndex].layers[
+        index
+      ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+      this.$store.state.canvasModule.pages[currentPageIndex].layers.push(
+        newLayerData
+      );
+    },
+    rename(this: any, index: number) {
+      console.log("rename", index);
     },
     setPreview(this: any) {
       const { width, height } = this.$store.state.canvasModule;
