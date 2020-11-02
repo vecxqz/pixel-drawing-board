@@ -27,7 +27,7 @@
     <span class="btn-layer-operate" @click="down(currentLayerIndex)">
       <img src="../assets/arrow.svg" class="layer-down" />
     </span>
-    <span class="btn-layer-operate" @click="down(currentLayerIndex)">
+    <span class="btn-layer-operate" @click="rename(currentLayerIndex)">
       <img src="../assets/rename.svg" class="layer-rename" />
     </span>
     <span class="btn-layer-operate" @click="copy(currentLayerIndex)">
@@ -47,13 +47,26 @@
     <li
       v-for="(layer, index) in layerReverse"
       @dblclick="rename(currentLayerIndex)"
-      :class="{
-        highlight: +currentLayerIndex === layerReverse.length - index - 1
-      }"
       :key="layer.key"
+      class="layer"
       @click="choose(layerReverse.length - index - 1)"
     >
-      {{ layer.layerName }}
+      <div
+        v-if="+renameIndex !== layerReverse.length - index - 1"
+        :class="{
+          highlight: +currentLayerIndex === layerReverse.length - index - 1
+        }"
+      >
+        {{ layer.layerName }}
+      </div>
+      <div class="layer-rename" v-else>
+        <input
+          ref="rename"
+          type="text"
+          v-model="layer.layerName"
+          @blur="renameSuccess"
+        />
+      </div>
     </li>
   </ul>
 </template>
@@ -72,6 +85,7 @@ export default {
   },
   data() {
     return {
+      renameIndex: undefined,
       operates: [
         {
           name: "创建新图层",
@@ -486,6 +500,14 @@ export default {
     },
     rename(this: any, index: number) {
       console.log("rename", index);
+      this.renameIndex = index;
+      this.$nextTick(() => {
+        const { rename } = this.$refs;
+        rename.focus()
+      });
+    },
+    renameSuccess(this: any) {
+      this.renameIndex = undefined;
     },
     setPreview(this: any) {
       const { width, height } = this.$store.state.canvasModule;
@@ -521,6 +543,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.layer {
+  margin: 2px 0;
+  div {
+    padding: 2px 4px;
+  }
+}
 .highlight {
   background: rgba(122, 139, 235, 0.315);
 }
