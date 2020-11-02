@@ -22,11 +22,8 @@ const module: Module<CanvasState, any> = {
     tempLayer: [],
     canvasCtx: undefined,
     selectCanvasCtx: undefined,
-    aboveCanvasCtx: undefined,
-    backgroundCanvasCtx: undefined,
-    belowCanvasCtx: undefined,
     shadowLayerCanvasCtx: undefined,
-    tempCanvasCtx: undefined,
+    backgroundCanvasCtx: undefined,
     canvasImageData: undefined,
     selectArea: {
       isSet: false,
