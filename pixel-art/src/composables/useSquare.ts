@@ -1,6 +1,7 @@
 import { drawSquare, drawGrid } from "../util/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
+import { useMousePosition } from "./usePosition";
 export function useSquare(this: any) {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
@@ -13,26 +14,7 @@ export function useSquare(this: any) {
       store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
         .layers[store.state.canvasModule.currentLayerIndex].layer
   );
-  const startX = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.startPoint.e.offsetX / size.value
-    )
-  );
-  const startY = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.startPoint.e.offsetY / size.value
-    )
-  );
-  const endX = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.endPoint.e.offsetX / size.value
-    )
-  );
-  const endY = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.endPoint.e.offsetY / size.value
-    )
-  );
+  const { startX, startY, endX, endY } = useMousePosition();
 
   function mouseDown(this: any, e: MouseEvent) {
     console.log("square mouseDown");

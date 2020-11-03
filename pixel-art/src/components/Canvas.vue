@@ -174,7 +174,14 @@ export default {
   },
   data() {
     return {
-      imageData: undefined
+      imageData: undefined,
+      isboundary: false,
+      boundaryMeta: {
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0
+      }
     };
   },
   computed: {
@@ -253,7 +260,9 @@ export default {
       belowCanvas,
       tempCanvas
     } = this.$refs;
-    const canvasContainer = window.document.getElementById("canvas-container");
+    const canvasContainer: HTMLElement = window.document.getElementById(
+      "canvas-container"
+    ) as HTMLElement;
     this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
@@ -276,105 +285,31 @@ export default {
         this.shadowCanvasCtx
       );
     });
-    const mouseDown = fromEvent(canvasContainer as HTMLElement, "mousedown");
-    const mouseMove = fromEvent(canvasContainer as HTMLElement, "mousemove");
-    const mouseUp = fromEvent(canvasContainer as HTMLElement, "mouseup");
+    const document = window.document.body;
+    const mouseDown = fromEvent(canvasContainer, "mousedown");
+    const mouseMove = fromEvent(canvasContainer, "mousemove");
+    const mouseUp = fromEvent(document, "mouseup");
     mouseDown
       .pipe(
-        tap((e: any) => {
-          const { mode } = this.$store.state.canvasModule;
-          this.setCurrentColor(e);
-          this.recordMouseDownPosition(e);
-          if (mode === "pencil") {
-            this.pencilMouseDown(e);
-          }
-          if (mode === "line") {
-            this.lineMouseDown(e);
-          }
-          if (mode === "bucket") {
-            this.bucketMouseDown(e);
-          }
-          if (mode === "square") {
-            this.squareMouseDown(e);
-          }
-          if (mode === "colorPicker") {
-            this.colorPickerMouseDown(e);
-          }
-          if (mode === "circle") {
-            this.circleMouseDown(e);
-          }
-          if (mode === "eraser") {
-            this.eraserMouseDown(e);
-          }
-          if (mode === "select") {
-            this.selectMouseDown(e);
-          }
-          if (mode === "mirrorPencil") {
-            this.mirrorPencilMouseDown(e);
-          }
+        tap(e => {
+          this.handleMouseDown(e);
         }),
+        // mouseDown事件转化为mouseMove事件
         map(() =>
           mouseMove.pipe(
+            // mouseUp后结束事件
             takeUntil(
               mouseUp.pipe(
-                tap((e: any) => {
-                  this.$store.dispatch("canvasModule/SET_END_POINT", { e });
-                  const { mode, size } = this.$store.state.canvasModule,
-                    columnIndex = Math.floor(e.offsetX / size),
-                    rowIndex = Math.floor(e.offsetY / size);
-                  this.$store.dispatch(
-                    "canvasModule/SET_COLUMN_INDEX",
-                    columnIndex
-                  );
-                  this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
-                  if (mode === "pencil") {
-                    this.canvasImageDataSaveClean();
-                    this.pencilMouseUp(e);
-                  }
-                  if (mode === "line") {
-                    this.canvasImageDataSaveClean();
-                    this.lineMouseUp(e);
-                  }
-                  if (mode === "bucket") {
-                    this.canvasImageDataSaveClean();
-                    this.bucketMouseUp(e);
-                  }
-                  if (mode === "square") {
-                    this.canvasImageDataSaveClean();
-                    this.squareMouseUp(e);
-                  }
-                  if (mode === "circle") {
-                    this.canvasImageDataSaveClean();
-                    this.circleMouseUp(e);
-                  }
-                  if (mode === "bucket") {
-                    this.canvasImageDataSaveClean();
-                  }
-                  if (mode === "colorPicker") {
-                    this.colorPickerMouseUp(e);
-                  }
-                  if (mode === "eraser") {
-                    this.eraserMouseUp(e);
-                  }
-                  if (mode === "select") {
-                    this.canvasImageDataSaveClean();
-                    this.selectMouseUp(e);
-                  }
-                  if (mode === "mirrorPencil") {
-                    this.canvasImageDataSaveClean();
-                    this.mirrorPencilMouseUp(e);
-                  }
-                  this.mergeCanvas();
-                  // this.setCanvasPreview(
-                  //   [this.backgroundCanvasCtx, this.canvasCtx],
-                  //   this.shadowCanvasCtx
-                  // );
+                tap(e => {
+                  console.log("mouseUp");
+                  this.handleMouseUp(e);
                 })
               )
             )
           )
         ),
         debounceTime(16, animationFrameScheduler),
+        // 拍平
         concatAll()
       )
       .subscribe(e => {
@@ -418,14 +353,27 @@ export default {
       );
     },
     handleMouseMove(this: any, e: any) {
-      const columnIndex = Math.floor(
+      const { mode, size, width, height } = this.$store.state.canvasModule;
+      let columnIndex = Math.floor(
           e.offsetX / this.$store.state.canvasModule.size
         ),
         rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
+      if (columnIndex >= width / size) {
+        columnIndex = width / size - 1;
+      }
+      if (columnIndex < 0) {
+        columnIndex = 0;
+      }
+      if (rowIndex >= height / size) {
+        rowIndex = height / size - 1;
+      }
+      if (rowIndex < 0) {
+        rowIndex = 0;
+      }
       this.recordMouseMovePosition(e);
+      // console.log(columnIndex, rowIndex);
       this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
       this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
-      const { mode } = this.$store.state.canvasModule;
       if (mode === "pencil") {
         this.pencilMouseMove(e);
       }
@@ -512,6 +460,108 @@ export default {
     },
     canvasImageDataSaveClean(this: any) {
       this.imageData = undefined;
+    },
+    handleMouseDown(this: any, e: MouseWheelEvent) {
+      const canvasContainer: HTMLElement = window.document.getElementById(
+        "canvas-container"
+      ) as HTMLElement;
+      const {
+        width,
+        left,
+        height,
+        top
+      } = canvasContainer.getBoundingClientRect();
+      this.boundaryMeta.startX = left;
+      this.boundaryMeta.endX = left + width;
+      this.boundaryMeta.startY = left;
+      this.boundaryMeta.endY = top + height;
+      const { mode } = this.$store.state.canvasModule;
+      this.setCurrentColor(e);
+      this.recordMouseDownPosition(e);
+      if (mode === "pencil") {
+        this.pencilMouseDown(e);
+      }
+      if (mode === "line") {
+        this.lineMouseDown(e);
+      }
+      if (mode === "bucket") {
+        this.bucketMouseDown(e);
+      }
+      if (mode === "square") {
+        this.squareMouseDown(e);
+      }
+      if (mode === "colorPicker") {
+        this.colorPickerMouseDown(e);
+      }
+      if (mode === "circle") {
+        this.circleMouseDown(e);
+      }
+      if (mode === "eraser") {
+        this.eraserMouseDown(e);
+      }
+      if (mode === "select") {
+        this.selectMouseDown(e);
+      }
+      if (mode === "mirrorPencil") {
+        this.mirrorPencilMouseDown(e);
+      }
+    },
+    handleMouseUp(this: any, e: MouseWheelEvent) {
+      const { clientX, clientY } = e;
+      const { mode, size } = this.$store.state.canvasModule;
+      if (
+        clientX > this.boundaryMeta.startX &&
+        clientX < this.boundaryMeta.endX &&
+        clientY > this.boundaryMeta.startY &&
+        clientY < this.boundaryMeta.endY
+      ) {
+        this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+        let columnIndex = Math.floor(e.offsetX / size),
+          rowIndex = Math.floor(e.offsetY / size);
+        this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
+        this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
+      }
+      if (mode === "pencil") {
+        this.canvasImageDataSaveClean();
+        this.pencilMouseUp(e);
+      }
+      if (mode === "line") {
+        this.canvasImageDataSaveClean();
+        this.lineMouseUp(e);
+      }
+      if (mode === "bucket") {
+        this.canvasImageDataSaveClean();
+        this.bucketMouseUp(e);
+      }
+      if (mode === "square") {
+        this.canvasImageDataSaveClean();
+        this.squareMouseUp(e);
+      }
+      if (mode === "circle") {
+        this.canvasImageDataSaveClean();
+        this.circleMouseUp(e);
+      }
+      if (mode === "bucket") {
+        this.canvasImageDataSaveClean();
+      }
+      if (mode === "colorPicker") {
+        this.colorPickerMouseUp(e);
+      }
+      if (mode === "eraser") {
+        this.eraserMouseUp(e);
+      }
+      if (mode === "select") {
+        this.canvasImageDataSaveClean();
+        this.selectMouseUp(e);
+      }
+      if (mode === "mirrorPencil") {
+        this.canvasImageDataSaveClean();
+        this.mirrorPencilMouseUp(e);
+      }
+      this.mergeCanvas();
+      // this.setCanvasPreview(
+      //   [this.backgroundCanvasCtx, this.canvasCtx],
+      //   this.shadowCanvasCtx
     }
   }
 };
