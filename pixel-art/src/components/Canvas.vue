@@ -4,8 +4,8 @@
       id="canvas-container"
       class="pos-relative"
       :style="
-        `width:${$store.state.canvasModule.width}px;
-        height:${$store.state.canvasModule.height}px`
+        `width:${$store.state.canvasModule.width * 10}px;
+        height:${$store.state.canvasModule.height * 10}px`
       "
     >
       <canvas
@@ -75,6 +75,7 @@ import { useEraser } from "../composables/useEraser";
 import { useSelect } from "../composables/useSelect";
 import { useMousePosition } from "../composables/usePosition";
 import { userPreview } from "../composables/userPreview";
+import { useCanvas } from "../composables/useCanvas";
 import { initGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
 import { fromEvent, animationFrameScheduler } from "rxjs";
@@ -135,6 +136,7 @@ export default {
     } = useMousePosition();
     const { setCurrentColor } = useColor();
     const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
+    const { calcColor } = useCanvas();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -169,7 +171,8 @@ export default {
       setCanvasPreviewByImageData,
       mirrorPencilMouseDown,
       mirrorPencilMouseMove,
-      mirrorPencilMouseUp
+      mirrorPencilMouseUp,
+      calcColor
     };
   },
   data() {
@@ -264,7 +267,6 @@ export default {
       "canvas-container"
     ) as HTMLElement;
     this.$store.dispatch("canvasModule/CREATE_PAGE");
-    this.$store.dispatch("canvasModule/CREATE_TEMP_LAYER");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
     this.$store.dispatch(
       "canvasModule/SET_BACKGROUND_CANVAS_CANVASCTX",
@@ -480,6 +482,10 @@ export default {
       this.recordMouseDownPosition(e);
       if (mode === "pencil") {
         this.pencilMouseDown(e);
+        const imageData = (this
+          .canvasCtx as CanvasRenderingContext2D).getImageData(0, 0, 80, 80);
+        const color = this.calcColor(imageData, 0, 0);
+        console.log(color);
       }
       if (mode === "line") {
         this.lineMouseDown(e);
@@ -585,10 +591,16 @@ export default {
   visibility: hidden;
 }
 .layer-shadow {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
   top: 0;
   left: 0;
 }
 .layer-main {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
   top: 0;
   left: 0;
 }

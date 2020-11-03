@@ -3,23 +3,23 @@
   <div class="dis-flex">
     <ToolBar class="area-tool" />
     <PixleCanvas class="area-canvas" />
-    <CanvasAttribute class="area-attribute" />
+    <!-- <CanvasAttribute class="area-attribute" /> -->
   </div>
-  <AnimationPreview />
+  <!-- <AnimationPreview /> -->
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
 import ToolHeader from "@/components/ToolHeader.vue";
 import ToolBar from "@/components/ToolBar.vue";
-import CanvasAttribute from "@/components/CanvasAttribute.vue";
-import AnimationPreview from "@/components/AnimationPreview.vue";
+// import CanvasAttribute from "@/components/CanvasAttribute.vue";
+// import AnimationPreview from "@/components/AnimationPreview.vue";
 export default {
   components: {
     PixleCanvas,
     ToolBar,
-    CanvasAttribute,
+    // CanvasAttribute,
     ToolHeader,
-    AnimationPreview
+    // AnimationPreview
   }
 };
 </script>

@@ -37,13 +37,6 @@ export function usePencil(this: any) {
       rowIndex,
       color.value
     );
-    store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-      columnIndex,
-      rowIndex,
-      data: {
-        color: color.value
-      }
-    });
     mouseMoveStart.lastX = columnIndex;
     mouseMoveStart.lastY = rowIndex;
   }
@@ -65,13 +58,6 @@ export function usePencil(this: any) {
         rowIndex,
         color.value
       );
-      store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-        columnIndex,
-        rowIndex,
-        data: {
-          color: color.value
-        }
-      });
     } else {
       bresenhamLine(
         mouseMoveStart.lastX,
@@ -86,13 +72,6 @@ export function usePencil(this: any) {
             rowIndex,
             color.value
           );
-          store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-            columnIndex,
-            rowIndex,
-            data: {
-              color: color.value
-            }
-          });
         }
       );
     }

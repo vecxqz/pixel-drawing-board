@@ -83,7 +83,11 @@ export default {
     const animationPreviewUrl = ref("");
     const { setCanvasPreview } = userPreview();
     function create(index: number) {
-      const layer: layer = initLayer(width.value, height.value, size.value);
+      const layer: layer = initLayer(
+        width.value,
+        height.value,
+        size.value / 10
+      );
       const layerMeta = {
         pageName: `page${currentPageIndex.value + 1}`,
         key: "0",

@@ -150,7 +150,7 @@ export default {
     factory(this: any, mode: string) {
       if (mode === "create") {
         const { width, height, size } = this.$store.state.canvasModule;
-        const layer: layer = initLayer(width, height, size);
+        const layer: layer = initLayer(width, height, size / 10);
         const index = this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers.length;
