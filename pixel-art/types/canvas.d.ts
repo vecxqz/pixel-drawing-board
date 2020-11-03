@@ -22,6 +22,9 @@ declare interface layerMeta {
 }
 /** 单页数据类型*/
 declare interface page {
+  pageName: string;
+  key: string|number;
+  previewUrl: string;
   layers: Array<layerMeta>;
 }
 declare interface canvasData {

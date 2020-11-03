@@ -19,7 +19,7 @@ export default {
 
 <style lang="scss" scoped>
 #toolHeader {
-  height: 45px;
+  height: 40px;
   color: #fff;
   background-color: #333;
 }

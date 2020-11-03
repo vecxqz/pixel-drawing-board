@@ -7,7 +7,7 @@ export function userPreview() {
     targetcanvasCtx: CanvasRenderingContext2D
   ) {
     // 这里将不同的canvas合到一个canvas上
-    const { width, height } = store.state.canvasModule;
+    const { width, height, currentPageIndex } = store.state.canvasModule;
     for (let i = 0; i < canvasCtxs.length; i++) {
       const data = canvasCtxs[i].canvas;
       targetcanvasCtx.drawImage(data, 0, 0);
@@ -16,6 +16,9 @@ export function userPreview() {
       "image/png",
       1
     );
+    store.state.canvasModule.pages[
+      currentPageIndex
+    ].previewUrl = targetcanvasCtx.canvas.toDataURL("image/png", 1);
   }
 
   function setCanvasPreviewByImageData(
@@ -24,7 +27,7 @@ export function userPreview() {
     targetcanvasCtx: CanvasRenderingContext2D
   ) {
     // 这里将不同的canvas合到一个canvas上
-    const { width, height } = store.state.canvasModule;
+    const { width, height, currentPageIndex } = store.state.canvasModule;
     for (let i = 0; i < imageDatas.length; i++) {
       const { canvaImageData } = imageDatas[i];
       if (canvaImageData) {
@@ -37,6 +40,9 @@ export function userPreview() {
       "image/png",
       1
     );
+    store.state.canvasModule.pages[
+      currentPageIndex
+    ].previewUrl = targetcanvasCtx.canvas.toDataURL("image/png", 1);
   }
 
   return {

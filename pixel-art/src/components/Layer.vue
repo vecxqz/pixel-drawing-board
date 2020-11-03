@@ -503,7 +503,7 @@ export default {
       this.renameIndex = index;
       this.$nextTick(() => {
         const { rename } = this.$refs;
-        rename.focus()
+        rename.focus();
       });
     },
     renameSuccess(this: any) {
@@ -566,6 +566,7 @@ export default {
   cursor: pointer;
   img {
     height: 16px;
+    width: 16px;
   }
 }
 .btn-group {

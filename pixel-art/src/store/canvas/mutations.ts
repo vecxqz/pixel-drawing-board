@@ -23,10 +23,13 @@ const CanvasMutations: MutationTree<CanvasState> = {
     const { width, height, size } = state;
     const layer: layer = initLayer(width, height, size);
     state.pages.push({
+      pageName: "page0",
+      key: "0",
+      previewUrl: "",
       layers: [
         {
           layer: layer,
-          layerName: `layer0`,
+          layerName: "layer0",
           key: "0"
         }
       ]
