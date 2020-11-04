@@ -52,13 +52,6 @@ export function useSquare(this: any) {
           rowIndex,
           color.value
         );
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex,
-          rowIndex,
-          data: {
-            color: color.value
-          }
-        });
       }
     );
   }

@@ -1,8 +1,10 @@
 import { ScanLineFill } from "../util/fill";
 import { computed, toRaw } from "vue";
 import { useStore } from "./useStore";
+import { useCanvas } from "./useCanvas";
 
 export function useBucket(this: any) {
+  const { calcColor } = useCanvas();
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
@@ -30,8 +32,13 @@ export function useBucket(this: any) {
     const currentPaesRaw = toRaw(store.state.canvasModule.pages);
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    const oldColor = currentLayer.value[columnIndex][rowIndex].color,
-      // const oldColor = "rgb(0, 0, 0)",
+    const imageData = canvasCtx.value.getImageData(
+      0,
+      0,
+      width.value,
+      height.value
+    );
+    const oldColor = calcColor(imageData, columnIndex, rowIndex).rgb,
       newColor = color.value;
     const layer = JSON.parse(
       JSON.stringify(
@@ -39,6 +46,7 @@ export function useBucket(this: any) {
       )
     );
     // 传入的是原始对象,提高算法性能
+    console.log(oldColor, newColor);
     if (oldColor !== newColor) {
       const boundaryWidth = (width.value / size.value) * 10;
       const boundaryHeight = (height.value / size.value) * 10;

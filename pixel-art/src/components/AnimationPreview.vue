@@ -86,7 +86,7 @@ export default {
       const layer: layer = initLayer(
         width.value,
         height.value,
-        size.value / 10
+        size.value
       );
       const layerMeta = {
         pageName: `page${currentPageIndex.value + 1}`,

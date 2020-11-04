@@ -80,13 +80,14 @@ function drawGrid(
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
   canvasCtx.fillStyle = color;
+  // console.log(color, x, y, size, size);
   canvasCtx.fillRect(x, y, size, size);
 }
 function clearGrid(
   canvasCtx: CanvasRenderingContext2D,
   layerMeta: layer,
   columnIndex: number,
-  rowIndex: number,
+  rowIndex: number
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
   canvasCtx.clearRect(x, y, size, size);

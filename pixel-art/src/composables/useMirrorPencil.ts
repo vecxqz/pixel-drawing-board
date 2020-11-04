@@ -4,9 +4,7 @@ import { useStore } from "./useStore";
 export function useMirrorPencil(this: any) {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
-  const width = computed(
-    () => store.state.canvasModule.width / store.state.canvasModule.size
-  );
+  const width = computed(() => store.state.canvasModule.width);
   const shadowLayerCanvasCtx = computed(
     () => store.state.canvasModule.shadowLayerCanvasCtx
   );
@@ -40,13 +38,6 @@ export function useMirrorPencil(this: any) {
         rowIndex,
         color.value
       );
-      store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-        columnIndex,
-        rowIndex,
-        data: {
-          color: color.value
-        }
-      });
       drawGrid(
         canvasCtx.value,
         currentLayer.value,
@@ -54,37 +45,16 @@ export function useMirrorPencil(this: any) {
         rowIndex,
         color.value
       );
-      store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-        columnIndex: mirrorColumnIndex,
-        rowIndex,
-        data: {
-          color: color.value
-        }
-      });
     }
     if (e.button === 2) {
       mode.value = "clear";
       clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-      store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-        columnIndex,
-        rowIndex,
-        data: {
-          color: undefined
-        }
-      });
       clearGrid(
         canvasCtx.value,
         currentLayer.value,
         mirrorColumnIndex,
         rowIndex
       );
-      store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-        columnIndex: mirrorColumnIndex,
-        rowIndex,
-        data: {
-          color: undefined
-        }
-      });
     }
     mouseMoveStart.lastX = columnIndex;
     mouseMoveStart.lastY = rowIndex;
@@ -109,13 +79,6 @@ export function useMirrorPencil(this: any) {
           rowIndex,
           color.value
         );
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex,
-          rowIndex,
-          data: {
-            color: color.value
-          }
-        });
         drawGrid(
           canvasCtx.value,
           currentLayer.value,
@@ -123,13 +86,6 @@ export function useMirrorPencil(this: any) {
           rowIndex,
           color.value
         );
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex: mirrorColumnIndex,
-          rowIndex,
-          data: {
-            color: color.value
-          }
-        });
       } else {
         bresenhamLine(
           mouseMoveStart.lastX,
@@ -145,13 +101,6 @@ export function useMirrorPencil(this: any) {
               rowIndex,
               color.value
             );
-            store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-              columnIndex,
-              rowIndex,
-              data: {
-                color: color.value
-              }
-            });
             drawGrid(
               canvasCtx.value,
               currentLayer.value,
@@ -159,13 +108,6 @@ export function useMirrorPencil(this: any) {
               rowIndex,
               color.value
             );
-            store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-              columnIndex: mirrorColumnIndex,
-              rowIndex,
-              data: {
-                color: color.value
-              }
-            });
           }
         );
       }
@@ -177,26 +119,12 @@ export function useMirrorPencil(this: any) {
         Math.abs(mouseMoveStart.lastY - mouseMoveStart.currentY) <= 1
       ) {
         clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex,
-          rowIndex,
-          data: {
-            color: undefined
-          }
-        });
         clearGrid(
           canvasCtx.value,
           currentLayer.value,
           mirrorColumnIndex,
           rowIndex
         );
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex: mirrorColumnIndex,
-          rowIndex,
-          data: {
-            color: undefined
-          }
-        });
       } else {
         bresenhamLine(
           mouseMoveStart.lastX,
@@ -211,26 +139,12 @@ export function useMirrorPencil(this: any) {
               columnIndex,
               rowIndex
             );
-            store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-              columnIndex,
-              rowIndex,
-              data: {
-                color: undefined
-              }
-            });
             clearGrid(
               canvasCtx.value,
               currentLayer.value,
               mirrorColumnIndex,
               rowIndex
             );
-            store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-              columnIndex: mirrorColumnIndex,
-              rowIndex,
-              data: {
-                color: undefined
-              }
-            });
           }
         );
       }

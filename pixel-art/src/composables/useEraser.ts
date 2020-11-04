@@ -17,37 +17,16 @@ export function useEraser(this: any) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-    store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-      columnIndex,
-      rowIndex,
-      data: {
-        color: undefined
-      }
-    });
   }
   function mouseMove(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-    store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-      columnIndex,
-      rowIndex,
-      data: {
-        color: undefined
-      }
-    });
   }
   function mouseUp(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-    store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-      columnIndex,
-      rowIndex,
-      data: {
-        color: undefined
-      }
-    });
   }
 
   return { mouseDown, mouseMove, mouseUp };

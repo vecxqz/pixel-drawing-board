@@ -48,10 +48,10 @@ export function useSelect(this: any) {
     () => store.state.canvasModule.selectCanvasCtx
   );
   const width = computed(
-    () => store.state.canvasModule.width / store.state.canvasModule.size
+    () => store.state.canvasModule.width
   );
   const height = computed(
-    () => store.state.canvasModule.height / store.state.canvasModule.size
+    () => store.state.canvasModule.height
   );
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
@@ -198,13 +198,6 @@ export function useSelect(this: any) {
                 minY + y,
                 color
               );
-              store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-                columnIndex: minX + x,
-                rowIndex: minY + y,
-                data: {
-                  color
-                }
-              });
             }
           }
         }
@@ -373,13 +366,6 @@ export function useSelect(this: any) {
           clearGrid(canvasCtx.value, currentLayer.value, minX + x, minY + y);
           // 提升性能
           currentLayerRaw[minX + x][minY + y].color = undefined;
-          // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          //   columnIndex: minX + x,
-          //   rowIndex: minY + y,
-          //   data: {
-          //     color: undefined
-          //   }
-          // });
         }
       }
     }

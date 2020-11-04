@@ -482,10 +482,10 @@ export default {
       this.recordMouseDownPosition(e);
       if (mode === "pencil") {
         this.pencilMouseDown(e);
-        const imageData = (this
-          .canvasCtx as CanvasRenderingContext2D).getImageData(0, 0, 80, 80);
-        const color = this.calcColor(imageData, 0, 0);
-        console.log(color);
+        // const imageData = (this
+        //   .canvasCtx as CanvasRenderingContext2D).getImageData(0, 0, 80, 80);
+        // const color = this.calcColor(imageData, 0, 0);
+        // console.log(color);
       }
       if (mode === "line") {
         this.lineMouseDown(e);

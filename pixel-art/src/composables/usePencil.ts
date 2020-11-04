@@ -5,7 +5,7 @@ export function usePencil(this: any) {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const width = computed(
-    () => store.state.canvasModule.width / store.state.canvasModule.size
+    () => store.state.canvasModule.width
   );
   const shadowLayerCanvasCtx = computed(
     () => store.state.canvasModule.shadowLayerCanvasCtx

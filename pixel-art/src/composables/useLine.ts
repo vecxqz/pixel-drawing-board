@@ -20,7 +20,6 @@ export function useLine(this: any) {
     console.log("line mouse move");
   }
   function mouseMove(this: any, e: MouseEvent) {
-    console.log(startX.value, startY.value, endX.value, endY.value);
     bresenhamLine(
       startX.value,
       startY.value,
@@ -52,13 +51,6 @@ export function useLine(this: any) {
           rowIndex,
           color.value
         );
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex,
-          rowIndex,
-          data: {
-            color: color.value
-          }
-        });
       }
     );
   }

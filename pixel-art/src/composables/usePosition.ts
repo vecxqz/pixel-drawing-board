@@ -1,5 +1,5 @@
 import { useStore } from "./useStore";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 export function useMousePosition() {
   const store: any = useStore();
   const size = computed(() => {
@@ -17,54 +17,26 @@ export function useMousePosition() {
   const realHeight = computed(() => {
     return height.value / size.value;
   });
-  const startX = computed(() => {
-    let num = Math.floor(
+  const startX = computed(() =>
+    Math.floor(
       store.state.canvasModule.eventPoint.startPoint.e.offsetX / size.value
-    );
-    if (num >= realWidth.value) {
-      num = realWidth.value - 1;
-    }
-    if (num < 0) {
-      num = 0;
-    }
-    return num;
-  });
-  const startY = computed(() => {
-    let num = Math.floor(
+    )
+  );
+  const startY = computed(() =>
+    Math.floor(
       store.state.canvasModule.eventPoint.startPoint.e.offsetY / size.value
-    );
-    if (num >= realHeight.value) {
-      num = realHeight.value - 1;
-    }
-    if (num < 0) {
-      num = 0;
-    }
-    return num;
-  });
-  const endX = computed(() => {
-    let num = Math.floor(
+    )
+  );
+  const endX = computed(() =>
+    Math.floor(
       store.state.canvasModule.eventPoint.endPoint.e.offsetX / size.value
-    );
-    if (num >= realWidth.value) {
-      num = realWidth.value - 1;
-    }
-    if (num < 0) {
-      num = 0;
-    }
-    return num;
-  });
-  const endY = computed(() => {
-    let num = Math.floor(
+    )
+  );
+  const endY = computed(() =>
+    Math.floor(
       store.state.canvasModule.eventPoint.endPoint.e.offsetY / size.value
-    );
-    if (num >= realHeight.value) {
-      num = realHeight.value - 1;
-    }
-    if (num < 0) {
-      num = 0;
-    }
-    return num;
-  });
+    )
+  );
   function mouseDown(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);

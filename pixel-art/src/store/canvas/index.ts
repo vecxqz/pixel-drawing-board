@@ -8,8 +8,8 @@ const module: Module<CanvasState, any> = {
   state: () => ({
     mode: "pencil",
     color: "",
-    primaryColor: "black",
-    secondaryColor: "white",
+    primaryColor: "rgb(100, 200, 150)",
+    secondaryColor: "rgb(255, 255, 255)",
     currentLayerIndex: 0,
     currentPageIndex: 0,
     currentRowIndex: 0,
