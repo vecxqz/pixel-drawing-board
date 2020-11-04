@@ -1,4 +1,4 @@
-import { drawGrid, clearGrid, bresenhamLine } from "../util/canvas";
+import { drawGridB, clearGridB, bresenhamLine } from "../util/canvas";
 import { computed, reactive, ref } from "vue";
 import { useStore } from "./useStore";
 export function useMirrorPencil(this: any) {
@@ -31,30 +31,31 @@ export function useMirrorPencil(this: any) {
     const mirrorColumnIndex = width.value - columnIndex - 1;
     if (e.button === 0) {
       mode.value = "pen";
-      drawGrid(
-        canvasCtx.value,
-        currentLayer.value,
+      drawGridB(canvasCtx.value, {
         columnIndex,
         rowIndex,
-        color.value
-      );
-      drawGrid(
-        canvasCtx.value,
-        currentLayer.value,
-        mirrorColumnIndex,
+        color: color.value,
+        size: 1
+      });
+      drawGridB(canvasCtx.value, {
+        columnIndex: mirrorColumnIndex,
         rowIndex,
-        color.value
-      );
+        color: color.value,
+        size: 1
+      });
     }
     if (e.button === 2) {
       mode.value = "clear";
-      clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-      clearGrid(
-        canvasCtx.value,
-        currentLayer.value,
-        mirrorColumnIndex,
-        rowIndex
-      );
+      clearGridB(canvasCtx.value, {
+        columnIndex,
+        rowIndex,
+        size: 1
+      });
+      clearGridB(canvasCtx.value, {
+        columnIndex: mirrorColumnIndex,
+        rowIndex,
+        size: 1
+      });
     }
     mouseMoveStart.lastX = columnIndex;
     mouseMoveStart.lastY = rowIndex;
@@ -72,20 +73,18 @@ export function useMirrorPencil(this: any) {
         Math.abs(mouseMoveStart.lastX - mouseMoveStart.currentX) <= 1 &&
         Math.abs(mouseMoveStart.lastY - mouseMoveStart.currentY) <= 1
       ) {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
-          mirrorColumnIndex,
+          color: color.value,
+          size: 1
+        });
+        drawGridB(canvasCtx.value, {
+          columnIndex: mirrorColumnIndex,
           rowIndex,
-          color.value
-        );
+          color: color.value,
+          size: 1
+        });
       } else {
         bresenhamLine(
           mouseMoveStart.lastX,
@@ -94,20 +93,18 @@ export function useMirrorPencil(this: any) {
           mouseMoveStart.currentY,
           (columnIndex: number, rowIndex: number) => {
             const mirrorColumnIndex = width.value - columnIndex - 1;
-            drawGrid(
-              canvasCtx.value,
-              currentLayer.value,
+            drawGridB(canvasCtx.value, {
               columnIndex,
               rowIndex,
-              color.value
-            );
-            drawGrid(
-              canvasCtx.value,
-              currentLayer.value,
-              mirrorColumnIndex,
+              color: color.value,
+              size: 1
+            });
+            drawGridB(canvasCtx.value, {
+              columnIndex: mirrorColumnIndex,
               rowIndex,
-              color.value
-            );
+              color: color.value,
+              size: 1
+            });
           }
         );
       }
@@ -118,13 +115,16 @@ export function useMirrorPencil(this: any) {
         Math.abs(mouseMoveStart.lastX - mouseMoveStart.currentX) <= 1 &&
         Math.abs(mouseMoveStart.lastY - mouseMoveStart.currentY) <= 1
       ) {
-        clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
-        clearGrid(
-          canvasCtx.value,
-          currentLayer.value,
-          mirrorColumnIndex,
-          rowIndex
-        );
+        clearGridB(canvasCtx.value, {
+          columnIndex,
+          rowIndex,
+          size: 1
+        });
+        clearGridB(canvasCtx.value, {
+          columnIndex: mirrorColumnIndex,
+          rowIndex,
+          size: 1
+        });
       } else {
         bresenhamLine(
           mouseMoveStart.lastX,
@@ -133,18 +133,16 @@ export function useMirrorPencil(this: any) {
           mouseMoveStart.currentY,
           (columnIndex: number, rowIndex: number) => {
             const mirrorColumnIndex = width.value - columnIndex - 1;
-            clearGrid(
-              canvasCtx.value,
-              currentLayer.value,
+            clearGridB(canvasCtx.value, {
               columnIndex,
-              rowIndex
-            );
-            clearGrid(
-              canvasCtx.value,
-              currentLayer.value,
-              mirrorColumnIndex,
-              rowIndex
-            );
+              rowIndex,
+              size: 1
+            });
+            clearGridB(canvasCtx.value, {
+              columnIndex: mirrorColumnIndex,
+              rowIndex,
+              size: 1
+            });
           }
         );
       }

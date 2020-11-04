@@ -1,4 +1,4 @@
-import { bresenhamLine, drawGrid } from "../util/canvas";
+import { bresenhamLine, drawGridB } from "../util/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
@@ -26,13 +26,12 @@ export function useLine(this: any) {
       endX.value,
       endY.value,
       (columnIndex: number, rowIndex: number) => {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
+          color: color.value,
+          size: 1
+        });
       }
     );
   }
@@ -44,13 +43,12 @@ export function useLine(this: any) {
       endX.value,
       endY.value,
       (columnIndex: number, rowIndex: number) => {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
+          color: color.value,
+          size: 1
+        });
       }
     );
   }

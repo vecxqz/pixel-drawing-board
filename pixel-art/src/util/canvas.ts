@@ -83,6 +83,23 @@ function drawGrid(
   // console.log(color, x, y, size, size);
   canvasCtx.fillRect(x, y, size, size);
 }
+function drawGridB(
+  canvasCtx: CanvasRenderingContext2D,
+  {
+    columnIndex,
+    rowIndex,
+    size,
+    color
+  }: {
+    columnIndex: number;
+    rowIndex: number;
+    size: number;
+    color: string;
+  }
+): void {
+  canvasCtx.fillStyle = color;
+  canvasCtx.fillRect(columnIndex, rowIndex, size, size);
+}
 function clearGrid(
   canvasCtx: CanvasRenderingContext2D,
   layerMeta: layer,
@@ -91,6 +108,20 @@ function clearGrid(
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
   canvasCtx.clearRect(x, y, size, size);
+}
+function clearGridB(
+  canvasCtx: CanvasRenderingContext2D,
+  {
+    columnIndex,
+    rowIndex,
+    size
+  }: {
+    columnIndex: number;
+    rowIndex: number;
+    size: number;
+  }
+): void {
+  canvasCtx.clearRect(columnIndex, rowIndex, size, size);
 }
 function initGrid(
   canvasCtx: CanvasRenderingContext2D,
@@ -313,5 +344,7 @@ export {
   drawGridGroup,
   drawSelectArea,
   drawSquare,
-  clearGrid
+  clearGrid,
+  drawGridB,
+  clearGridB
 };

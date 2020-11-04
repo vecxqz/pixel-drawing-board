@@ -1,4 +1,4 @@
-import { bresenhamLineCircle, drawGrid, clearGrid } from "../util/canvas";
+import { bresenhamLineCircle, clearGridB } from "../util/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 export function useEraser(this: any) {
@@ -16,17 +16,17 @@ export function useEraser(this: any) {
   function mouseDown(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
+    clearGridB(canvasCtx.value, { columnIndex, rowIndex, size: 1 });
   }
   function mouseMove(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
+    clearGridB(canvasCtx.value, { columnIndex, rowIndex, size: 1 });
   }
   function mouseUp(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    clearGrid(canvasCtx.value, currentLayer.value, columnIndex, rowIndex);
+    clearGridB(canvasCtx.value, { columnIndex, rowIndex, size: 1 });
   }
 
   return { mouseDown, mouseMove, mouseUp };

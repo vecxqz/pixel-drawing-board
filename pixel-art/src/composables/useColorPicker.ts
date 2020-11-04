@@ -2,7 +2,6 @@ import { drawGrid } from "../util/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useCanvas } from "./useCanvas";
-
 export function useColorPicker(this: any) {
   const { calcColor } = useCanvas();
   const store: any = useStore();
@@ -20,7 +19,6 @@ export function useColorPicker(this: any) {
   );
 
   function mouseDown(this: any, e: MouseEvent) {
-    console.log(canvasCtx.value);
     const imageData = canvasCtx.value.getImageData(
       0,
       0,

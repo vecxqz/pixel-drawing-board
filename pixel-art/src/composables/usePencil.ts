@@ -1,12 +1,10 @@
-import { drawGrid, bresenhamLine } from "../util/canvas";
+import { drawGridB, bresenhamLine } from "../util/canvas";
 import { computed, reactive } from "vue";
 import { useStore } from "./useStore";
 export function usePencil(this: any) {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
-  const width = computed(
-    () => store.state.canvasModule.width
-  );
+  const width = computed(() => store.state.canvasModule.width);
   const shadowLayerCanvasCtx = computed(
     () => store.state.canvasModule.shadowLayerCanvasCtx
   );
@@ -30,13 +28,12 @@ export function usePencil(this: any) {
   function mouseDown(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    drawGrid(
-      canvasCtx.value,
-      currentLayer.value,
+    drawGridB(canvasCtx.value, {
       columnIndex,
       rowIndex,
-      color.value
-    );
+      color: color.value,
+      size: 1
+    });
     mouseMoveStart.lastX = columnIndex;
     mouseMoveStart.lastY = rowIndex;
   }
@@ -51,13 +48,12 @@ export function usePencil(this: any) {
       Math.abs(mouseMoveStart.lastX - mouseMoveStart.currentX) <= 1 &&
       Math.abs(mouseMoveStart.lastY - mouseMoveStart.currentY) <= 1
     ) {
-      drawGrid(
-        canvasCtx.value,
-        currentLayer.value,
+      drawGridB(canvasCtx.value, {
         columnIndex,
         rowIndex,
-        color.value
-      );
+        color: color.value,
+        size: 1
+      });
     } else {
       bresenhamLine(
         mouseMoveStart.lastX,
@@ -65,13 +61,12 @@ export function usePencil(this: any) {
         mouseMoveStart.currentX,
         mouseMoveStart.currentY,
         (columnIndex: number, rowIndex: number) => {
-          drawGrid(
-            canvasCtx.value,
-            currentLayer.value,
+          drawGridB(canvasCtx.value, {
             columnIndex,
             rowIndex,
-            color.value
-          );
+            color: color.value,
+            size: 1
+          });
         }
       );
     }

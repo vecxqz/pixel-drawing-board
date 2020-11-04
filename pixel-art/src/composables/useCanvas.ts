@@ -11,26 +11,17 @@ export function useCanvas() {
     rowIndex: number
   ) {
     const { height, data } = imageData;
-    // console.log(
-    //   `
-    //    columnIndex ${columnIndex}, 
-    //    rowIndex ${rowIndex},
-    //    height ${height},
-    //   `
-    // );
     const index = (columnIndex + rowIndex * height) * 4;
-    // console.log(index);
+    // console.log(columnIndex, rowIndex, index);
     const r = data[index];
     const g = data[index + 1];
     const b = data[index + 2];
     const a = data[index + 3] / 255;
-    const hex = RGBToHex(r, g, b);
     return {
       r,
       g,
       b,
       a,
-      hex,
       rgba: `rgba(${r}, ${g}, ${b}, ${a})`,
       rgb: `rgb(${r}, ${g}, ${b})`
     };

@@ -1,4 +1,4 @@
-import { bresenhamLineCircle, drawGrid } from "../util/canvas";
+import { bresenhamLineCircle, drawGridB } from "../util/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
@@ -15,7 +15,7 @@ export function useCircle(this: any) {
         .layers[store.state.canvasModule.currentLayerIndex].layer
   );
   const { startX, startY, endX, endY } = useMousePosition();
-  
+
   function mouseDown(this: any, e: MouseEvent) {
     console.log("circle mouseDown");
   }
@@ -48,13 +48,12 @@ export function useCircle(this: any) {
       r1,
       false,
       (columnIndex: number, rowIndex: number) => {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
+          color: color.value,
+          size: 1
+        });
       }
     );
   }
@@ -86,13 +85,12 @@ export function useCircle(this: any) {
       r1,
       false,
       (columnIndex: number, rowIndex: number) => {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
+          color: color.value,
+          size: 1
+        });
         store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
           columnIndex,
           rowIndex,
