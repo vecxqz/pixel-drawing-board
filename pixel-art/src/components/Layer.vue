@@ -72,7 +72,6 @@
 </template>
 
 <script lang="ts">
-import { initLayer } from "../util/canvas";
 import clone from "lodash/clone";
 import { toRaw } from "vue";
 import { userPreview } from "../composables/userPreview";
@@ -149,15 +148,12 @@ export default {
   methods: {
     factory(this: any, mode: string) {
       if (mode === "create") {
-        const { width, height, size } = this.$store.state.canvasModule;
-        const layer: layer = initLayer(width, height, size / 10);
         const index = this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers.length;
         this.$store.state.canvasModule.pages[
           this.$store.state.canvasModule.currentPageIndex
         ].layers.push({
-          layer: layer,
           layerName: `layer${index}`,
           key: `${index}`,
           canvaImageData: undefined
@@ -380,30 +376,6 @@ export default {
       this.$store.state.canvasModule.pages[currentPageIndex].layers[
         index + 1
       ].canvaImageData = canvasCtx.getImageData(0, 0, width, height);
-      for (
-        let x = 0;
-        x <
-        this.$store.state.canvasModule.pages[currentPageIndex].layers[index + 1]
-          .layer.length;
-        x++
-      )
-        for (
-          let y = 0;
-          y <
-          this.$store.state.canvasModule.pages[currentPageIndex].layers[
-            index + 1
-          ].layer[x].length;
-          y++
-        ) {
-          const { color } = this.$store.state.canvasModule.pages[
-            currentPageIndex
-          ].layers[index].layer[x][y];
-          if (color) {
-            this.$store.state.canvasModule.pages[currentPageIndex].layers[
-              index + 1
-            ].layer[x][y].color = color;
-          }
-        }
       this.deleteLayer(index);
     },
     mergeDown(this: any, index: number) {
@@ -437,30 +409,6 @@ export default {
       this.$store.state.canvasModule.pages[currentPageIndex].layers[
         index - 1
       ].canvaImageData = canvasCtx.getImageData(0, 0, width, height);
-      for (
-        let x = 0;
-        x <
-        this.$store.state.canvasModule.pages[currentPageIndex].layers[index - 1]
-          .layer.length;
-        x++
-      )
-        for (
-          let y = 0;
-          y <
-          this.$store.state.canvasModule.pages[currentPageIndex].layers[
-            index - 1
-          ].layer[x].length;
-          y++
-        ) {
-          const { color } = this.$store.state.canvasModule.pages[
-            currentPageIndex
-          ].layers[index].layer[x][y];
-          if (color) {
-            this.$store.state.canvasModule.pages[currentPageIndex].layers[
-              index - 1
-            ].layer[x][y].color = color;
-          }
-        }
       this.deleteLayer(index);
     },
     copy(this: any, index: number) {
@@ -474,15 +422,6 @@ export default {
           this.$store.state.canvasModule.pages[currentPageIndex].layers[index]
         )
       );
-      let layer: Array<any> = [];
-      for (let x = 0; x < newLayerData.layer.length; x++)
-        for (let y = 0; y < newLayerData.layer[x].length; y++) {
-          if (!Array.isArray(layer[x])) {
-            layer[x] = [];
-          }
-          layer[x][y] = { ...newLayerData.layer[x][y] };
-        }
-      newLayerData.layer = layer;
       newLayerData.key = `${newLayerData.key}_copy_${Math.random() * 100}`;
       newLayerData.layerName = `${newLayerData.layerName}_copy`;
       newLayerData.canvaImageData = this.canvasCtx.getImageData(

@@ -9,11 +9,6 @@ export function useSquare(this: any) {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const currentLayer = computed(
-    () =>
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex].layer
-  );
   const { startX, startY, endX, endY } = useMousePosition();
 
   function mouseDown(this: any, e: MouseEvent) {

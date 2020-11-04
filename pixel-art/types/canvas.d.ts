@@ -15,7 +15,6 @@ declare interface layer {
   length: number;
 }
 declare interface layerMeta {
-  layer: layer;
   layerName: string;
   canvaImageData!: CanvasImageData;
   key: string | number;

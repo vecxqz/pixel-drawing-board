@@ -7,11 +7,6 @@ export function useEraser(this: any) {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const currentLayer = computed(
-    () =>
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex].layer
-  );
 
   function mouseDown(this: any, e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),

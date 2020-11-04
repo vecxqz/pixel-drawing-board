@@ -7,17 +7,13 @@
       <div class="title">画布信息</div>
       <div class="info-layer-size">{{ width }} * {{ height }}</div>
       <div v-if="girdMeta">
-        x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }} color:{{
-          girdMeta.color
-        }}
+        {{ girdMeta }}
+        x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }}
       </div>
     </div>
     <div class="attribute-box">
       <layer />
     </div>
-    <!-- <div class="current-color" :style="currentGirdColor">
-      {{ currentGirdColor }}
-    </div> -->
     <!-- <div class="color-choose">
       <ul>
         <li
@@ -54,16 +50,13 @@ export default {
     previewUrl(this: any) {
       return this.$store.state.canvasModule.previewUrl;
     },
-    currentGirdColor(this: any) {
-      return `background:${this.$store.getters["canvasModule/currentGridMeta"].color}`;
-    },
     width(this: any) {
-      const { width, size } = this.$store.state.canvasModule;
-      return width / size;
+      const { width } = this.$store.state.canvasModule;
+      return width;
     },
     height(this: any) {
-      const { height, size } = this.$store.state.canvasModule;
-      return height / size;
+      const { height } = this.$store.state.canvasModule;
+      return height;
     }
   },
   methods: {

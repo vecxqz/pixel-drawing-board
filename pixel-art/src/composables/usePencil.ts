@@ -12,11 +12,6 @@ export function usePencil(this: any) {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const currentLayer = computed(
-    () =>
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex].layer
-  );
 
   const mouseMoveStart = reactive({
     lastX: 0,

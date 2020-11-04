@@ -83,11 +83,7 @@ export default {
     const animationPreviewUrl = ref("");
     const { setCanvasPreview } = userPreview();
     function create(index: number) {
-      const layer: layer = initLayer(
-        width.value,
-        height.value,
-        size.value
-      );
+      const layer: layer = initLayer(width.value, height.value, size.value);
       const layerMeta = {
         pageName: `page${currentPageIndex.value + 1}`,
         key: "0",
@@ -150,8 +146,8 @@ export default {
       const page: page = cloneDeep(
         toRaw(store.state.canvasModule.pages[index])
       );
-      store.state.canvasModule.pages.push(page);
-      store.state.canvasModule.currentPageIndex += 1;
+      store.state.canvasModule.pages.splice(index, 0, page);
+      store.state.canvasModule.currentPageIndex = index + 1;
     }
     function deletePage(index: number) {
       const pageLength = store.state.canvasModule.pages.length;

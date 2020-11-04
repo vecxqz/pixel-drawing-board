@@ -197,7 +197,6 @@ function _draw_circle_8(
 }
 
 function bresenhamLineCircle(
-  layer: layer,
   xc: number,
   yc: number,
   r: number,

@@ -34,14 +34,9 @@
       />
       <canvas
         class="pos-absoulte pe-none layer-select"
-        :class="{ 'visb-hidden': !selectArea.isSet }"
         ref="selectcanvas"
-        :style="{
-          left: selectArea.left,
-          top: selectArea.top
-        }"
-        :width="selectArea.width"
-        :height="selectArea.height"
+        :width="selectArea.diffX"
+        :height="selectArea.diffY"
       />
       <canvas
         class="pos-absoulte pe-none layer-shadow"
@@ -57,7 +52,6 @@
         :width="$store.state.canvasModule.width"
         :height="$store.state.canvasModule.height"
       />
-      <div style="color:white">{{ selectArea }}</div>
     </div>
   </div>
 </template>
@@ -76,8 +70,10 @@ import { useSelect } from "../composables/useSelect";
 import { useMousePosition } from "../composables/usePosition";
 import { userPreview } from "../composables/userPreview";
 import { useCanvas } from "../composables/useCanvas";
+import { useMove } from "../composables/useMove";
 import { initGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
+import { initLayer } from "../util/canvas";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
 export default {
@@ -127,13 +123,18 @@ export default {
       mouseDown: selectMouseDown,
       mouseMove: selectMouseMove,
       mouseUp: selectMouseUp,
-      selectArea: selectAreaData
+      selectArea: selectArea
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
       mouseMove: recordMouseMovePosition,
       mouseUp: recordMouseUpPosition
     } = useMousePosition();
+    const {
+      mouseDown: moveMouseDown,
+      mouseMove: moveMouseMove,
+      mouseUp: moveMouseUp
+    } = useMove();
     const { setCurrentColor } = useColor();
     const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
     const { calcColor } = useCanvas();
@@ -165,14 +166,17 @@ export default {
       selectMouseDown,
       selectMouseMove,
       selectMouseUp,
-      selectAreaData,
       setCurrentColor,
       setCanvasPreview,
       setCanvasPreviewByImageData,
       mirrorPencilMouseDown,
       mirrorPencilMouseMove,
       mirrorPencilMouseUp,
-      calcColor
+      calcColor,
+      moveMouseDown,
+      moveMouseMove,
+      moveMouseUp,
+      selectArea
     };
   },
   data() {
@@ -188,39 +192,6 @@ export default {
     };
   },
   computed: {
-    selectArea(this: any) {
-      const { size } = this.$store.state.canvasModule;
-      const { startX, startY, endX, endY, isSet } = this.selectAreaData;
-      let left = 0,
-        top = 0,
-        width = 0,
-        height = 0;
-      if (startX >= endX) {
-        left = endX * size;
-        width = (startX - endX + 1) * size;
-      } else {
-        left = startX * size;
-        width = (endX - startX + 1) * size;
-      }
-      if (startY >= endY) {
-        top = endY * size;
-        height = (startY - endY + 1) * size;
-      } else {
-        top = startY * size;
-        height = (endY - startY + 1) * size;
-      }
-      return {
-        isSet: isSet,
-        width: width,
-        height: height,
-        left: `${left + 0}px`,
-        top: `${top + 0}px`,
-        startX,
-        startY,
-        endX,
-        endY
-      };
-    },
     canvasCtx(this: any) {
       return this.$store.state.canvasModule.canvasCtx;
     },
@@ -411,28 +382,13 @@ export default {
       if (mode === "mirrorPencil") {
         this.mirrorPencilMouseMove(e);
       }
+      if (mode === "move") {
+        this.moveMouseMove(e);
+      }
     },
-    // parse(this: any) {
-    //   const layer = this.$store.state.canvasModule.pages[
-    //     this.$store.state.canvasModule.currentPageIndex
-    //   ].layers[this.$store.state.canvasModule.currentLayerIndex].layer;
-    //   for (let i = 0; i < layer.length; i++)
-    //     for (let j = 0; j < layer.length; j++) {
-    //       const cell = layer[i][j];
-    //       const { color, backgroundColor } = cell;
-    //       initGrid(
-    //         this.canvasCtx,
-    //         layer,
-    //         i,
-    //         j,
-    //         color ? color : backgroundColor
-    //       );
-    //     }
-    // },
     parseBackground(this: any) {
-      const layer = this.$store.state.canvasModule.pages[
-        this.$store.state.canvasModule.currentPageIndex
-      ].layers[this.$store.state.canvasModule.currentLayerIndex].layer;
+      const { width, height, gridSize } = this.$store.state.canvasModule;
+      const layer: layer = initLayer(width, height, gridSize);
       for (let i = 0; i < layer.length; i++)
         for (let j = 0; j < layer.length; j++) {
           const cell = layer[i][j];
@@ -441,20 +397,16 @@ export default {
         }
     },
     canvasImageDataSave(this: any) {
-      console.log("canvasImageDataSave");
+      // console.log("canvasImageDataSave");
+      const { width, height } = this.$store.state.canvasModule;
       const { canvasCtx } = this;
       // 存储在进行绘制之前的画布数据
       if (isUndefined(this.imageData)) {
-        this.imageData = canvasCtx.getImageData(
-          0,
-          0,
-          this.$store.state.canvasModule.width,
-          this.$store.state.canvasModule.height
-        );
+        this.imageData = canvasCtx.getImageData(0, 0, width, height);
       }
     },
     canvasImageDataUse(this: any) {
-      console.log("canvasImageDataUse");
+      // console.log("canvasImageDataUse");
       const { canvasCtx } = this;
       if (!isUndefined(this.imageData)) {
         canvasCtx.putImageData(this.imageData, 0, 0);
@@ -511,6 +463,9 @@ export default {
       if (mode === "mirrorPencil") {
         this.mirrorPencilMouseDown(e);
       }
+      if (mode === "move") {
+        this.moveMouseDown(e);
+      }
     },
     handleMouseUp(this: any, e: MouseWheelEvent) {
       const { clientX, clientY } = e;
@@ -563,6 +518,9 @@ export default {
       if (mode === "mirrorPencil") {
         this.canvasImageDataSaveClean();
         this.mirrorPencilMouseUp(e);
+      }
+      if (mode === "move") {
+        this.moveMouseUp(e);
       }
       this.mergeCanvas();
       // this.setCanvasPreview(

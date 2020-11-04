@@ -18,6 +18,7 @@ const module: Module<CanvasState, any> = {
     pages: [],
     width: 80,
     height: 80,
+    gridSize: 1,
     size: 10,
     tempLayer: [],
     canvasCtx: undefined,

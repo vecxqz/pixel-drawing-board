@@ -2,7 +2,6 @@ import { MutationTree } from "vuex";
 import { CanvasState } from "./type";
 import { Mutation } from "vuex";
 import { MutationsTypes } from "./enum";
-import { initLayer } from "../../util/canvas";
 import { isUndefined } from "../../util/common";
 import { useCanvas } from "../../composables/useCanvas";
 const CanvasMutations: MutationTree<CanvasState> = {
@@ -17,18 +16,16 @@ const CanvasMutations: MutationTree<CanvasState> = {
   [MutationsTypes.CREATE_PAGE](state: CanvasState) {
     const { createImageData } = useCanvas();
     const { width, height, size } = state;
-    const layer: layer = initLayer(width, height, size / 10);
-    const imageData = createImageData(width, height);
+    const canvaImageData = createImageData(width, height);
     state.pages.push({
       pageName: "page0",
       key: "0",
       previewUrl: "",
       layers: [
         {
-          layer: layer,
           layerName: "layer0",
           key: "0",
-          imageData
+          canvaImageData
         }
       ]
     });

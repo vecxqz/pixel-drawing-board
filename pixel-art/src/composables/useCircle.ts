@@ -9,11 +9,7 @@ export function useCircle(this: any) {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const currentLayer = computed(
-    () =>
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex].layer
-  );
+
   const { startX, startY, endX, endY } = useMousePosition();
 
   function mouseDown(this: any, e: MouseEvent) {
@@ -42,7 +38,6 @@ export function useCircle(this: any) {
       r1 = Math.abs(Math.floor((ya1 - startY.value) / 2));
     }
     bresenhamLineCircle(
-      currentLayer.value,
       midX1,
       midY1,
       r1,
@@ -79,7 +74,6 @@ export function useCircle(this: any) {
       r1 = Math.abs(Math.floor((ya1 - startY.value) / 2));
     }
     bresenhamLineCircle(
-      currentLayer.value,
       midX1,
       midY1,
       r1,
@@ -90,13 +84,6 @@ export function useCircle(this: any) {
           rowIndex,
           color: color.value,
           size: 1
-        });
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex,
-          rowIndex,
-          data: {
-            color: color.value
-          }
         });
       }
     );
