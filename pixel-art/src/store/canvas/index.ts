@@ -9,7 +9,7 @@ const module: Module<CanvasState, any> = {
     mode: "pencil",
     color: "",
     primaryColor: "rgb(100, 200, 150)",
-    secondaryColor: "rgb(255, 255, 255)",
+    secondaryColor: "rgb(190, 255, 255)",
     currentLayerIndex: 0,
     currentPageIndex: 0,
     currentRowIndex: 0,

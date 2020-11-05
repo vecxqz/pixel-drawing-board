@@ -12,6 +12,7 @@ export function useSelect(this: any) {
   const selectCanvasCtx = computed(
     () => store.state.canvasModule.selectCanvasCtx
   );
+  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
   const width = computed(() => store.state.canvasModule.width);
   const height = computed(() => store.state.canvasModule.height);
   const color = computed(() => store.state.canvasModule.color);
@@ -20,6 +21,7 @@ export function useSelect(this: any) {
   });
   const selectImageData = ref(null);
   const tempImageData = ref(null);
+  const firstClear = ref(false);
   const selectArea = reactive({
     startX: 0,
     startY: 0,
@@ -87,6 +89,7 @@ export function useSelect(this: any) {
         height.value
       );
     }
+    tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
     // 如果设置了选择区域则判断是否点击在选择区域内
     if (isSet.value) {
       const isInSelectAreaFlag = isInSelectArea(
@@ -97,13 +100,7 @@ export function useSelect(this: any) {
         selectArea.endX,
         selectArea.endY
       );
-      console.log(isInSelectAreaFlag);
-      console.log(
-        selectArea.startX,
-        selectArea.startY,
-        selectArea.endX,
-        selectArea.endY
-      );
+
       if (isInSelectAreaFlag) {
         setSetStatus(true);
         setClickOutSideStatus(false);
@@ -114,7 +111,50 @@ export function useSelect(this: any) {
         console.log("释放");
         const maxX = selectArea.startX;
         const maxY = selectArea.startY;
-        canvasCtx.value.putImageData(selectImageData.value, maxX, maxY);
+        // 获取被选择区域合并的画布上的数据
+        tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+        tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
+        const clearImageData = tempCanvasCtx.value.getImageData(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        // 清除选择阴影
+        canvasCtx.value.clearRect(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+
+        // 绘制被选择阴影清除时同时被清除的原区域数据
+        selectCanvasCtx.value.clearRect(
+          0,
+          0,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+        canvasCtx.value.drawImage(
+          selectCanvasCtx.value.canvas,
+          selectArea.startX,
+          selectArea.startY
+        );
+        // 绘制被选择区域
+        selectCanvasCtx.value.clearRect(
+          0,
+          0,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
+        canvasCtx.value.drawImage(
+          selectCanvasCtx.value.canvas,
+          selectArea.startX,
+          selectArea.startY
+        );
+        // 结束 状态重置
         setClickOutSideStatus(true);
         setSetStatus(false);
         setMoveStatus(false);
@@ -175,33 +215,8 @@ export function useSelect(this: any) {
     if (isMove.value) {
       const diffX = endX.value - startX.value;
       const diffY = endY.value - startY.value;
-      // console.log(diffX, diffY);
-      // console.log(startX.value, startY.value);
       const tempColor = color.value;
-      // 清除选择区域
-      const belowImageData = canvasCtx.value.getImageData(
-        selectAreaStartX,
-        selectAreaStartY,
-        selectAreaDiffX,
-        selectAreaDiffY
-      );
-      canvasCtx.value.clearRect(
-        selectAreaStartX,
-        selectAreaStartY,
-        selectAreaDiffX,
-        selectAreaDiffY
-      );
-      // 绘制选择区域
-      canvasCtx.value.putImageData(
-        belowImageData,
-        selectAreaStartX + diffX,
-        selectAreaStartY + diffY
-      );
-      canvasCtx.value.putImageData(
-        selectImageData.value,
-        selectAreaStartX + diffX,
-        selectAreaStartY + diffY
-      );
+
       canvasCtx.value.globalAlpha = 0.5;
       canvasCtx.value.fillStyle = "rgb(0,0,0)";
       // 绘制阴影区域
@@ -238,13 +253,15 @@ export function useSelect(this: any) {
     if (!isSet.value && selectAreaDiffX !== 0 && selectAreaDiffY !== 0) {
       // 先获取选择区域像素信息再绘制阴影
       canvasCtx.value.putImageData(tempImageData.value, 0, 0);
+      // 存储被选中区域的imagedata
       selectImageData.value = canvasCtx.value.getImageData(
         selectAreaStartX,
         selectAreaStartY,
         selectAreaDiffX,
         selectAreaDiffY
       );
-      canvasCtx.value.putImageData(tempImageData.value, 0, 0);
+
+      // 开始 绘制阴影
       canvasCtx.value.globalAlpha = 0.5;
       canvasCtx.value.fillStyle = "rgb(0,0,0)";
       canvasCtx.value.fillRect(
@@ -256,6 +273,7 @@ export function useSelect(this: any) {
       // 重置
       canvasCtx.value.globalAlpha = 1;
       canvasCtx.value.fillStyle = tempFillStyle;
+      // 结束 绘制阴影
       setSetStatus(true);
     }
     // 移动状态
@@ -264,31 +282,7 @@ export function useSelect(this: any) {
       const diffY = endY.value - startY.value;
       // console.log(diffX, diffY);
       // console.log(startX.value, startY.value);
-      const tempColor = color.value;
-      // 清除选择区域
-      canvasCtx.value.clearRect(
-        selectAreaStartX,
-        selectAreaStartY,
-        selectAreaDiffX,
-        selectAreaDiffY
-      );
-      // 绘制选择区域
-      canvasCtx.value.putImageData(
-        selectImageData.value,
-        selectAreaStartX + diffX,
-        selectAreaStartY + diffY
-      );
-      canvasCtx.value.globalAlpha = 0.5;
-      canvasCtx.value.fillStyle = "rgb(0,0,0)";
-      // 绘制阴影区域
-      canvasCtx.value.fillRect(
-        selectAreaStartX + diffX,
-        selectAreaStartY + diffY,
-        selectAreaDiffX,
-        selectAreaDiffY
-      );
-      canvasCtx.value.globalAlpha = 1;
-      canvasCtx.value.fillStyle = tempFillStyle;
+      // 更新移动区域数据
       setSelectArea({
         startX: selectAreaStartX + diffX,
         startY: selectAreaStartY + diffY,

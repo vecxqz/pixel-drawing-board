@@ -326,25 +326,14 @@ export default {
       );
     },
     handleMouseMove(this: any, e: any) {
-      const { mode, size, width, height } = this.$store.state.canvasModule;
+      const { mode } = this.$store.state.canvasModule;
       let columnIndex = Math.floor(
           e.offsetX / this.$store.state.canvasModule.size
         ),
         rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
-      if (columnIndex >= width / size) {
-        columnIndex = width / size - 1;
-      }
-      if (columnIndex < 0) {
-        columnIndex = 0;
-      }
-      if (rowIndex >= height / size) {
-        rowIndex = height / size - 1;
-      }
-      if (rowIndex < 0) {
-        rowIndex = 0;
-      }
       this.recordMouseMovePosition(e);
       // console.log(columnIndex, rowIndex);
+      console.log(columnIndex, rowIndex);
       this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
       this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       if (mode === "pencil") {
