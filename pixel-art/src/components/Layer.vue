@@ -1,14 +1,5 @@
 <template>
   <div>当前选中层{{ currentLayer.layerName }}</div>
-  <!-- <ul class="btn-group">
-    <li
-      v-for="operate in operates"
-      @click="factory(operate.mode)"
-      :key="operate.key"
-    >
-      {{ operate.name }}
-    </li>
-  </ul> -->
   <div class="btn-group">
     <span class="btn-layer-operate">
       <img
@@ -65,6 +56,7 @@
           type="text"
           v-model="layer.layerName"
           @blur="renameSuccess"
+          @keydown.enter="blurInput"
         />
       </div>
     </li>
@@ -84,14 +76,7 @@ export default {
   },
   data() {
     return {
-      renameIndex: undefined,
-      operates: [
-        {
-          name: "创建新图层",
-          key: "创建新图层",
-          mode: "create"
-        }
-      ]
+      renameIndex: undefined
     };
   },
   computed: {
@@ -444,6 +429,10 @@ export default {
         const { rename } = this.$refs;
         rename.focus();
       });
+    },
+    blurInput(this: any) {
+      const { rename } = this.$refs;
+      rename.blur();
     },
     renameSuccess(this: any) {
       this.renameIndex = undefined;
