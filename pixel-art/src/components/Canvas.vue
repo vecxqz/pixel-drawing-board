@@ -333,7 +333,6 @@ export default {
         rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
       this.recordMouseMovePosition(e);
       // console.log(columnIndex, rowIndex);
-      console.log(columnIndex, rowIndex);
       this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
       this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       if (mode === "pencil") {

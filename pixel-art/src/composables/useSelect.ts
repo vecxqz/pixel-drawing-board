@@ -143,7 +143,7 @@ export function useSelect(this: any) {
         const maxY = selectArea.startY;
         // 获取被选择区域合并的画布上的数据
         tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
-        tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
+        tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
         const clearImageData = tempCanvasCtx.value.getImageData(
           selectArea.startX,
           selectArea.startY,
@@ -194,6 +194,7 @@ export function useSelect(this: any) {
           width.value,
           height.value
         );
+        selectClearImageData.value = null;
         selectImageData.value = null;
         setSelectArea({
           startX: 0,
