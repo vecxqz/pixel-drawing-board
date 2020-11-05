@@ -5,21 +5,21 @@
     <PixleCanvas class="area-canvas" />
     <CanvasAttribute class="area-attribute" />
   </div>
-  <AnimationPreview />
+  <Page />
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
 import ToolHeader from "@/components/ToolHeader.vue";
 import ToolBar from "@/components/ToolBar.vue";
 import CanvasAttribute from "@/components/CanvasAttribute.vue";
-import AnimationPreview from "@/components/AnimationPreview.vue";
+import Page from "@/components/Page.vue";
 export default {
   components: {
     PixleCanvas,
     ToolBar,
     CanvasAttribute,
     ToolHeader,
-    AnimationPreview
+    Page
   }
 };
 </script>
