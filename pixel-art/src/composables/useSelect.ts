@@ -107,11 +107,33 @@ export function useSelect(this: any) {
         setClickOutSideStatus(false);
         setMoveStatus(true);
         // 初次移动，时清除当前画布上选择区域数据
+        tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+        tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+        const clearImageData = tempCanvasCtx.value.getImageData(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        // 清除选择阴影
         canvasCtx.value.clearRect(
           selectArea.startX,
           selectArea.startY,
           selectArea.diffX,
           selectArea.diffY
+        );
+        // 绘制被选择阴影清除时,同时被清除的原区域数据
+        selectCanvasCtx.value.clearRect(
+          0,
+          0,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+        canvasCtx.value.drawImage(
+          selectCanvasCtx.value.canvas,
+          selectArea.startX,
+          selectArea.startY
         );
         // 说明在点击区域内,进入移动
       } else {
