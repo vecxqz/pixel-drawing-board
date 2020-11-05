@@ -71,6 +71,7 @@ import { useMousePosition } from "../composables/usePosition";
 import { userPreview } from "../composables/userPreview";
 import { useCanvas } from "../composables/useCanvas";
 import { useMove } from "../composables/useMove";
+import { useDoState } from "../composables/useDoState";
 import { initGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
 import { initLayer } from "../util/canvas";
@@ -138,6 +139,7 @@ export default {
     const { setCurrentColor } = useColor();
     const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
     const { calcColor } = useCanvas();
+    const { toRedoStack, TYPE } = useDoState();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -176,7 +178,9 @@ export default {
       moveMouseDown,
       moveMouseMove,
       moveMouseUp,
-      selectArea
+      selectArea,
+      toRedoStack,
+      TYPE
     };
   },
   data() {
@@ -511,6 +515,18 @@ export default {
         this.moveMouseUp(e);
       }
       this.mergeCanvas();
+      const {
+        currentPageIndex,
+        currentLayerIndex
+      } = this.$store.state.canvasModule;
+      this.toRedoStack({
+        currentLayerIndex,
+        currentPageIndex,
+        layerData: this.$store.state.canvasModule.pages[currentPageIndex]
+          .layers[currentLayerIndex],
+        type: this.TYPE.LAYER_DATA_CHANGE
+      });
+      console.log(this.$store.state.canvasModule.redo);
       // this.setCanvasPreview(
       //   [this.backgroundCanvasCtx, this.canvasCtx],
       //   this.shadowCanvasCtx
