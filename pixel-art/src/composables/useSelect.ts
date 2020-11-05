@@ -19,8 +19,9 @@ export function useSelect(this: any) {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const selectImageData = ref(null);
+  const selectImageData = ref(null); //选择区域数据
   const tempImageData = ref(null);
+  const selectClearImageData = ref(null); //没有被选取区域的大画布数据
   const firstClear = ref(false);
   const selectArea = reactive({
     startX: 0,
@@ -105,6 +106,13 @@ export function useSelect(this: any) {
         setSetStatus(true);
         setClickOutSideStatus(false);
         setMoveStatus(true);
+        // 初次移动，时清除当前画布上选择区域数据
+        canvasCtx.value.clearRect(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
         // 说明在点击区域内,进入移动
       } else {
         // 不在点击区域内，取消选择区域
@@ -216,7 +224,38 @@ export function useSelect(this: any) {
       const diffX = endX.value - startX.value;
       const diffY = endY.value - startY.value;
       const tempColor = color.value;
+      tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+      tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+      const clearImageData = tempCanvasCtx.value.getImageData(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      // 清除选择阴影
+      canvasCtx.value.clearRect(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
 
+      // 绘制被选择阴影清除时,同时被清除的原区域数据
+      selectCanvasCtx.value.clearRect(0, 0, selectAreaDiffX, selectAreaDiffY);
+      selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+      canvasCtx.value.drawImage(
+        selectCanvasCtx.value.canvas,
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY
+      );
+      // 绘制被选择区域
+      selectCanvasCtx.value.clearRect(0, 0, selectAreaDiffX, selectAreaDiffY);
+      selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
+      canvasCtx.value.drawImage(
+        selectCanvasCtx.value.canvas,
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY
+      );
       canvasCtx.value.globalAlpha = 0.5;
       canvasCtx.value.fillStyle = "rgb(0,0,0)";
       // 绘制阴影区域
@@ -260,7 +299,20 @@ export function useSelect(this: any) {
         selectAreaDiffX,
         selectAreaDiffY
       );
-
+      // 存储没有被选择区域的画布数据
+      tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
+      tempCanvasCtx.value.clearRect(
+        selectAreaStartX,
+        selectAreaStartY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      selectClearImageData.value = tempCanvasCtx.value.getImageData(
+        0,
+        0,
+        width.value,
+        height.value
+      );
       // 开始 绘制阴影
       canvasCtx.value.globalAlpha = 0.5;
       canvasCtx.value.fillStyle = "rgb(0,0,0)";
