@@ -76,6 +76,7 @@ export default {
 #preview {
   display: flex;
   flex: 1;
+  max-height: 140px;
   padding: 4px 0 4px;
   border-top: 1px solid rgba(0, 0, 0, 0.5);
   background-color: #333;

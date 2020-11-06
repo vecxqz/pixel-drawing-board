@@ -1,11 +1,11 @@
 <template>
   <ToolHeader />
-  <div class="dis-flex">
+  <div class="dis-flex area-mid">
     <ToolBar class="area-tool" />
     <PixleCanvas class="area-canvas" />
     <CanvasAttribute class="area-attribute" />
   </div>
-  <Page />
+  <Page class="page"/>
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
@@ -40,6 +40,11 @@ export default {
   &-canvas {
     flex: 1;
     overflow: auto;
+    display: flex;
+    align-items: center;
   }
+}
+.area-mid{
+  flex: 1;
 }
 </style>

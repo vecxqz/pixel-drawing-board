@@ -31,8 +31,8 @@ export function useBucket(this: any) {
       newColor = color.value;
     // 传入的是原始对象,提高算法性能
     if (oldColor !== newColor) {
-      const boundaryWidth = (width.value / size.value) * 10;
-      const boundaryHeight = (height.value / size.value) * 10;
+      const boundaryWidth = width.value;
+      const boundaryHeight = height.value;
       ScanLineFill(
         canvasCtx.value,
         columnIndex,

@@ -63,14 +63,13 @@ function ScanLineFill(
   stack.push(point);
   let x, y, xl, xr, yl;
   let ct = 0;
-  while (stack.length > 0 && ct < 200) {
+  while (stack.length > 0) {
     const imageData = canvasCtx.getImageData(0, 0, 80, 80);
     const { columnIndex, rowIndex }: any = stack.pop(); //2.取当前种子点
     x = columnIndex;
     y = rowIndex;
     xl = xr = x;
     yl = y;
-    ct += 1;
     const color = calcColor(imageData, columnIndex, rowIndex).rgb;
     // 3.向左右填充（在当前点所在扫描线扫描）
     if (color === oldColor) {
@@ -83,7 +82,6 @@ function ScanLineFill(
       });
       const { x: nxl, y: nyl1 } = Fill(
         canvasCtx,
-        imageData,
         xl,
         yl,
         w,
@@ -94,7 +92,6 @@ function ScanLineFill(
       (xl = nxl), (yl = nyl1);
       const { x: nxr, y: nyl2 } = Fill(
         canvasCtx,
-        imageData,
         xr,
         yl,
         w,
@@ -105,10 +102,10 @@ function ScanLineFill(
       (xr = nxr), (yl = nyl2);
       // 4.处理相邻两条扫描新线，并获得新种子入栈
       if (y - 1 >= 0) {
-        SearchLineNewSeed(stack, imageData, xl, xr, y - 1, oldColor, newColor);
+        SearchLineNewSeed(canvasCtx, stack, xl, xr, y - 1, oldColor, newColor);
       }
       if (y + 1 < h) {
-        SearchLineNewSeed(stack, imageData, xl, xr, y + 1, oldColor, newColor);
+        SearchLineNewSeed(canvasCtx, stack, xl, xr, y + 1, oldColor, newColor);
       }
     }
   }
@@ -116,7 +113,6 @@ function ScanLineFill(
 
 function Fill(
   canvasCtx: CanvasRenderingContext2D,
-  imageData: ImageData,
   x: number,
   y: number,
   w: number,
@@ -124,6 +120,7 @@ function Fill(
   oldColor: string,
   newColor: string
 ): any {
+  let imageData = canvasCtx.getImageData(0, 0, 80, 80);
   if (drFlg === -1) {
     // x--
     for (; x - 1 >= 0 && calcColor(imageData, x - 1, y).rgb === oldColor; ) {
@@ -134,6 +131,7 @@ function Fill(
         size: 1,
         color: newColor
       });
+      imageData = canvasCtx.getImageData(0, 0, 80, 80);
     }
   } else {
     // x++
@@ -145,14 +143,15 @@ function Fill(
         size: 1,
         color: newColor
       });
+      imageData = canvasCtx.getImageData(0, 0, 80, 80);
     }
   }
   return { x: x, y: y };
 }
 
 function SearchLineNewSeed(
+  canvasCtx: CanvasRenderingContext2D,
   stack: Array<any>,
-  imageData: ImageData,
   xLeft: number,
   xRight: number,
   y: number,
@@ -163,6 +162,8 @@ function SearchLineNewSeed(
   let findNewSeed = false;
   while (xt <= xRight) {
     // 从xl开始到xr，找到新的种子点
+    let imageData = canvasCtx.getImageData(0, 0, 80, 80);
+    // console.log(xt, y, calcColor(imageData, xt, y).rgb);
     if (calcColor(imageData, xt, y).rgb === oldColor) {
       findNewSeed = true; // 说明有种子点
       xt++;
