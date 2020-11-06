@@ -176,20 +176,18 @@ export function useLayer() {
   function deleteLayer(index: number) {
     const { currentPageIndex } = store.state.canvasModule;
     const length =
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers.length;
+      store.state.canvasModule.pages[currentPageIndex].layers.length;
     if (length === 1) {
       return;
     }
-    const deleteData =
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[index];
-    store.state.canvasModule.pages[
-      store.state.canvasModule.currentPageIndex
-    ].layers.splice(index, 1);
+    const deleteData = {
+      currentPageIndex: currentPageIndex,
+      currentLayerIndex: index,
+      deleteData: store.state.canvasModule.pages[currentPageIndex].layers[index]
+    };
+    store.state.canvasModule.pages[currentPageIndex].layers.splice(index, 1);
     const newLength =
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers.length;
+      store.state.canvasModule.pages[currentPageIndex].layers.length;
     if (index !== 0) {
       if (newLength === 1) {
         const { canvasImageData } = store.state.canvasModule.pages[

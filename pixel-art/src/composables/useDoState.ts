@@ -100,8 +100,10 @@ export function useDoState(this: any) {
   }
 
   function LAYER_CREATE(data: any) {
-    const { currentPageIndex, currentLayerIndex } = data;
-    const deleteData = deleteLayer(currentLayerIndex);
+    const { currentLayerIndex: deleteIndex } = data;
+    const { currentPageIndex, currentLayerIndex, deleteData } = deleteLayer(
+      deleteIndex
+    ) as any;
     const previousData = {
       type: TYPE.LAYER_DELETE,
       currentPageIndex,

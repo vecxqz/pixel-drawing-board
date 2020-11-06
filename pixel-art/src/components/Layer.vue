@@ -30,7 +30,7 @@
     <span class="btn-layer-operate" @click="mergeDown(currentLayerIndex)">
       <img src="../assets/merge.svg" class="layer-merge-down" />
     </span>
-    <span @click="deleteLayer(currentLayerIndex)" class="btn-layer-operate">
+    <span @click="deleteLayerA(currentLayerIndex)" class="btn-layer-operate">
       <img src="../assets/trash.svg" />
     </span>
   </div>
@@ -98,6 +98,10 @@ export default {
       const data: any = create();
       toUndoStack({ ...data, type: TYPE.LAYER_CREATE }, true);
     }
+    function deleteLayerA(index: number) {
+      const data = deleteLayer(index);
+      toUndoStack({ ...data, type: TYPE.LAYER_DELETE }, true);
+    }
     const { chooseLayer } = useChoose();
     return {
       currentLayer,
@@ -108,7 +112,7 @@ export default {
       copy,
       mergeUp,
       mergeDown,
-      deleteLayer,
+      deleteLayerA,
       renameIndex,
       layerReverse,
       currentLayerIndex,
