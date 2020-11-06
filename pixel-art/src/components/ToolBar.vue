@@ -1,6 +1,6 @@
 <template>
   <div id="toolbar">
-    <div class="title">TOOLS</div>
+    <div class="title">工具</div>
     <ul class="toolbar-list">
       <li
         class="toolbar-item"

@@ -1,12 +1,12 @@
 <template>
   <div id="toolHeader">
     <ul class="dis-flex operators">
-      <li class="operator-item">FILE</li>
-      <li class="operator-item">SETTINGS</li>
-      <li class="operator-item">DOWNLOAD</li>
-      <li class="operator-item" @click="undo">UNDO</li>
-      <li class="operator-item" @click="redo">REDO</li>
-      <li class="operator-item">FULL SCREEN</li>
+      <li class="operator-item">文件</li>
+      <li class="operator-item">设置</li>
+      <li class="operator-item">下载</li>
+      <li class="operator-item" @click="undo">撤销</li>
+      <li class="operator-item" @click="redo">还原</li>
+      <li class="operator-item">全屏</li>
     </ul>
   </div>
 </template>
