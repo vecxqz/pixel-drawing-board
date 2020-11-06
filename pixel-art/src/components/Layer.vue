@@ -24,10 +24,10 @@
     <span class="btn-layer-operate" @click="copyLayer(currentLayerIndex)">
       <img src="../assets/copy.svg" class="layer-copy" />
     </span>
-    <span class="btn-layer-operate" @click="mergeUp(currentLayerIndex)">
+    <span class="btn-layer-operate" @click="mergeUpLayer(currentLayerIndex)">
       <img src="../assets/merge.svg" class="layer-merge-up" />
     </span>
-    <span class="btn-layer-operate" @click="mergeDown(currentLayerIndex)">
+    <span class="btn-layer-operate" @click="mergeDownLayer(currentLayerIndex)">
       <img src="../assets/merge.svg" class="layer-merge-down" />
     </span>
     <span @click="deleteLayerA(currentLayerIndex)" class="btn-layer-operate">
@@ -114,6 +114,14 @@ export default {
       const data = copy(index);
       toUndoStack({ ...data, type: TYPE.LAYER_COPY }, true);
     }
+    function mergeUpLayer(index: number) {
+      const data = mergeUp(index);
+      toUndoStack({ ...data, type: TYPE.LAYER_MERGE_UP }, true);
+    }
+    function mergeDownLayer(index: number) {
+      const data = mergeDown(index);
+      toUndoStack({ ...data, type: TYPE.LAYER_MERGE_DOWN }, true);
+    }
     const { chooseLayer } = useChoose();
     return {
       currentLayer,
@@ -122,8 +130,8 @@ export default {
       rename,
       renameElement,
       copyLayer,
-      mergeUp,
-      mergeDown,
+      mergeUpLayer,
+      mergeDownLayer,
       deleteLayerA,
       renameIndex,
       layerReverse,

@@ -1,9 +1,10 @@
-import { computed, ref, nextTick } from "vue";
+import { computed, ref, nextTick, toRaw } from "vue";
 import { useStore } from "./useStore";
 import { userPreview } from "./userPreview";
 import { useChoose } from "./useChoose";
 
 import clone from "lodash/clone";
+import cloneDeep from "lodash/cloneDeep";
 export function useLayer() {
   const store: any = useStore();
   const { setCanvasPreviewByImageData } = userPreview();
@@ -64,12 +65,12 @@ export function useLayer() {
     return { currentPageIndex, currentLayerIndex: index };
   }
   function createLayerByData(data: any) {
-    const { currentPageIndex, currentLayerIndex, deleteData } = data;
-    store.state.canvasModule.pages[currentPageIndex].layers.length;
+    const { currentPageIndex, currentLayerIndex, currentLayerData } = data;
+    // console.log(currentLayerData);
     store.state.canvasModule.pages[currentPageIndex].layers.splice(
       currentLayerIndex,
       0,
-      deleteData
+      currentLayerData
     );
     chooseLayer(currentLayerIndex);
     return {
@@ -188,11 +189,12 @@ export function useLayer() {
     if (length === 1) {
       return;
     }
-    const deleteData = {
+    const deleteData = cloneDeep({
       currentPageIndex: currentPageIndex,
       currentLayerIndex: index,
-      deleteData: store.state.canvasModule.pages[currentPageIndex].layers[index]
-    };
+      currentLayerData:
+        store.state.canvasModule.pages[currentPageIndex].layers[index]
+    });
     store.state.canvasModule.pages[currentPageIndex].layers.splice(index, 1);
     const newLength =
       store.state.canvasModule.pages[currentPageIndex].layers.length;
@@ -245,6 +247,20 @@ export function useLayer() {
     store.state.canvasModule.pages[currentPageIndex].layers[
       index
     ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
+    const mergeUpData = cloneDeep({
+      currentLayerData: {
+        currentPageIndex,
+        currentLayerIndex: index,
+        currentLayerData:
+          store.state.canvasModule.pages[currentPageIndex].layers[index]
+      },
+      curretOtherLayerData: {
+        currentPageIndex,
+        currentLayerIndex: index + 1,
+        currentLayerData:
+          store.state.canvasModule.pages[currentPageIndex].layers[index + 1]
+      }
+    });
     const { canvasImageData } = store.state.canvasModule.pages[
       currentPageIndex
     ].layers[index];
@@ -262,6 +278,7 @@ export function useLayer() {
       index + 1
     ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
     deleteLayer(index);
+    return mergeUpData;
   }
   function mergeDown(index: number) {
     if (index === 0) {
@@ -276,6 +293,22 @@ export function useLayer() {
     store.state.canvasModule.pages[currentPageIndex].layers[
       index
     ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
+    const mergeDownData = cloneDeep({
+      currentLayerData: {
+        currentPageIndex,
+        currentLayerIndex: index,
+        currentLayerData: toRaw(
+          store.state.canvasModule.pages[currentPageIndex].layers[index]
+        )
+      },
+      curretOtherLayerData: {
+        currentPageIndex,
+        currentLayerIndex: index - 1,
+        currentLayerData: toRaw(
+          store.state.canvasModule.pages[currentPageIndex].layers[index - 1]
+        )
+      }
+    });
     const { canvasImageData } = store.state.canvasModule.pages[
       currentPageIndex
     ].layers[index];
@@ -293,6 +326,7 @@ export function useLayer() {
       index - 1
     ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
     deleteLayer(index);
+    return mergeDownData;
   }
   function copy(index: number) {
     const { currentPageIndex, width, height } = store.state.canvasModule;

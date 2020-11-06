@@ -19,9 +19,17 @@ export function useDoState(this: any) {
     LAYER_UP = "LAYER_UP", // 上移层
     LAYER_DOWN = "LAYER_DOWN", // 下移层
     LAYER_MERGE_UP = "LAYER_MERGE_UP", // 向上合并层
-    LAYER_MERGE_DOWN = "LAYER_MERGE_DOWN" // 向下合并层
+    LAYER_MERGE_DOWN = "LAYER_MERGE_DOWN", // 向下合并层
+    LAYER_MERGE_CANCEL = "LAYER_MERGE_CANCEL" // 取消合并图层
   }
-  const { deleteLayer, createLayerByData, up, down } = useLayer();
+  const {
+    deleteLayer,
+    createLayerByData,
+    up,
+    down,
+    mergeDown,
+    mergeUp
+  } = useLayer();
   const { chooseLayer } = useChoose();
   const redoStack = computed(() => store.state.canvasModule.redo);
   const undoStack = computed(() => store.state.canvasModule.undo);
@@ -101,14 +109,16 @@ export function useDoState(this: any) {
 
   function LAYER_CREATE(data: any) {
     const { currentLayerIndex: deleteIndex } = data;
-    const { currentPageIndex, currentLayerIndex, deleteData } = deleteLayer(
-      deleteIndex
-    ) as any;
+    const {
+      currentPageIndex,
+      currentLayerIndex,
+      currentLayerData
+    } = deleteLayer(deleteIndex) as any;
     const previousData = {
       type: TYPE.LAYER_DELETE,
       currentPageIndex,
       currentLayerIndex,
-      deleteData
+      currentLayerData
     };
     return previousData;
   }
@@ -148,18 +158,67 @@ export function useDoState(this: any) {
   function LAYER_COPY(data: any) {
     const { currentLayerIndex: deleteIndex } = data;
     console.log(deleteIndex);
-    const { currentPageIndex, currentLayerIndex, deleteData } = deleteLayer(
-      deleteIndex
-    ) as any;
+    const {
+      currentPageIndex,
+      currentLayerIndex,
+      currentLayerData
+    } = deleteLayer(deleteIndex) as any;
     const previousData = {
       type: TYPE.LAYER_DELETE,
       currentPageIndex,
       currentLayerIndex,
-      deleteData
+      currentLayerData
     };
     return previousData;
   }
-
+  function LAYER_MERGE_UP(data: any) {
+    const { currentLayerData, curretOtherLayerData } = data;
+    // console.log(currentLayerData, curretOtherLayerData);
+    createLayerByData(curretOtherLayerData);
+    createLayerByData(currentLayerData);
+    deleteLayer(curretOtherLayerData.currentLayerIndex);
+    chooseLayer(currentLayerData.currentLayerIndex);
+    const previousData = {
+      type: TYPE.LAYER_MERGE_CANCEL,
+      currentLayerData,
+      curretOtherLayerData
+    };
+    return previousData;
+  }
+  function LAYER_MERGE_DOWN(data: any) {
+    const { currentLayerData, curretOtherLayerData } = data;
+    createLayerByData(currentLayerData);
+    createLayerByData(curretOtherLayerData);
+    deleteLayer(currentLayerData.currentLayerIndex);
+    chooseLayer(currentLayerData.currentLayerIndex);
+    const previousData = {
+      type: TYPE.LAYER_MERGE_CANCEL,
+      currentLayerData,
+      curretOtherLayerData
+    };
+    return previousData;
+  }
+  function LAYER_MERGE_CANCEL(data: any) {
+    const { currentLayerData, curretOtherLayerData } = data;
+    let previousData = {};
+    let resultData = {};
+    let type = "";
+    if (
+      currentLayerData.currentLayerIndex >
+      curretOtherLayerData.currentLayerIndex
+    ) {
+      resultData = mergeDown(currentLayerData.currentLayerIndex) as any;
+      type = TYPE.LAYER_MERGE_DOWN;
+    } else {
+      resultData = mergeUp(curretOtherLayerData.currentLayerIndex) as any;
+      type = TYPE.LAYER_MERGE_UP;
+    }
+    previousData = {
+      type,
+      ...resultData
+    };
+    return previousData;
+  }
   function getFunction(TYPE: string) {
     const functionData: { [key: string]: Function } = {
       LAYER_DATA_CHANGE: LAYER_DATA_CHANGE,
@@ -168,7 +227,10 @@ export function useDoState(this: any) {
       LAYER_DELETE: LAYER_DELETE,
       LAYER_UP: LAYER_UP,
       LAYER_DOWN: LAYER_DOWN,
-      LAYER_COPY: LAYER_COPY
+      LAYER_COPY: LAYER_COPY,
+      LAYER_MERGE_UP: LAYER_MERGE_UP,
+      LAYER_MERGE_DOWN: LAYER_MERGE_DOWN,
+      LAYER_MERGE_CANCEL: LAYER_MERGE_CANCEL
     };
     return functionData[TYPE];
   }
