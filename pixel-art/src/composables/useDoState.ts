@@ -145,6 +145,21 @@ export function useDoState(this: any) {
     return previousData;
   }
 
+  function LAYER_COPY(data: any) {
+    const { currentLayerIndex: deleteIndex } = data;
+    console.log(deleteIndex);
+    const { currentPageIndex, currentLayerIndex, deleteData } = deleteLayer(
+      deleteIndex
+    ) as any;
+    const previousData = {
+      type: TYPE.LAYER_DELETE,
+      currentPageIndex,
+      currentLayerIndex,
+      deleteData
+    };
+    return previousData;
+  }
+
   function getFunction(TYPE: string) {
     const functionData: { [key: string]: Function } = {
       LAYER_DATA_CHANGE: LAYER_DATA_CHANGE,
@@ -152,7 +167,8 @@ export function useDoState(this: any) {
       LAYER_CREATE: LAYER_CREATE,
       LAYER_DELETE: LAYER_DELETE,
       LAYER_UP: LAYER_UP,
-      LAYER_DOWN: LAYER_DOWN
+      LAYER_DOWN: LAYER_DOWN,
+      LAYER_COPY: LAYER_COPY
     };
     return functionData[TYPE];
   }

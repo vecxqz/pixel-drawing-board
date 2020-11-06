@@ -21,7 +21,7 @@
     <span class="btn-layer-operate" @click="rename(currentLayerIndex)">
       <img src="../assets/rename.svg" class="layer-rename" />
     </span>
-    <span class="btn-layer-operate" @click="copy(currentLayerIndex)">
+    <span class="btn-layer-operate" @click="copyLayer(currentLayerIndex)">
       <img src="../assets/copy.svg" class="layer-copy" />
     </span>
     <span class="btn-layer-operate" @click="mergeUp(currentLayerIndex)">
@@ -110,6 +110,10 @@ export default {
       const data = down(index);
       toUndoStack({ ...data, type: TYPE.LAYER_DOWN }, true);
     }
+    function copyLayer(index: number) {
+      const data = copy(index);
+      toUndoStack({ ...data, type: TYPE.LAYER_COPY }, true);
+    }
     const { chooseLayer } = useChoose();
     return {
       currentLayer,
@@ -117,7 +121,7 @@ export default {
       downLayer,
       rename,
       renameElement,
-      copy,
+      copyLayer,
       mergeUp,
       mergeDown,
       deleteLayerA,

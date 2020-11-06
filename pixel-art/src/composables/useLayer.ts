@@ -310,7 +310,16 @@ export function useLayer() {
     store.state.canvasModule.pages[currentPageIndex].layers[
       index
     ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
-    store.state.canvasModule.pages[currentPageIndex].layers.push(newLayerData);
+    store.state.canvasModule.pages[currentPageIndex].layers.splice(
+      index + 1,
+      0,
+      newLayerData
+    );
+    chooseLayer(index + 1);
+    return {
+      currentPageIndex,
+      currentLayerIndex: index + 1
+    };
   }
 
   function setPreview() {
