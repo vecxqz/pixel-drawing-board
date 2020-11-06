@@ -1,9 +1,9 @@
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useChoose } from "./useChoose";
+import { useLayer } from "./useLayer";
 import { usePage } from "./usePage";
 import cloneDeep from "lodash/cloneDeep";
-import { clone } from "lodash";
 export function useDoState(this: any) {
   enum TYPE {
     LAYER_DATA_CHANGE = "LAYER_DATA_CHANGE", //只修改了单页单层页面数据
@@ -21,6 +21,7 @@ export function useDoState(this: any) {
     LAYER_MERGE_UP = "LAYER_MERGE_UP", // 向上合并层
     LAYER_MERGE_DOWN = "LAYER_MERGE_DOWN" // 向下合并层
   }
+  const { deleteLayer, createLayerByData } = useLayer();
   const { chooseLayer } = useChoose();
   const redoStack = computed(() => store.state.canvasModule.redo);
   const undoStack = computed(() => store.state.canvasModule.undo);
@@ -97,10 +98,35 @@ export function useDoState(this: any) {
     chooseLayer(currentLayerIndex);
     return previousData;
   }
+
+  function LAYER_CREATE(data: any) {
+    const { currentPageIndex, currentLayerIndex } = data;
+    const deleteData = deleteLayer(currentLayerIndex);
+    const previousData = {
+      type: TYPE.LAYER_DELETE,
+      currentPageIndex,
+      currentLayerIndex,
+      deleteData
+    };
+    return previousData;
+  }
+
+  function LAYER_DELETE(data: any) {
+    const { currentPageIndex, currentLayerIndex } = createLayerByData(data);
+    const previousData = {
+      type: TYPE.LAYER_CREATE,
+      currentPageIndex,
+      currentLayerIndex
+    };
+    return previousData;
+  }
+
   function getFunction(TYPE: string) {
     const functionData: { [key: string]: Function } = {
       LAYER_DATA_CHANGE: LAYER_DATA_CHANGE,
-      LAYER_RENAME: LAYER_RENAME
+      LAYER_RENAME: LAYER_RENAME,
+      LAYER_CREATE: LAYER_CREATE,
+      LAYER_DELETE: LAYER_DELETE
     };
     return functionData[TYPE];
   }

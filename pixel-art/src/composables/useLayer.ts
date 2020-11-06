@@ -2,6 +2,7 @@ import { computed, ref, nextTick } from "vue";
 import { useStore } from "./useStore";
 import { userPreview } from "./userPreview";
 import { useChoose } from "./useChoose";
+
 import clone from "lodash/clone";
 export function useLayer() {
   const store: any = useStore();
@@ -51,17 +52,30 @@ export function useLayer() {
   );
 
   function create() {
+    const { currentPageIndex } = store.state.canvasModule;
     const index =
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers.length;
-    store.state.canvasModule.pages[
-      store.state.canvasModule.currentPageIndex
-    ].layers.push({
+      store.state.canvasModule.pages[currentPageIndex].layers.length;
+    store.state.canvasModule.pages[currentPageIndex].layers.push({
       layerName: `layer${index}`,
       key: `${index}`,
       canvasImageData: undefined
     });
     chooseLayer(index);
+    return { currentPageIndex, currentLayerIndex: index };
+  }
+  function createLayerByData(data: any) {
+    const { currentPageIndex, currentLayerIndex, deleteData } = data;
+    store.state.canvasModule.pages[currentPageIndex].layers.length;
+    store.state.canvasModule.pages[currentPageIndex].layers.splice(
+      currentLayerIndex,
+      0,
+      deleteData
+    );
+    chooseLayer(currentLayerIndex);
+    return {
+      currentPageIndex,
+      currentLayerIndex
+    };
   }
   function up(index: number) {
     if (currentLayerIndex.value !== layers.value.length - 1) {
@@ -167,6 +181,9 @@ export function useLayer() {
     if (length === 1) {
       return;
     }
+    const deleteData =
+      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
+        .layers[index];
     store.state.canvasModule.pages[
       store.state.canvasModule.currentPageIndex
     ].layers.splice(index, 1);
@@ -207,6 +224,7 @@ export function useLayer() {
       }
     }
     setPreview();
+    return deleteData;
   }
   function mergeUp(index: number) {
     if (index === layers.value.length - 1) {
@@ -329,6 +347,8 @@ export function useLayer() {
     deleteLayer,
     layerReverse,
     currentLayerIndex,
-    currentLayer
+    currentLayer,
+    chooseLayer,
+    createLayerByData
   };
 }

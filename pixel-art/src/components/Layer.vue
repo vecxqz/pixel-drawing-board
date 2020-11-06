@@ -2,7 +2,11 @@
   <div>当前选中层{{ currentLayer.layerName }}</div>
   <div class="btn-group">
     <span class="btn-layer-operate">
-      <img src="../assets/create.svg" @click="create" class="layer-create" />
+      <img
+        src="../assets/create.svg"
+        @click="createLayer"
+        class="layer-create"
+      />
     </span>
     <span class="btn-layer-operate">
       <img
@@ -64,9 +68,11 @@
 <script lang="ts">
 import { useLayer } from "../composables/useLayer";
 import { useLayerName } from "../composables/useLayerName";
+import { useDoState } from "../composables/useDoState";
 import { useChoose } from "../composables/useChoose";
 export default {
   setup() {
+    const { toUndoStack, TYPE } = useDoState();
     const {
       changeLayerName,
       renameStart,
@@ -88,9 +94,13 @@ export default {
       currentLayerIndex,
       currentLayer
     } = useLayer();
+    function createLayer() {
+      const data: any = create();
+      toUndoStack({ ...data, type: TYPE.LAYER_CREATE }, true);
+    }
     const { chooseLayer } = useChoose();
     return {
-      create,
+      currentLayer,
       up,
       down,
       rename,
@@ -104,10 +114,10 @@ export default {
       currentLayerIndex,
       renameFinish,
       blurInput,
-      currentLayer,
       chooseLayer,
       changeLayerName,
-      renameStart
+      renameStart,
+      createLayer
     };
   }
 };
