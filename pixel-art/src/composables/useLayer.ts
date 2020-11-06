@@ -73,6 +73,7 @@ export function useLayer() {
       currentLayerData
     );
     chooseLayer(currentLayerIndex);
+    setPreview();
     return {
       currentPageIndex,
       currentLayerIndex
@@ -398,6 +399,7 @@ export function useLayer() {
     currentLayerIndex,
     currentLayer,
     chooseLayer,
-    createLayerByData
+    createLayerByData,
+    setPreview
   };
 }

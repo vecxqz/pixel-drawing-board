@@ -28,7 +28,8 @@ export function useDoState(this: any) {
     up,
     down,
     mergeDown,
-    mergeUp
+    mergeUp,
+    setPreview
   } = useLayer();
   const { chooseLayer } = useChoose();
   const redoStack = computed(() => store.state.canvasModule.redo);
@@ -85,6 +86,7 @@ export function useDoState(this: any) {
     ] = layerData;
     canvasCtx.value.putImageData(canvasImageData, 0, 0);
     chooseLayer(currentLayerIndex);
+    setPreview()
     return previousData;
   }
 
