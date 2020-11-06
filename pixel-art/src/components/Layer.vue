@@ -36,7 +36,7 @@
       @dblclick="rename(currentLayerIndex)"
       :key="layer.key"
       class="layer"
-      @click="choose(layerReverse.length - index - 1)"
+      @click="chooseLayer(layerReverse.length - index - 1)"
     >
       <div
         v-if="+renameIndex !== layerReverse.length - index - 1"
@@ -50,8 +50,10 @@
         <input
           ref="renameElement"
           type="text"
-          v-model="layer.layerName"
-          @blur="renameSuccess"
+          @input="changeLayerName"
+          :value="layer.layerName"
+          @focus="renameStart"
+          @blur="renameFinish"
           @keydown.enter="blurInput"
         />
       </div>
@@ -61,26 +63,32 @@
 
 <script lang="ts">
 import { useLayer } from "../composables/useLayer";
+import { useLayerName } from "../composables/useLayerName";
+import { useChoose } from "../composables/useChoose";
 export default {
   setup() {
+    const {
+      changeLayerName,
+      renameStart,
+      renameFinish,
+      blurInput,
+      renameIndex,
+      renameElement,
+      rename
+    } = useLayerName();
     const {
       create,
       up,
       down,
-      rename,
-      renameElement,
       copy,
       mergeUp,
       mergeDown,
       deleteLayer,
-      renameIndex,
       layerReverse,
       currentLayerIndex,
-      renameSuccess,
-      blurInput,
-      currentLayer,
-      choose
+      currentLayer
     } = useLayer();
+    const { chooseLayer } = useChoose();
     return {
       create,
       up,
@@ -94,10 +102,12 @@ export default {
       renameIndex,
       layerReverse,
       currentLayerIndex,
-      renameSuccess,
+      renameFinish,
       blurInput,
       currentLayer,
-      choose
+      chooseLayer,
+      changeLayerName,
+      renameStart
     };
   }
 };
