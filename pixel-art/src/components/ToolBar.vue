@@ -14,7 +14,7 @@
         <div class="toolbar-icon"></div>
       </li>
     </ul>
-    <colorPreview />
+    <colorPreview class="color-preview"/>
   </div>
 </template>
 
@@ -232,5 +232,8 @@ export default {
 }
 #tool-gradient .toolbar-icon {
   background-position: -34px -232px;
+}
+.color-preview{
+  margin-top: 20px;
 }
 </style>

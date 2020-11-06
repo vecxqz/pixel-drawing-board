@@ -139,7 +139,7 @@ export default {
     const { setCurrentColor } = useColor();
     const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
     const { calcColor } = useCanvas();
-    const { toUndoStack, TYPE } = useDoState();
+    const { toUndoStack, TYPE, redo, undo } = useDoState();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -180,7 +180,9 @@ export default {
       moveMouseUp,
       selectArea,
       toUndoStack,
-      TYPE
+      TYPE,
+      redo,
+      undo
     };
   },
   data() {
@@ -263,6 +265,16 @@ export default {
       );
     });
     const document = window.document.body;
+    fromEvent(document, "keydown").subscribe(e => {
+      console.log(e);
+      const { code, ctrlKey } = e as KeyboardEvent;
+      if (code === "KeyZ" && ctrlKey) {
+        this.undo();
+      }
+      if (code === "KeyY" && ctrlKey) {
+        this.redo();
+      }
+    });
     const mouseDown = fromEvent(canvasContainer, "mousedown");
     const mouseMove = fromEvent(canvasContainer, "mousemove");
     const mouseUp = fromEvent(document, "mouseup");
