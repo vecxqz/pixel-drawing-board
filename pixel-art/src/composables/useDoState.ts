@@ -21,7 +21,7 @@ export function useDoState(this: any) {
     LAYER_MERGE_UP = "LAYER_MERGE_UP", // 向上合并层
     LAYER_MERGE_DOWN = "LAYER_MERGE_DOWN" // 向下合并层
   }
-  const { deleteLayer, createLayerByData } = useLayer();
+  const { deleteLayer, createLayerByData, up, down } = useLayer();
   const { chooseLayer } = useChoose();
   const redoStack = computed(() => store.state.canvasModule.redo);
   const undoStack = computed(() => store.state.canvasModule.undo);
@@ -123,12 +123,36 @@ export function useDoState(this: any) {
     return previousData;
   }
 
+  function LAYER_UP(data: any) {
+    const { currentLayerIndex: downIndex } = data;
+    const { currentPageIndex, currentLayerIndex } = down(downIndex) as any;
+    const previousData = {
+      type: TYPE.LAYER_DOWN,
+      currentPageIndex,
+      currentLayerIndex
+    };
+    return previousData;
+  }
+
+  function LAYER_DOWN(data: any) {
+    const { currentLayerIndex: upIndex } = data;
+    const { currentPageIndex, currentLayerIndex } = up(upIndex) as any;
+    const previousData = {
+      type: TYPE.LAYER_UP,
+      currentPageIndex,
+      currentLayerIndex
+    };
+    return previousData;
+  }
+
   function getFunction(TYPE: string) {
     const functionData: { [key: string]: Function } = {
       LAYER_DATA_CHANGE: LAYER_DATA_CHANGE,
       LAYER_RENAME: LAYER_RENAME,
       LAYER_CREATE: LAYER_CREATE,
-      LAYER_DELETE: LAYER_DELETE
+      LAYER_DELETE: LAYER_DELETE,
+      LAYER_UP: LAYER_UP,
+      LAYER_DOWN: LAYER_DOWN
     };
     return functionData[TYPE];
   }

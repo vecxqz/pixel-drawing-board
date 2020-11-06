@@ -11,11 +11,11 @@
     <span class="btn-layer-operate">
       <img
         src="../assets/arrow.svg"
-        @click="up(currentLayerIndex)"
+        @click="upLayer(currentLayerIndex)"
         class="layer-up"
       />
     </span>
-    <span class="btn-layer-operate" @click="down(currentLayerIndex)">
+    <span class="btn-layer-operate" @click="downLayer(currentLayerIndex)">
       <img src="../assets/arrow.svg" class="layer-down" />
     </span>
     <span class="btn-layer-operate" @click="rename(currentLayerIndex)">
@@ -102,11 +102,19 @@ export default {
       const data = deleteLayer(index);
       toUndoStack({ ...data, type: TYPE.LAYER_DELETE }, true);
     }
+    function upLayer(index: number) {
+      const data = up(index);
+      toUndoStack({ ...data, type: TYPE.LAYER_UP }, true);
+    }
+    function downLayer(index: number) {
+      const data = down(index);
+      toUndoStack({ ...data, type: TYPE.LAYER_DOWN }, true);
+    }
     const { chooseLayer } = useChoose();
     return {
       currentLayer,
-      up,
-      down,
+      upLayer,
+      downLayer,
       rename,
       renameElement,
       copy,

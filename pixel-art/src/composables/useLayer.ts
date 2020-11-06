@@ -99,6 +99,10 @@ export function useLayer() {
       ].layers[index + 1] = temp;
       chooseLayer(index + 1);
       setPreview();
+      return {
+        currentPageIndex,
+        currentLayerIndex: index + 1
+      };
     }
   }
   function down(index: number) {
@@ -171,6 +175,10 @@ export function useLayer() {
       ].layers[index - 1] = temp;
       chooseLayer(index - 1);
       setPreview();
+      return {
+        currentPageIndex,
+        currentLayerIndex: index - 1
+      };
     }
   }
   function deleteLayer(index: number) {
