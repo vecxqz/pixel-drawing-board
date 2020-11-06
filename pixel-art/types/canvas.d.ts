@@ -16,7 +16,7 @@ declare interface layer {
 }
 declare interface layerMeta {
   layerName: string;
-  canvaImageData!: CanvasImageData;
+  canvasImageData!: CanvasImageData;
   key: string | number;
 }
 /** 单页数据类型*/

@@ -16,7 +16,7 @@ const CanvasMutations: MutationTree<CanvasState> = {
   [MutationsTypes.CREATE_PAGE](state: CanvasState) {
     const { createImageData } = useCanvas();
     const { width, height, size } = state;
-    const canvaImageData = createImageData(width, height);
+    const canvasImageData = createImageData(width, height);
     state.pages.push({
       pageName: "page0",
       key: "0",
@@ -25,7 +25,7 @@ const CanvasMutations: MutationTree<CanvasState> = {
         {
           layerName: "layer0",
           key: "0",
-          canvaImageData
+          canvasImageData
         }
       ]
     });

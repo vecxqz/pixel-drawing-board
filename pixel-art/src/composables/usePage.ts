@@ -66,10 +66,10 @@ export function usePage() {
     aboveCanvasCtx.value.clearRect(0, 0, width.value, height.value);
     for (let i = 0; i < layers.length; i++) {
       const layer = layers[i];
-      const { canvaImageData, layerName } = layer;
+      const { canvasImageData, layerName } = layer;
       if (i < mergIndex) {
         console.log(`${layerName} 合到下层`);
-        tempCanvasCtx.value.putImageData(canvaImageData, 0, 0);
+        tempCanvasCtx.value.putImageData(canvasImageData, 0, 0);
         const { canvas } = tempCanvasCtx.value;
         belowCanvasCtx.value.drawImage(canvas, 0, 0);
       }
@@ -77,13 +77,13 @@ export function usePage() {
         // 说明下层数据已合并完，清除临时层的画布内容，绘制上层数据
         // 如果该层存在数据，则把该层数据绘制到canvas上
         tempCanvasCtx.value.clearRect(0, 0, width, height);
-        if (canvaImageData) {
-          canvasCtx.value.putImageData(canvaImageData, 0, 0);
+        if (canvasImageData) {
+          canvasCtx.value.putImageData(canvasImageData, 0, 0);
         }
       }
       if (i > mergIndex) {
         console.log(`${layerName} 合到上层`);
-        tempCanvasCtx.value.putImageData(canvaImageData, 0, 0);
+        tempCanvasCtx.value.putImageData(canvasImageData, 0, 0);
         const { canvas } = tempCanvasCtx.value;
         aboveCanvasCtx.value.drawImage(canvas, 0, 0);
       }

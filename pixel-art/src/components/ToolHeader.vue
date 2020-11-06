@@ -4,16 +4,24 @@
       <li class="operator-item">FILE</li>
       <li class="operator-item">SETTINGS</li>
       <li class="operator-item">DOWNLOAD</li>
-      <li class="operator-item">UNDO</li>
-      <li class="operator-item">REDO</li>
+      <li class="operator-item" @click="undo">UNDO</li>
+      <li class="operator-item" @click="redo">REDO</li>
       <li class="operator-item">FULL SCREEN</li>
     </ul>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { useDoState } from "../composables/useDoState";
 export default {
-  name: "ToolHeader"
+  name: "ToolHeader",
+  setup() {
+    const { redo, undo } = useDoState();
+    return {
+      redo,
+      undo
+    };
+  }
 };
 </script>
 

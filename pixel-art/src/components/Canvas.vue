@@ -139,7 +139,7 @@ export default {
     const { setCurrentColor } = useColor();
     const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
     const { calcColor } = useCanvas();
-    const { toRedoStack, TYPE } = useDoState();
+    const { toUndoStack, TYPE } = useDoState();
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -179,7 +179,7 @@ export default {
       moveMouseMove,
       moveMouseUp,
       selectArea,
-      toRedoStack,
+      toUndoStack,
       TYPE
     };
   },
@@ -300,10 +300,10 @@ export default {
         this.$store.state.canvasModule.currentPageIndex
       ].layers[
         this.$store.state.canvasModule.currentLayerIndex
-      ].canvaImageData = this.canvasCtx.getImageData(0, 0, width, height);
+      ].canvasImageData = this.canvasCtx.getImageData(0, 0, width, height);
       const backgroundMeta = {
         layerName: "background",
-        canvaImageData: this.backgroundCanvasCtx.getImageData(
+        canvasImageData: this.backgroundCanvasCtx.getImageData(
           0,
           0,
           width,
@@ -312,15 +312,15 @@ export default {
       };
       const belowMeta = {
         layerName: "below",
-        canvaImageData: this.belowCanvasCtx.getImageData(0, 0, width, height)
+        canvasImageData: this.belowCanvasCtx.getImageData(0, 0, width, height)
       };
       const aboveMeta = {
         layerName: "above",
-        canvaImageData: this.aboveCanvasCtx.getImageData(0, 0, width, height)
+        canvasImageData: this.aboveCanvasCtx.getImageData(0, 0, width, height)
       };
       const currentMeta = {
         layerName: "current",
-        canvaImageData: this.canvasCtx.getImageData(0, 0, width, height)
+        canvasImageData: this.canvasCtx.getImageData(0, 0, width, height)
       };
       const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
       this.setCanvasPreviewByImageData(
@@ -408,6 +408,31 @@ export default {
       this.imageData = undefined;
     },
     handleMouseDown(this: any, e: MouseWheelEvent) {
+      const {
+        currentPageIndex,
+        currentLayerIndex,
+        width: layerWidth,
+        height: layerHeight
+      } = this.$store.state.canvasModule;
+      this.toUndoStack(
+        {
+          currentLayerIndex,
+          currentPageIndex,
+          layerData: {
+            ...this.$store.state.canvasModule.pages[currentPageIndex].layers[
+              currentLayerIndex
+            ],
+            canvasImageData: this.canvasCtx.getImageData(
+              0,
+              0,
+              layerWidth,
+              layerHeight
+            )
+          },
+          type: this.TYPE.LAYER_DATA_CHANGE
+        },
+        true
+      );
       const canvasContainer: HTMLElement = window.document.getElementById(
         "canvas-container"
       ) as HTMLElement;
@@ -515,18 +540,6 @@ export default {
         this.moveMouseUp(e);
       }
       this.mergeCanvas();
-      const {
-        currentPageIndex,
-        currentLayerIndex
-      } = this.$store.state.canvasModule;
-      this.toRedoStack({
-        currentLayerIndex,
-        currentPageIndex,
-        layerData: this.$store.state.canvasModule.pages[currentPageIndex]
-          .layers[currentLayerIndex],
-        type: this.TYPE.LAYER_DATA_CHANGE
-      });
-      console.log(this.$store.state.canvasModule.redo);
       // this.setCanvasPreview(
       //   [this.backgroundCanvasCtx, this.canvasCtx],
       //   this.shadowCanvasCtx

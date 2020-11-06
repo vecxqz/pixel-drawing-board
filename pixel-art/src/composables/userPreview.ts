@@ -29,9 +29,9 @@ export function userPreview() {
     // 这里将不同的canvas合到一个canvas上
     const { width, height, currentPageIndex } = store.state.canvasModule;
     for (let i = 0; i < imageDatas.length; i++) {
-      const { canvaImageData } = imageDatas[i];
-      if (canvaImageData) {
-        tempcanvasCtx.putImageData(canvaImageData, 0, 0);
+      const { canvasImageData } = imageDatas[i];
+      if (canvasImageData) {
+        tempcanvasCtx.putImageData(canvasImageData, 0, 0);
         const { canvas } = tempcanvasCtx;
         targetcanvasCtx.drawImage(canvas, 0, 0);
       }

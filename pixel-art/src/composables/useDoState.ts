@@ -1,9 +1,13 @@
 import { computed } from "vue";
 import { useStore } from "./useStore";
-
+import { useLayer } from "./useLayer";
+import { usePage } from "./usePage";
+import cloneDeep from "lodash/cloneDeep";
+import { clone } from "lodash";
 export function useDoState(this: any) {
   enum TYPE {
     LAYER_DATA_CHANGE = "LAYER_DATA_CHANGE", //只修改了单页单层页面数据
+    PAGE_RENAME = "PAGE_RENAME", // 页面重命名
     PAGE_CREATE = "PAGE_CREATE", // 创建页面
     PAGE_DELETE = "PAGE_DELETE", // 删除页面
     PAGE_COPY = "PAGE_COPY", // 复制页面
@@ -17,23 +21,69 @@ export function useDoState(this: any) {
     LAYER_MERGE_UP = "LAYER_MERGE_UP", // 向上合并层
     LAYER_MERGE_DOWN = "LAYER_MERGE_DOWN" // 向下合并层
   }
+  const { choose: chooseLayer } = useLayer();
   const redoStack = computed(() => store.state.canvasModule.redo);
   const undoStack = computed(() => store.state.canvasModule.undo);
   const store: any = useStore();
+  const canvasCtx = computed(
+    () => store.state.canvasModule.canvasCtx as CanvasRenderingContext2D
+  );
 
   function toRedoStack(redoData: any) {
     store.state.canvasModule.redo.push(redoData);
   }
   function redo() {
-    const redoData = store.state.canvasModule.redo.shift();
-    toUndoStack(redoData);
+    console.log("redo");
+    const redoData = store.state.canvasModule.redo.pop();
+    if (redoData) {
+      const undoData = ((functionDict as any)[redoData.type as any] as any)(
+        redoData
+      );
+      console.log(undoData);
+      toUndoStack(undoData);
+    }
   }
-  function toUndoStack(undoData: any) {
+  function toUndoStack(undoData: any, clearFlag = false) {
     store.state.canvasModule.undo.push(undoData);
+    if (clearFlag) {
+      store.state.canvasModule.redo = [];
+    }
   }
   function undo() {
-    const unedoData = store.state.canvasModule.undo.shift();
-    toRedoStack(unedoData);
+    const undoData = store.state.canvasModule.undo.pop();
+    if (undoData) {
+      const redoData = ((functionDict as any)[undoData.type as any] as any)(
+        undoData
+      );
+      toRedoStack(redoData);
+    }
   }
-  return { toRedoStack, redo, undo, TYPE };
+  function LAYER_DATA_CHANGE(data: any) {
+    const {
+      currentLayerIndex,
+      currentPageIndex,
+      layerData,
+      layerData: { canvasImageData }
+    } = data;
+    const previousData = {
+      ...data,
+      layerData: cloneDeep(
+        store.state.canvasModule.pages[currentPageIndex].layers[
+          currentLayerIndex
+        ]
+      )
+    };
+    store.state.canvasModule.currentPageIndex = currentPageIndex;
+    store.state.canvasModule.currentLayerIndex = currentLayerIndex;
+    store.state.canvasModule.pages[currentPageIndex].layers[
+      currentLayerIndex
+    ] = layerData;
+    canvasCtx.value.putImageData(canvasImageData, 0, 0);
+    chooseLayer(currentLayerIndex);
+    return previousData;
+  }
+  const functionDict = {
+    LAYER_DATA_CHANGE: LAYER_DATA_CHANGE
+  };
+  return { toRedoStack, toUndoStack, redo, undo, TYPE };
 }
