@@ -33,7 +33,7 @@ export function useBucket(this: any) {
     if (oldColor !== newColor) {
       const boundaryWidth = width.value;
       const boundaryHeight = height.value;
-      ScanLineFill(
+      const imageData = ScanLineFill(
         canvasCtx.value,
         columnIndex,
         rowIndex,
@@ -42,6 +42,7 @@ export function useBucket(this: any) {
         oldColor,
         newColor
       );
+      canvasCtx.value.putImageData(imageData, 0, 0);
       // boundaryFill4(
       //   canvasCtx.value,
       //   columnIndex,

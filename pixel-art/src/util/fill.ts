@@ -46,6 +46,19 @@ function boundaryFill4( //递归填充
  * @param oldColor 旧填充颜色
  * @param callback 绘制回调函数
  */
+function changeColorByImageData(
+  imageData: ImageData,
+  columnIndex: number,
+  rowIndex: number,
+  { r, g, b }: { r: number; g: number; b: number }
+) {
+  const { height, data } = imageData;
+  const index = (columnIndex + rowIndex * height) * 4;
+  data[index] = r; // r
+  data[index + 1] = g; // g
+  data[index + 2] = b; // b
+  data[index + 3] = 255; // a
+}
 function ScanLineFill(
   canvasCtx: CanvasRenderingContext2D,
   layerX: number,
@@ -55,6 +68,10 @@ function ScanLineFill(
   oldColor: string,
   newColor: string
 ) {
+  // 获取颜色rgb值
+  const matchColors = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+  const [rgb, nr, ng, nb] = matchColors.exec(newColor) as Iterable<string>;
+  const [r, g, b] = [+nr, +ng, +nb];
   let stack = []; // 构造种子点栈
   let point = {
     columnIndex: layerX,
@@ -63,8 +80,9 @@ function ScanLineFill(
   stack.push(point);
   let x, y, xl, xr, yl;
   let ct = 0;
+  const imageData = canvasCtx.getImageData(0, 0, 80, 80);
+  // debugger;
   while (stack.length > 0) {
-    const imageData = canvasCtx.getImageData(0, 0, 80, 80);
     const { columnIndex, rowIndex }: any = stack.pop(); //2.取当前种子点
     x = columnIndex;
     y = rowIndex;
@@ -74,83 +92,69 @@ function ScanLineFill(
     // 3.向左右填充（在当前点所在扫描线扫描）
     if (color === oldColor) {
       //填充颜色
-      drawGridB(canvasCtx as CanvasRenderingContext2D, {
-        columnIndex: x,
-        rowIndex: y,
-        size: 1,
-        color: newColor
-      });
+      changeColorByImageData(imageData, x, y, { r, g, b });
       const { x: nxl, y: nyl1 } = Fill(
-        canvasCtx,
+        imageData,
         xl,
         yl,
         w,
         -1,
         oldColor,
-        newColor
+        newColor,
+        { r, g, b }
       ); // x--方向填充，并返回边界点
       (xl = nxl), (yl = nyl1);
       const { x: nxr, y: nyl2 } = Fill(
-        canvasCtx,
+        imageData,
         xr,
         yl,
         w,
         1,
         oldColor,
-        newColor
+        newColor,
+        { r, g, b }
       ); // x++方向填充，并返回边界点
       (xr = nxr), (yl = nyl2);
       // 4.处理相邻两条扫描新线，并获得新种子入栈
       if (y - 1 >= 0) {
-        SearchLineNewSeed(canvasCtx, stack, xl, xr, y - 1, oldColor, newColor);
+        SearchLineNewSeed(imageData, stack, xl, xr, y - 1, oldColor, newColor);
       }
       if (y + 1 < h) {
-        SearchLineNewSeed(canvasCtx, stack, xl, xr, y + 1, oldColor, newColor);
+        SearchLineNewSeed(imageData, stack, xl, xr, y + 1, oldColor, newColor);
       }
     }
   }
+  return imageData;
 }
 
 function Fill(
-  canvasCtx: CanvasRenderingContext2D,
+  imageData: ImageData,
   x: number,
   y: number,
   w: number,
   drFlg: number,
   oldColor: string,
-  newColor: string
+  newColor: string,
+  { r, g, b }: { r: number; g: number; b: number }
 ): any {
-  let imageData = canvasCtx.getImageData(0, 0, 80, 80);
   if (drFlg === -1) {
     // x--
     for (; x - 1 >= 0 && calcColor(imageData, x - 1, y).rgb === oldColor; ) {
       --x;
-      drawGridB(canvasCtx, {
-        columnIndex: x,
-        rowIndex: y,
-        size: 1,
-        color: newColor
-      });
-      imageData = canvasCtx.getImageData(0, 0, 80, 80);
+      changeColorByImageData(imageData, x, y, { r, g, b });
     }
   } else {
     // x++
     for (; x + 1 < w && calcColor(imageData, x + 1, y).rgb === oldColor; ) {
       ++x;
-      drawGridB(canvasCtx, {
-        columnIndex: x,
-        rowIndex: y,
-        size: 1,
-        color: newColor
-      });
-      imageData = canvasCtx.getImageData(0, 0, 80, 80);
+      changeColorByImageData(imageData, x, y, { r, g, b });
     }
   }
   return { x: x, y: y };
 }
 
 function SearchLineNewSeed(
-  canvasCtx: CanvasRenderingContext2D,
+  imageData: ImageData,
   stack: Array<any>,
   xLeft: number,
   xRight: number,
@@ -162,7 +166,6 @@ function SearchLineNewSeed(
   let findNewSeed = false;
   while (xt <= xRight) {
     // 从xl开始到xr，找到新的种子点
-    let imageData = canvasCtx.getImageData(0, 0, 80, 80);
     // console.log(xt, y, calcColor(imageData, xt, y).rgb);
     if (calcColor(imageData, xt, y).rgb === oldColor) {
       findNewSeed = true; // 说明有种子点
