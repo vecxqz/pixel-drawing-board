@@ -13,19 +13,25 @@
     </div>
     <div class="preview-page">
       <div class="page-operate-group">
-        <div class="page-operate-item" @click="create(currentPageIndex)">
+        <div class="page-operate-item" @click="createPage(currentPageIndex)">
           新建图层
         </div>
-        <div class="page-operate-item" @click="copy(currentPageIndex)">
+        <div class="page-operate-item" @click="copyPage(currentPageIndex)">
           复制图层
         </div>
-        <div class="page-operate-item" @click="deletePage(currentPageIndex)">
+        <div class="page-operate-item" @click="deletePageA(currentPageIndex)">
           删除图层
         </div>
-        <div class="page-operate-item" @click="move(currentPageIndex, 'left')">
+        <div
+          class="page-operate-item"
+          @click="movePage(currentPageIndex, 'left')"
+        >
           左移图层
         </div>
-        <div class="page-operate-item" @click="move(currentPageIndex, 'right')">
+        <div
+          class="page-operate-item"
+          @click="movePage(currentPageIndex, 'right')"
+        >
           右移图层
         </div>
       </div>
@@ -46,9 +52,11 @@
 
 <script lang="ts">
 import { usePage } from "../composables/usePage";
+import { useDoState } from "../composables/useDoState";
 export default {
   name: "Page",
   setup() {
+    const { toUndoStack, TYPE } = useDoState();
     const {
       pages,
       create,
@@ -57,17 +65,39 @@ export default {
       choose,
       animationPreviewUrl,
       currentPageIndex,
-      move,
+      move
     } = usePage();
+    function createPage(index: number) {
+      const data: any = create(index);
+      toUndoStack({ ...data, type: TYPE.PAGE_CREATE }, true);
+    }
+    function deletePageA(index: number) {
+      const data: any = deletePage(index);
+      toUndoStack({ ...data, type: TYPE.PAGE_DELETE }, true);
+    }
+    function copyPage(index: number) {
+      const data: any = copy(index);
+      toUndoStack({ ...data, type: TYPE.PAGE_COPY }, true);
+    }
+    function movePage(index: number, mode: string) {
+      if (mode === "left") {
+        const data: any = move(index, mode);
+        toUndoStack({ ...data, type: TYPE.PAGE_TO_LEFT }, true);
+      }
+      if (mode === "right") {
+        const data: any = move(index, mode);
+        toUndoStack({ ...data, type: TYPE.PAGE_TO_RIGHT }, true);
+      }
+    }
     return {
       pages,
-      create,
-      copy,
-      deletePage,
+      createPage,
+      copyPage,
+      deletePageA,
       choose,
       animationPreviewUrl,
       currentPageIndex,
-      move
+      movePage
     };
   }
 };

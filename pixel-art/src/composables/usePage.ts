@@ -54,6 +54,9 @@ export function usePage() {
     nextTick(() => {
       setCanvasPreview([backgroundCanvasCtx.value], shadowCanvasCtx.value);
     });
+    return {
+      currentPageIndex: store.state.canvasModule.currentPageIndex
+    };
   }
   function choose(index: number) {
     store.state.canvasModule.currentPageIndex = index;
@@ -94,16 +97,33 @@ export function usePage() {
     const page: page = cloneDeep(toRaw(store.state.canvasModule.pages[index]));
     store.state.canvasModule.pages.splice(index, 0, page);
     store.state.canvasModule.currentPageIndex = index + 1;
+    return {
+      currentPageIndex: store.state.canvasModule.currentPageIndex
+    };
   }
   function deletePage(index: number) {
     const pageLength = store.state.canvasModule.pages.length;
     if (pageLength > 1) {
+      const deleteData = store.state.canvasModule.pages[index];
       store.state.canvasModule.pages.splice(index, 1);
       if (index === pageLength - 1) {
         store.state.canvasModule.currentPageIndex -= 1;
         choose(store.state.canvasModule.currentPageIndex);
       }
+      return {
+        currentPageIndex: store.state.canvasModule.currentPageIndex + 1,
+        currentPageData: deleteData
+      };
     }
+  }
+  function createPageByData(data: any) {
+    const { currentPageIndex, currentPageData } = data;
+    // console.log(currentPageData);
+    store.state.canvasModule.pages.splice(currentPageIndex, 0, currentPageData);
+    choose(currentPageIndex);
+    return {
+      currentPageIndex
+    };
   }
   function move(index: number, mode: string) {
     interface step {
@@ -123,6 +143,10 @@ export function usePage() {
       store.state.canvasModule.pages[index]
     ];
     choose(index + step);
+    return {
+      currentPageIndex: index + step,
+      mode: mode
+    };
   }
   function setAnimationPreview() {
     let index = 0;
@@ -143,7 +167,7 @@ export function usePage() {
       }
       setTimeout(() => {
         animation();
-      }, 16.66);
+      }, 33.33);
     }
     animation();
   }
@@ -159,5 +183,6 @@ export function usePage() {
     animationPreviewUrl,
     currentPageIndex,
     move,
+    createPageByData
   };
 }

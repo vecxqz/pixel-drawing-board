@@ -10,7 +10,7 @@ export function useDoState(this: any) {
     PAGE_CREATE = "PAGE_CREATE", // 创建页面
     PAGE_DELETE = "PAGE_DELETE", // 删除页面
     PAGE_COPY = "PAGE_COPY", // 复制页面
-    PAGE_TO_RIGTH = "PAGE_TO_RIGTH", // 页面右位移,
+    PAGE_TO_RIGHT = "PAGE_TO_RIGHT", // 页面右位移,
     PAGE_TO_LEFT = "PAGE_TO_LEFT", // 页面左位移,
     LAYER_RENAME = "LAYER_RENAME", // 层重命名
     LAYER_CREATE = "LAYER_CREATE", // 创建层
@@ -31,6 +31,7 @@ export function useDoState(this: any) {
     mergeUp,
     setPreview
   } = useLayer();
+  const { deletePage, createPageByData, move } = usePage();
   const { chooseLayer } = useChoose();
   const redoStack = computed(() => store.state.canvasModule.redo);
   const undoStack = computed(() => store.state.canvasModule.undo);
@@ -86,7 +87,7 @@ export function useDoState(this: any) {
     ] = layerData;
     canvasCtx.value.putImageData(canvasImageData, 0, 0);
     chooseLayer(currentLayerIndex);
-    setPreview()
+    setPreview();
     return previousData;
   }
 
@@ -221,6 +222,58 @@ export function useDoState(this: any) {
     };
     return previousData;
   }
+  function PAGE_CREATE(data: any) {
+    const { currentPageIndex: deleteIndex } = data;
+    const { currentPageIndex, currentPageData } = deletePage(
+      deleteIndex
+    ) as any;
+    const previousData = {
+      type: TYPE.PAGE_DELETE,
+      currentPageIndex,
+      currentPageData
+    };
+    return previousData;
+  }
+  function PAGE_DELETE(data: any) {
+    console.log(data);
+    const { currentPageIndex } = createPageByData(data);
+    const previousData = {
+      type: TYPE.PAGE_CREATE,
+      currentPageIndex
+    };
+    return previousData;
+  }
+  function PAGE_COPY(data: any) {
+    const { currentPageIndex: deleteIndex } = data;
+    console.log(deleteIndex);
+    const { currentPageIndex, currentPageData } = deletePage(
+      deleteIndex
+    ) as any;
+    const previousData = {
+      type: TYPE.PAGE_DELETE,
+      currentPageIndex,
+      currentPageData
+    };
+    return previousData;
+  }
+  function PAGE_TO_LEFT(data: any) {
+    const { currentPageIndex: moveIndex } = data;
+    const { currentPageIndex } = move(moveIndex, "right") as any;
+    const previousData = {
+      type: TYPE.PAGE_TO_RIGHT,
+      currentPageIndex
+    };
+    return previousData;
+  }
+  function PAGE_TO_RIGHT(data: any) {
+    const { currentPageIndex: moveIndex } = data;
+    const { currentPageIndex } = move(moveIndex, "left") as any;
+    const previousData = {
+      type: TYPE.PAGE_TO_LEFT,
+      currentPageIndex
+    };
+    return previousData;
+  }
   function getFunction(TYPE: string) {
     const functionData: { [key: string]: Function } = {
       LAYER_DATA_CHANGE: LAYER_DATA_CHANGE,
@@ -232,7 +285,12 @@ export function useDoState(this: any) {
       LAYER_COPY: LAYER_COPY,
       LAYER_MERGE_UP: LAYER_MERGE_UP,
       LAYER_MERGE_DOWN: LAYER_MERGE_DOWN,
-      LAYER_MERGE_CANCEL: LAYER_MERGE_CANCEL
+      LAYER_MERGE_CANCEL: LAYER_MERGE_CANCEL,
+      PAGE_CREATE: PAGE_CREATE,
+      PAGE_DELETE: PAGE_DELETE,
+      PAGE_COPY: PAGE_COPY,
+      PAGE_TO_LEFT: PAGE_TO_LEFT,
+      PAGE_TO_RIGHT: PAGE_TO_RIGHT
     };
     return functionData[TYPE];
   }
