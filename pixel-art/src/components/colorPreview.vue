@@ -2,10 +2,12 @@
   <div class="color-preview-container">
     <div
       class="color-primary color-public-attr"
+      @click="primaryColorShow"
       :style="`background:${primaryColor}`"
     ></div>
     <div
       class="color-secondary color-public-attr"
+      @click="secondaryColorShow"
       :style="`background:${secondaryColor}`"
     ></div>
     <img
@@ -13,21 +15,53 @@
       src="../assets/double_arrow.svg"
       class="color-ps-exchange"
     />
+    <colorPicker
+      v-model:visible="primaryColorVisible"
+      v-model:emitColor="$store.state.canvasModule.primaryColor"
+    />
+    <colorPicker
+      v-model:visible="secondaryColorVisible"
+      v-model:emitColor="$store.state.canvasModule.secondaryColor"
+    />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { ref } from "vue";
+import colorPicker from "./colorPicker/main.vue";
 export default {
+  setup() {
+    const primaryColorVisible = ref(false);
+    const secondaryColorVisible = ref(false);
+
+    function primaryColorShow() {
+      primaryColorVisible.value = !primaryColorVisible.value;
+      secondaryColorVisible.value = false;
+    }
+    function secondaryColorShow() {
+      secondaryColorVisible.value = !secondaryColorVisible.value;
+      primaryColorVisible.value = false;
+    }
+    return {
+      primaryColorVisible,
+      secondaryColorVisible,
+      primaryColorShow,
+      secondaryColorShow
+    };
+  },
+  components: {
+    colorPicker
+  },
   computed: {
-    primaryColor() {
+    primaryColor(this: any) {
       return this.$store.state.canvasModule.primaryColor;
     },
-    secondaryColor() {
+    secondaryColor(this: any) {
       return this.$store.state.canvasModule.secondaryColor;
     }
   },
   methods: {
-    exhcangePsColor() {
+    exhcangePsColor(this: any) {
       const [newPrimaryColor, newSecondaryColor] = [
         this.secondaryColor,
         this.primaryColor
@@ -65,8 +99,8 @@ export default {
   }
   &-ps-exchange {
     position: relative;
-    bottom: 26px;
-    left: -22px;
+    bottom: 22px;
+    left: 14px;
     width: 24px;
     transform: rotate(45deg);
     cursor: pointer;

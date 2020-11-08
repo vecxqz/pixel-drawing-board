@@ -7,7 +7,7 @@ const module: Module<CanvasState, any> = {
   namespaced: true,
   state: () => ({
     mode: "pencil",
-    color: "",
+    color: "rgb(100, 200, 150)",
     primaryColor: "rgb(100, 200, 150)",
     secondaryColor: "rgb(190, 255, 255)",
     currentLayerIndex: 0,

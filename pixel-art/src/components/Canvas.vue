@@ -76,7 +76,7 @@ import { initGrid } from "../util/canvas";
 import { isUndefined } from "../util/common";
 import { initLayer } from "../util/canvas";
 import { fromEvent, animationFrameScheduler } from "rxjs";
-import { concatAll, map, takeUntil, tap, debounceTime } from "rxjs/operators";
+import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 export default {
   name: "Canvas",
   setup(this: any) {
@@ -297,7 +297,7 @@ export default {
             )
           )
         ),
-        debounceTime(16, animationFrameScheduler),
+        throttleTime(0, animationFrameScheduler),
         // 拍平
         concatAll()
       )

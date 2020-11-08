@@ -3,7 +3,7 @@
     <ul class="dis-flex operators">
       <li class="operator-item">文件</li>
       <li class="operator-item">设置</li>
-      <li class="operator-item">下载</li>
+      <li class="operator-item" @click="downloadGIF">下载</li>
       <li class="operator-item" @click="undo">撤销</li>
       <li class="operator-item" @click="redo">还原</li>
       <li class="operator-item">全屏</li>
@@ -13,13 +13,16 @@
 
 <script lang="ts">
 import { useDoState } from "../composables/useDoState";
+import { useDownload } from "../composables/useDownload";
 export default {
   name: "ToolHeader",
   setup() {
     const { redo, undo } = useDoState();
+    const { downloadGIF } = useDownload();
     return {
       redo,
-      undo
+      undo,
+      downloadGIF
     };
   }
 };

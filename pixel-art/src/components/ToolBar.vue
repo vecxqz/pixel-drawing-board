@@ -235,5 +235,6 @@ export default {
 }
 .color-preview{
   margin-top: 20px;
+  z-index: 2;
 }
 </style>
