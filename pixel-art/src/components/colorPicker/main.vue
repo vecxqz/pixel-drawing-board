@@ -46,9 +46,18 @@
           </div>
         </div>
         <div class="color-meta-item">
-          <div><span>h</span><input v-model="hues" /></div>
-          <div><span>s</span><input v-model="saturation" /></div>
-          <div><span>v</span><input v-model="value" /></div>
+          <div>
+            <span>h</span
+            ><input @input="hsvInputFilter($event, 'h')" v-model="hues" />
+          </div>
+          <div>
+            <span>s</span
+            ><input @input="hsvInputFilter($event, 's')" v-model="saturation" />
+          </div>
+          <div>
+            <span>v</span
+            ><input @input="hsvInputFilter($event, 'v')" v-model="value" />
+          </div>
         </div>
       </div>
     </div>
@@ -96,8 +105,8 @@ export default {
     const rgbMeta = reactive({ r: 0, g: 0, b: 0 }) as rgbMeat;
     watch(
       () => props.emitColor,
-      newColro => {
-        setBoardView(newColro);
+      newColor => {
+        setBoardView(newColor);
       }
     );
     onMounted(() => {
@@ -159,14 +168,15 @@ export default {
       } else {
         cursorTop = clientY - top;
       }
-      saturation.value = Math.round((cursorLeft / width) * 100) / 100;
-      value.value = Math.round((1 - cursorTop / height) * 100) / 100;
+      saturation.value = Math.round((cursorLeft / width) * 100);
+      value.value = Math.round((1 - cursorTop / height) * 100);
       satCursorPosition.top = `${cursorTop - 5}px`;
       satCursorPosition.left = `${cursorLeft - 5}px`;
-      hsv.value = `${hues.value},${saturation.value},${value.value},`;
+      hsv.value = `${hues.value},${saturation.value / 100},${value.value /
+        100},`;
       const h = hues.value,
-        s = saturation.value,
-        v = value.value;
+        s = saturation.value / 100,
+        v = value.value / 100;
       const { r, g, b } = HSVtoRGB(h, s, v);
       rgbMeta.r = r;
       rgbMeta.g = g;
@@ -189,15 +199,14 @@ export default {
       huesCursorPosition.top = `${cursorTop - 4}px`;
       hues.value = Math.round((1 - cursorTop / height) * 360 * 100) / 100;
       const h = hues.value,
-        s = saturation.value,
-        v = value.value;
+        s = saturation.value / 100,
+        v = value.value / 100;
       const { h: newH, s: newS, l: newL } = HSVtoHSL(h, s, v);
       const { r, g, b } = HSVtoRGB(h, s, v);
       rgbMeta.r = r;
       rgbMeta.g = g;
       rgbMeta.b = b;
       chooseColor.value = `hsl(${newH}, ${newS * 100}%, ${newL * 100}%)`;
-      // console.log(chooseColor.value);
       newColor.value = `rgb(${r}, ${g}, ${b})`;
       context.emit("update:emitColor", newColor.value);
     }
@@ -376,9 +385,9 @@ export default {
       satCursorPosition.top = `${satCursorTop}`;
       satCursorPosition.left = `${satCursorLeft}`;
       huesCursorPosition.top = `${hueCursorTop}`;
-      saturation.value = s;
       hues.value = h;
-      value.value = v;
+      saturation.value = Math.floor(s * 100);
+      value.value = Math.floor(v * 100);
     }
     function getRgbfromString(rgb: string) {
       const matchColors = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
@@ -410,8 +419,50 @@ export default {
         value = 0;
       }
       rgbMeta[mode] = value;
-      console.log(mode, rgbMeta);
       const { r, g, b } = rgbMeta;
+      setBoardView(`rgb(${r}, ${g}, ${b})`);
+    }
+    function hsvInputFilter(e: any, mode: string) {
+      let inputValue = e.target.value;
+      if (inputValue.length > 3) {
+        inputValue = inputValue.slice(0, 3);
+      }
+      inputValue = +inputValue.replace(/((?<=\d)\.\d+)|\D/g, "");
+      if (mode === "h") {
+        if (inputValue > 360) {
+          inputValue = 360;
+        }
+        if (inputValue === 0) {
+          inputValue = 0;
+        }
+        hues.value = inputValue;
+      }
+      if (mode === "s") {
+        if (inputValue > 100) {
+          inputValue = 100;
+        }
+        if (inputValue === 0) {
+          inputValue = 0;
+        }
+        saturation.value = inputValue;
+      }
+      if (mode === "v") {
+        if (inputValue > 100) {
+          inputValue = 100;
+        }
+        if (inputValue === 0) {
+          inputValue = 0;
+        }
+        value.value = inputValue;
+      }
+      const { r, g, b } = HSVtoRGB(
+        hues.value,
+        saturation.value / 100,
+        value.value / 100
+      );
+      rgbMeta.r = r;
+      rgbMeta.g = g;
+      rgbMeta.b = b;
       setBoardView(`rgb(${r}, ${g}, ${b})`);
     }
     return {
@@ -434,6 +485,7 @@ export default {
       rgbMeta,
       popupHide,
       rgbInputFilter,
+      hsvInputFilter,
       colrPicker
     };
   }
