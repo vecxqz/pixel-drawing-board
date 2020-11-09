@@ -60,6 +60,10 @@
           </div>
         </div>
       </div>
+      <div class="color-hex">
+        <span>#</span>
+        <input @input="hexInputFilter($event)" v-model="colorHex" />
+      </div>
     </div>
   </div>
 </template>
@@ -69,7 +73,7 @@ import clickOutSide from "../../directives/clickoutside";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, takeUntil, tap, map, throttleTime } from "rxjs/operators";
-import { useStore } from "../../composables/useStore";
+import Color from "color";
 interface rgbMeat {
   [key: string]: number;
 }
@@ -85,8 +89,7 @@ export default {
     clickOutSide
   },
   setup(props: any, context: any) {
-    const store: any = useStore();
-    const color = computed(() => store.state.canvasModule.color);
+    const color = computed(() => props.emitColor);
     const newColor = ref("rgb(0, 0, 0)");
     const satWidth = ref(150);
     const satHeight = ref(150);
@@ -95,18 +98,17 @@ export default {
     const hues = ref(0);
     const saturation = ref(0);
     const value = ref(0);
-    const hsv = ref("");
+    const colorHex = ref("");
     const areaSat = ref(document.body);
     const areaHues = ref(document.body);
     const colrPicker = ref(document.body);
     const satCursorPosition = reactive({ left: "0px", top: "0px" });
     const huesCursorPosition = reactive({ left: "0px", top: "0px" });
-    const currentColor = ref("");
     const rgbMeta = reactive({ r: 0, g: 0, b: 0 }) as rgbMeat;
     watch(
-      () => props.emitColor,
-      newColor => {
-        setBoardView(newColor);
+      () => props.visible,
+      () => {
+        setBoardView(props.emitColor);
       }
     );
     onMounted(() => {
@@ -172,16 +174,19 @@ export default {
       value.value = Math.round((1 - cursorTop / height) * 100);
       satCursorPosition.top = `${cursorTop - 5}px`;
       satCursorPosition.left = `${cursorLeft - 5}px`;
-      hsv.value = `${hues.value},${saturation.value / 100},${value.value /
-        100},`;
       const h = hues.value,
-        s = saturation.value / 100,
-        v = value.value / 100;
-      const { r, g, b } = HSVtoRGB(h, s, v);
-      rgbMeta.r = r;
-      rgbMeta.g = g;
-      rgbMeta.b = b;
-      newColor.value = `rgb(${r}, ${g}, ${b})`;
+        s = saturation.value,
+        v = value.value;
+      const [r, g, b] = Color.hsv([h, s, v]).rgb().color;
+
+      rgbMeta.r = Math.round(r);
+      rgbMeta.g = Math.round(g);
+      rgbMeta.b = Math.round(b);
+      colorHex.value = Color.hsv([h, s, v])
+        .hex()
+        .slice(1);
+      console.log(Color.hsv([h, s, v]));
+      newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
       context.emit("update:emitColor", newColor.value);
     }
     function chooseHues(e: MouseEvent) {
@@ -197,210 +202,61 @@ export default {
         cursorTop = clientY - top;
       }
       huesCursorPosition.top = `${cursorTop - 4}px`;
-      hues.value = Math.round((1 - cursorTop / height) * 360 * 100) / 100;
+      hues.value = Math.round((1 - cursorTop / height) * 360);
       const h = hues.value,
-        s = saturation.value / 100,
-        v = value.value / 100;
-      const { h: newH, s: newS, l: newL } = HSVtoHSL(h, s, v);
-      const { r, g, b } = HSVtoRGB(h, s, v);
-      rgbMeta.r = r;
-      rgbMeta.g = g;
-      rgbMeta.b = b;
-      chooseColor.value = `hsl(${newH}, ${newS * 100}%, ${newL * 100}%)`;
-      newColor.value = `rgb(${r}, ${g}, ${b})`;
+        s = saturation.value,
+        v = value.value;
+      const [r, g, b] = Color.hsv([h, s, v]).rgb().color;
+      const [newH, newS, newL] = Color.hsv([h, s, v]).hsl().color;
+      chooseColor.value = `hsl(${newH}, ${newS}%, ${newL}%)`;
+      rgbMeta.r = Math.round(r);
+      rgbMeta.g = Math.round(g);
+      rgbMeta.b = Math.round(b);
+      newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
+      colorHex.value = Color.hsv([h, s, v])
+        .hex()
+        .slice(1);
       context.emit("update:emitColor", newColor.value);
-    }
-    function HSVtoHSL(h: number, s: number, v: number) {
-      // both hsv and hsl values are in [0, 1]
-      var l = ((2 - s) * v) / 2;
-
-      if (l != 0) {
-        if (l == 1) {
-          s = 0;
-        } else if (l < 0.5) {
-          s = (s * v) / (l * 2);
-        } else {
-          s = (s * v) / (2 - l * 2);
-        }
-      }
-
-      return {
-        h,
-        s,
-        l
-      };
-    }
-    function HSVtoRGB(h: number, s: number, v: number) {
-      let h1 = Math.floor(h / 60) % 6;
-      let f = h / 60 - h1;
-      let p = v * (1 - s);
-      let q = v * (1 - f * s);
-      let t = v * (1 - (1 - f) * s);
-      let r = 0,
-        g = 0,
-        b = 0;
-      switch (h1) {
-        case 0:
-          r = v;
-          g = t;
-          b = p;
-          break;
-        case 1:
-          r = q;
-          g = v;
-          b = p;
-          break;
-        case 2:
-          r = p;
-          g = v;
-          b = t;
-          break;
-        case 3:
-          r = p;
-          g = q;
-          b = v;
-          break;
-        case 4:
-          r = t;
-          g = p;
-          b = v;
-          break;
-        case 5:
-          r = v;
-          g = p;
-          b = q;
-          break;
-      }
-      return {
-        r: Math.round((r as number) * 255),
-        g: Math.round((g as number) * 255),
-        b: Math.round((b as number) * 255)
-      } as {
-        r: number;
-        g: number;
-        b: number;
-      };
-    }
-    function RGBtoHSL(ar: number, ag: number, ab: number) {
-      let r = ar / 255;
-      let g = ag / 255;
-      let b = ab / 255;
-
-      let min = Math.min(r, g, b);
-      let max = Math.max(r, g, b);
-      let difference = max - min;
-      let h = 0,
-        s = 0,
-        l = 0;
-      if (max == min) {
-        h = 0;
-        s = 0;
-      } else {
-        s = l > 0.5 ? difference / (2.0 - max - min) : difference / (max + min);
-        switch (max) {
-          case r:
-            h = (g - b) / difference + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = 2.0 + (b - r) / difference;
-            break;
-          case b:
-            h = 4.0 + (r - g) / difference;
-            break;
-        }
-        h = Math.round(h * 60);
-      }
-      return {
-        h,
-        s,
-        l
-      };
-    }
-    function RGBtoHSV(ar: number, ag: number, ab: number) {
-      let r = ar / 255;
-      let g = ag / 255;
-      let b = ab / 255;
-      let h = 0,
-        s = 0,
-        v = 0;
-      let min = Math.min(r, g, b);
-      let max = (v = Math.max(r, g, b));
-      let difference = max - min;
-
-      if (max == min) {
-        h = 0;
-      } else {
-        switch (max) {
-          case r:
-            h = (g - b) / difference + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = 2.0 + (b - r) / difference;
-            break;
-          case b:
-            h = 4.0 + (r - g) / difference;
-            break;
-        }
-        h = Math.round(h * 60);
-      }
-      if (max == 0) {
-        s = 0;
-      } else {
-        s = 1 - min / max;
-      }
-      return {
-        h,
-        s,
-        v
-      };
     }
     function popupHide() {
       context.emit("update:visible", false);
     }
     function calcSatCursorPos(color: string) {
-      const { r, g, b } = getRgbfromString(color);
-      const { s, v } = RGBtoHSV(r, g, b);
-      const satCursorLeft = s * satWidth.value;
-      const satCursorTop = (1 - v) * satHeight.value;
-      // satCursorPosition.top = `${satCursorTop - 5}px`;
-      // satCursorPosition.left = `${satCursorLeft + 5}px`;
+      const c = Color(color);
+      const hsv = c.hsv().color;
+      const s = hsv[1];
+      const v = hsv[2];
+      const satCursorLeft = (s / 100) * satWidth.value;
+      const satCursorTop = (1 - v / 100) * satHeight.value;
       return {
         top: `${satCursorTop - 5}px`,
         left: `${satCursorLeft - 5}px`
       };
     }
-    function setBoardView(color: string) {
-      const { r, g, b } = getRgbfromString(color);
-      const { h, s, v } = RGBtoHSV(r, g, b);
-      const { h: newH, s: newS, l: newL } = HSVtoHSL(h, s, v);
+    function setBoardView(color: string, { ingoreHex } = { ingoreHex: false }) {
+      const c = Color(color);
+      const [r, g, b] = c.color;
+      const [h, s, v] = c.hsv().color;
+      const [newH, newS, newL] = c.hsl().color;
       const { top: satCursorTop, left: satCursorLeft } = calcSatCursorPos(
         color
       );
       const { top: hueCursorTop } = calcHuesCursorPos(color);
-      chooseColor.value = `hsl(${newH}, ${newS * 100}%, ${newL * 100}%)`;
-      currentColor.value = color;
+      chooseColor.value = `hsl(${newH}, ${newS}%, ${newL}%)`;
       rgbMeta.r = r;
       rgbMeta.g = g;
       rgbMeta.b = b;
       satCursorPosition.top = `${satCursorTop}`;
       satCursorPosition.left = `${satCursorLeft}`;
       huesCursorPosition.top = `${hueCursorTop}`;
-      hues.value = h;
-      saturation.value = Math.floor(s * 100);
-      value.value = Math.floor(v * 100);
-    }
-    function getRgbfromString(rgb: string) {
-      const matchColors = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-      const mColor = matchColors.exec(rgb) as Array<any>;
-      const nr = mColor[1],
-        ng = mColor[2],
-        nb = mColor[3];
-      const [r, g, b] = [+nr, +ng, +nb];
-      return { r, g, b };
+      hues.value = Math.round(h);
+      saturation.value = Math.round(s);
+      value.value = Math.round(v);
+      if (!ingoreHex) colorHex.value = c.hex().slice(1);
     }
     function calcHuesCursorPos(color: string) {
-      const { r, g, b } = getRgbfromString(color);
-      const { h } = RGBtoHSV(r, g, b);
+      const c = Color(color);
+      const [h] = c.hsv().color;
       const hueCursorTop = (1 - h / 360) * huesHeight.value;
       return {
         top: `${hueCursorTop - 4}px`
@@ -455,15 +311,32 @@ export default {
         }
         value.value = inputValue;
       }
-      const { r, g, b } = HSVtoRGB(
+      const [r, g, b] = Color.hsv([
         hues.value,
-        saturation.value / 100,
-        value.value / 100
-      );
-      rgbMeta.r = r;
-      rgbMeta.g = g;
-      rgbMeta.b = b;
+        saturation.value,
+        value.value
+      ]).rgb().color;
+      rgbMeta.r = Math.round(r);
+      rgbMeta.g = Math.round(g);
+      rgbMeta.b = Math.round(b);
       setBoardView(`rgb(${r}, ${g}, ${b})`);
+    }
+    function hexInputFilter(e: any) {
+      let inputValue = e.target.value;
+      let r, g, b;
+      // /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/;
+      inputValue = inputValue.replace(/$#?([a-fA-F0-9]{6})/g, "");
+      colorHex.value = inputValue;
+      inputValue = [...inputValue].filter(w => w !== "#").join("");
+      try {
+        [r, g, b] = Color(`#${inputValue}`).rgb().color;
+        rgbMeta.r = Math.round(r);
+        rgbMeta.g = Math.round(g);
+        rgbMeta.b = Math.round(b);
+        setBoardView(`rgb(${r}, ${g}, ${b})`, { ingoreHex: true });
+      } catch (e) {
+        (r = 0), (g = 0), (b = 0);
+      }
     }
     return {
       color,
@@ -477,16 +350,14 @@ export default {
       areaSat,
       areaHues,
       huesCursorPosition,
-      HSVtoRGB,
-      RGBtoHSL,
-      HSVtoHSL,
-      RGBtoHSV,
       newColor,
       rgbMeta,
       popupHide,
       rgbInputFilter,
       hsvInputFilter,
-      colrPicker
+      colrPicker,
+      colorHex,
+      hexInputFilter
     };
   }
 };
@@ -564,7 +435,7 @@ export default {
     }
     div {
       width: 60px;
-      margin: 8px 0;
+      margin: 6px 0;
       span {
         display: inline-block;
         width: 14px;
@@ -610,6 +481,15 @@ export default {
     border-width: 4px;
     border-style: solid;
     border-color: transparent transparent transparent red;
+  }
+}
+.color-hex {
+  span {
+    display: inline-block;
+    width: 14px;
+  }
+  input {
+    width: 105px;
   }
 }
 .hideen {
