@@ -114,8 +114,8 @@ ul {
   border: 2px solid rgba(122, 139, 235, 0.315);
 }
 .image-preview {
-  width: 200px;
-  height: 200px;
+  width: 100px;
+  height: 100px;
 }
 .attribute-box {
   .title {

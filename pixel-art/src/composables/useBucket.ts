@@ -27,7 +27,7 @@ export function useBucket(this: any) {
       width.value,
       height.value
     );
-    const oldColor = calcColor(imageData, columnIndex, rowIndex).rgb,
+    const oldColor = calcColor(imageData, columnIndex, rowIndex).rgba,
       newColor = color.value;
     // 传入的是原始对象,提高算法性能
     if (oldColor !== newColor) {
