@@ -16,10 +16,12 @@
       class="color-ps-exchange"
     />
     <colorPicker
+      class="color-primary-choose"
       v-model:visible="primaryColorVisible"
       v-model:emitColor="$store.state.canvasModule.primaryColor"
     />
     <colorPicker
+      class="color-secondary-choose"
       v-model:visible="secondaryColorVisible"
       v-model:emitColor="$store.state.canvasModule.secondaryColor"
     />
@@ -104,6 +106,16 @@ export default {
     width: 24px;
     transform: rotate(45deg);
     cursor: pointer;
+  }
+}
+.color {
+  &-primary-choose {
+    top: 50px;
+    left: 16px;
+  }
+  &-secondary-choose {
+    top: 70px;
+    left: 40px;
   }
 }
 </style>

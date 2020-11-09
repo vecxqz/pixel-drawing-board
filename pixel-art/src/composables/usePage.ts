@@ -1,7 +1,7 @@
 import { computed, nextTick, onMounted, ref, toRaw } from "vue";
 import { useStore } from "./useStore";
 import cloneDeep from "lodash/cloneDeep";
-import { initLayer } from "../util/canvas";
+import { initLayer } from "../utils/canvas";
 import { userPreview } from "./userPreview";
 import clone from "lodash/clone";
 export function usePage() {

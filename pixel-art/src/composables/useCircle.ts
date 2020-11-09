@@ -1,4 +1,4 @@
-import { bresenhamLineCircle, drawGridB } from "../util/canvas";
+import { bresenhamLineCircle, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";

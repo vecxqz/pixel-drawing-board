@@ -1,4 +1,4 @@
-import { bresenhamLineCircle, clearGridB } from "../util/canvas";
+import { bresenhamLineCircle, clearGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 export function useEraser(this: any) {

@@ -1,4 +1,4 @@
-import { drawGridB, bresenhamLine } from "../util/canvas";
+import { drawGridB, bresenhamLine } from "../utils/canvas";
 import { computed, reactive } from "vue";
 import { useStore } from "./useStore";
 export function usePencil(this: any) {

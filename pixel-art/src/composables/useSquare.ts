@@ -1,4 +1,4 @@
-import { drawSquare, drawGridB } from "../util/canvas";
+import { drawSquare, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";

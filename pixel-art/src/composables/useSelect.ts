@@ -1,4 +1,4 @@
-import { drawGridB, clearGridB } from "../util/canvas";
+import { drawGridB, clearGridB } from "../utils/canvas";
 import { computed, reactive, nextTick, toRaw, ref } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";

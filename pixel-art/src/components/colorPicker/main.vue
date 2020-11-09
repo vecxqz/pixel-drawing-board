@@ -1,5 +1,10 @@
 <template>
-  <div class="dis-flex pos-absolute container" :class="{ hideen: !visible }">
+  <div
+    v-clickOutSide="popupHide"
+    class="dis-flex pos-absolute container"
+    :class="{ hideen: !visible }"
+    ref="colrPicker"
+  >
     <div
       class="color-picker-saturation"
       ref="areaSat"
@@ -13,20 +18,52 @@
       </div>
     </div>
     <div class="color-picker-preview">
-      <p>新的颜色</p>
-      <div class="current-color" :style="`background-color:${newColor}`"></div>
-      <div class="choose-color" :style="`background-color:${color}`"></div>
-      <p>当前颜色</p>
-      <div>h:{{ hues }} s:{{ saturation }} v:{{ value }}</div>
+      <div class="color-group dis-flex">
+        <div class="color-item">
+          <div
+            class="current-color"
+            :style="`background-color:${newColor}`"
+          ></div>
+        </div>
+        <div class="color-item">
+          <div class="choose-color" :style="`background-color:${color}`"></div>
+        </div>
+      </div>
+      <!-- <div>h:{{ hues }} s:{{ saturation }} v:{{ value }}</div> -->
+      <div class="color-meta dis-flex">
+        <div class="color-meta-item">
+          <div>
+            <span>r</span
+            ><input @input="rgbInputFilter($event, 'r')" v-model="rgbMeta.r" />
+          </div>
+          <div>
+            <span>g</span
+            ><input @input="rgbInputFilter($event, 'g')" v-model="rgbMeta.g" />
+          </div>
+          <div>
+            <span>b</span
+            ><input @input="rgbInputFilter($event, 'b')" v-model="rgbMeta.b" />
+          </div>
+        </div>
+        <div class="color-meta-item">
+          <div><span>h</span><input v-model="hues" /></div>
+          <div><span>s</span><input v-model="saturation" /></div>
+          <div><span>v</span><input v-model="value" /></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import clickOutSide from "../../directives/clickoutside";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, takeUntil, tap, map, throttleTime } from "rxjs/operators";
 import { useStore } from "../../composables/useStore";
+interface rgbMeat {
+  [key: string]: number;
+}
 export default {
   props: {
     emitColor: String,
@@ -35,10 +72,16 @@ export default {
       type: Boolean
     }
   },
+  directives: {
+    clickOutSide
+  },
   setup(props: any, context: any) {
     const store: any = useStore();
     const color = computed(() => store.state.canvasModule.color);
     const newColor = ref("rgb(0, 0, 0)");
+    const satWidth = ref(150);
+    const satHeight = ref(150);
+    const huesHeight = ref(150);
     const chooseColor = ref("");
     const hues = ref(0);
     const saturation = ref(0);
@@ -46,36 +89,32 @@ export default {
     const hsv = ref("");
     const areaSat = ref(document.body);
     const areaHues = ref(document.body);
+    const colrPicker = ref(document.body);
     const satCursorPosition = reactive({ left: "0px", top: "0px" });
     const huesCursorPosition = reactive({ left: "0px", top: "0px" });
     const currentColor = ref("");
+    const rgbMeta = reactive({ r: 0, g: 0, b: 0 }) as rgbMeat;
+    watch(
+      () => props.emitColor,
+      newColro => {
+        setBoardView(newColro);
+      }
+    );
     onMounted(() => {
       const satDom = areaSat.value;
       const huesDom = areaHues.value;
+      const colorPickerDom = colrPicker.value;
       const satDomMouseDown = fromEvent(satDom, "mousedown");
       const satDomMouseMove = fromEvent(document, "mousemove");
       const satDomMouseUp = fromEvent(document, "mouseup");
       const huesDomMouseDown = fromEvent(huesDom, "mousedown");
       const huesDomMouseMove = fromEvent(document, "mousemove");
       const huesDomMouseUp = fromEvent(document, "mouseup");
-      // RGBtoHSV()
-      const matchColors = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-      const mColor = matchColors.exec(props.emitColor) as Array<any>;
-      const nr = mColor[1],
-        ng = mColor[2],
-        nb = mColor[3];
-      const [r, g, b] = [+nr, +ng, +nb];
-      const { h, s, v } = RGBtoHSV(r, g, b);
-      const { h: newH, s: newS, l: newL } = HSVtoHSL(h, s, v);
-      chooseColor.value = `hsl(${newH}, ${newS * 100}%, ${newL * 100}%)`;
-      const satCursorLeft = s * 150;
-      const satCursorTop = (1 - v) * 150;
-      const hueCursorTop = (1- h/360) * 150;
-      satCursorPosition.top = `${satCursorTop - 5}px`;
-      satCursorPosition.left = `${satCursorLeft + 5}px`;
-      huesCursorPosition.top = `${hueCursorTop}px`;
-      currentColor.value = props.emitColor;
-      hues.value = h;
+      const colorPickerKeyUp = fromEvent(colorPickerDom, "keyup");
+      setBoardView(props.emitColor);
+      colorPickerKeyUp.pipe().subscribe(e => {
+        e.stopPropagation();
+      });
       satDomMouseDown
         .pipe(
           tap((e: any) => {
@@ -129,6 +168,9 @@ export default {
         s = saturation.value,
         v = value.value;
       const { r, g, b } = HSVtoRGB(h, s, v);
+      rgbMeta.r = r;
+      rgbMeta.g = g;
+      rgbMeta.b = b;
       newColor.value = `rgb(${r}, ${g}, ${b})`;
       context.emit("update:emitColor", newColor.value);
     }
@@ -151,8 +193,11 @@ export default {
         v = value.value;
       const { h: newH, s: newS, l: newL } = HSVtoHSL(h, s, v);
       const { r, g, b } = HSVtoRGB(h, s, v);
+      rgbMeta.r = r;
+      rgbMeta.g = g;
+      rgbMeta.b = b;
       chooseColor.value = `hsl(${newH}, ${newS * 100}%, ${newL * 100}%)`;
-      console.log(chooseColor.value);
+      // console.log(chooseColor.value);
       newColor.value = `rgb(${r}, ${g}, ${b})`;
       context.emit("update:emitColor", newColor.value);
     }
@@ -182,7 +227,9 @@ export default {
       let p = v * (1 - s);
       let q = v * (1 - f * s);
       let t = v * (1 - (1 - f) * s);
-      let r, g, b;
+      let r = 0,
+        g = 0,
+        b = 0;
       switch (h1) {
         case 0:
           r = v;
@@ -220,9 +267,9 @@ export default {
         g: Math.round((g as number) * 255),
         b: Math.round((b as number) * 255)
       } as {
-        r: number | undefined;
-        g: number | undefined;
-        b: number | undefined;
+        r: number;
+        g: number;
+        b: number;
       };
     }
     function RGBtoHSL(ar: number, ag: number, ab: number) {
@@ -298,6 +345,75 @@ export default {
         v
       };
     }
+    function popupHide() {
+      context.emit("update:visible", false);
+    }
+    function calcSatCursorPos(color: string) {
+      const { r, g, b } = getRgbfromString(color);
+      const { s, v } = RGBtoHSV(r, g, b);
+      const satCursorLeft = s * satWidth.value;
+      const satCursorTop = (1 - v) * satHeight.value;
+      // satCursorPosition.top = `${satCursorTop - 5}px`;
+      // satCursorPosition.left = `${satCursorLeft + 5}px`;
+      return {
+        top: `${satCursorTop - 5}px`,
+        left: `${satCursorLeft - 5}px`
+      };
+    }
+    function setBoardView(color: string) {
+      const { r, g, b } = getRgbfromString(color);
+      const { h, s, v } = RGBtoHSV(r, g, b);
+      const { h: newH, s: newS, l: newL } = HSVtoHSL(h, s, v);
+      const { top: satCursorTop, left: satCursorLeft } = calcSatCursorPos(
+        color
+      );
+      const { top: hueCursorTop } = calcHuesCursorPos(color);
+      chooseColor.value = `hsl(${newH}, ${newS * 100}%, ${newL * 100}%)`;
+      currentColor.value = color;
+      rgbMeta.r = r;
+      rgbMeta.g = g;
+      rgbMeta.b = b;
+      satCursorPosition.top = `${satCursorTop}`;
+      satCursorPosition.left = `${satCursorLeft}`;
+      huesCursorPosition.top = `${hueCursorTop}`;
+      saturation.value = s;
+      hues.value = h;
+      value.value = v;
+    }
+    function getRgbfromString(rgb: string) {
+      const matchColors = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+      const mColor = matchColors.exec(rgb) as Array<any>;
+      const nr = mColor[1],
+        ng = mColor[2],
+        nb = mColor[3];
+      const [r, g, b] = [+nr, +ng, +nb];
+      return { r, g, b };
+    }
+    function calcHuesCursorPos(color: string) {
+      const { r, g, b } = getRgbfromString(color);
+      const { h } = RGBtoHSV(r, g, b);
+      const hueCursorTop = (1 - h / 360) * huesHeight.value;
+      return {
+        top: `${hueCursorTop - 4}px`
+      };
+    }
+    function rgbInputFilter(e: any, mode: string) {
+      let value = e.target.value;
+      if (value.length > 3) {
+        value = value.slice(0, 3);
+      }
+      value = +value.replace(/((?<=\d)\.\d+)|\D/g, "");
+      if (value > 255) {
+        value = 255;
+      }
+      if (value === 0) {
+        value = 0;
+      }
+      rgbMeta[mode] = value;
+      console.log(mode, rgbMeta);
+      const { r, g, b } = rgbMeta;
+      setBoardView(`rgb(${r}, ${g}, ${b})`);
+    }
     return {
       color,
       chooseSat,
@@ -314,15 +430,21 @@ export default {
       RGBtoHSL,
       HSVtoHSL,
       RGBtoHSV,
-      newColor
+      newColor,
+      rgbMeta,
+      popupHide,
+      rgbInputFilter,
+      colrPicker
     };
   }
 };
 </script>
 <style lang="scss" scoped>
 .container {
-  background: rgb(190, 737, 417);
   padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: #333;
+  color: rgb(255, 255, 255);
 }
 .pos-absolute {
   position: absolute;
@@ -370,14 +492,35 @@ export default {
   );
   background-size: 100% 100%;
 }
-.color-picker-preview {
+.color-group .color-item {
+  &:first-of-type {
+    margin: 0 5px 0 0;
+  }
   p {
     margin: 0;
     font-size: 12px;
   }
   div {
-    width: 50px;
+    width: 60px;
     height: 35px;
+  }
+}
+.color-meta {
+  &-item {
+    &:first-of-type {
+      margin: 0 5px 0 0;
+    }
+    div {
+      width: 60px;
+      margin: 8px 0;
+      span {
+        display: inline-block;
+        width: 14px;
+      }
+      input {
+        width: 40px;
+      }
+    }
   }
 }
 .cursor-sat {

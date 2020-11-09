@@ -1,4 +1,4 @@
-import { drawGridB, clearGridB, bresenhamLine } from "../util/canvas";
+import { drawGridB, clearGridB, bresenhamLine } from "../utils/canvas";
 import { computed, reactive, ref } from "vue";
 import { useStore } from "./useStore";
 export function useMirrorPencil(this: any) {

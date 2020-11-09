@@ -2,7 +2,7 @@ import { MutationTree } from "vuex";
 import { CanvasState } from "./type";
 import { Mutation } from "vuex";
 import { MutationsTypes } from "./enum";
-import { isUndefined } from "../../util/common";
+import { isUndefined } from "../../utils/common";
 import { useCanvas } from "../../composables/useCanvas";
 const CanvasMutations: MutationTree<CanvasState> = {
   [MutationsTypes.SET_PAINT_MODE](state: CanvasState, mode: string) {

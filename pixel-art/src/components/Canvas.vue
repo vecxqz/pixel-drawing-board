@@ -72,9 +72,9 @@ import { userPreview } from "../composables/userPreview";
 import { useCanvas } from "../composables/useCanvas";
 import { useMove } from "../composables/useMove";
 import { useDoState } from "../composables/useDoState";
-import { initGrid } from "../util/canvas";
-import { isUndefined } from "../util/common";
-import { initLayer } from "../util/canvas";
+import { initGrid } from "../utils/canvas";
+import { isUndefined } from "../utils/common";
+import { initLayer } from "../utils/canvas";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 export default {
@@ -265,8 +265,7 @@ export default {
       );
     });
     const document = window.document.body;
-    fromEvent(document, "keydown").subscribe(e => {
-      console.log(e);
+    fromEvent(document, "keyup").subscribe(e => {
       const { code, ctrlKey } = e as KeyboardEvent;
       if (code === "KeyZ" && ctrlKey) {
         this.undo();

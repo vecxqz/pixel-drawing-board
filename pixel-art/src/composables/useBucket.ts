@@ -1,4 +1,4 @@
-import { ScanLineFill, boundaryFill4 } from "../util/fill";
+import { ScanLineFill, boundaryFill4 } from "../utils/fill";
 import { computed } from "vue";
 import { useCanvas } from "./useCanvas";
 import { useStore } from "./useStore";

@@ -1,4 +1,4 @@
-import { drawGrid } from "../util/canvas";
+import { drawGrid } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useCanvas } from "./useCanvas";
