@@ -71,7 +71,6 @@ function ScanLineFill(
 ) {
   // 获取颜色rgb值
   const [r, g, b] = Color(newColor).color;
-  console.log(Color(newColor));
   let stack = []; // 构造种子点栈
   let point = {
     columnIndex: layerX,
@@ -90,7 +89,6 @@ function ScanLineFill(
     yl = y;
     const color = calcColor(imageData, columnIndex, rowIndex).rgba;
     // 3.向左右填充（在当前点所在扫描线扫描）
-    console.log(color, oldColor);
     if (color === oldColor) {
       //填充颜色
       changeColorByImageData(imageData, x, y, { r, g, b });
@@ -167,7 +165,6 @@ function SearchLineNewSeed(
   let findNewSeed = false;
   while (xt <= xRight) {
     // 从xl开始到xr，找到新的种子点
-    // console.log(xt, y, calcColor(imageData, xt, y).rgb);
     if (calcColor(imageData, xt, y).rgba === oldColor) {
       findNewSeed = true; // 说明有种子点
       xt++;

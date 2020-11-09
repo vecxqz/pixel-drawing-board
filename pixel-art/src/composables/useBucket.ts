@@ -2,6 +2,7 @@ import { ScanLineFill, boundaryFill4 } from "../utils/fill";
 import { computed } from "vue";
 import { useCanvas } from "./useCanvas";
 import { useStore } from "./useStore";
+import Color from "color";
 
 export function useBucket(this: any) {
   const { calcColor } = useCanvas();
@@ -27,9 +28,10 @@ export function useBucket(this: any) {
       width.value,
       height.value
     );
+    const [r, g, b] = Color(color.value).color;
     const oldColor = calcColor(imageData, columnIndex, rowIndex).rgba,
-      newColor = color.value;
-    // 传入的是原始对象,提高算法性能
+      newColor = `rgba(${r}, ${g}, ${b}, 1)`;
+    console.log(oldColor, newColor);
     if (oldColor !== newColor) {
       const boundaryWidth = width.value;
       const boundaryHeight = height.value;
