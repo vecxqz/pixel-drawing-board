@@ -31,7 +31,6 @@ export function useBucket(this: any) {
     const [r, g, b] = Color(color.value).color;
     const oldColor = calcColor(imageData, columnIndex, rowIndex).rgba,
       newColor = `rgba(${r}, ${g}, ${b}, 1)`;
-    console.log(oldColor, newColor);
     if (oldColor !== newColor) {
       const boundaryWidth = width.value;
       const boundaryHeight = height.value;

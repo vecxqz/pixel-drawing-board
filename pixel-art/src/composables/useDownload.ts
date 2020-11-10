@@ -1,29 +1,128 @@
+import { computed, nextTick } from "vue";
 import { useStore } from "./useStore";
 export function useDownload() {
   const store: any = useStore();
+  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
+  const currentPageIndex = computed(
+    () => store.state.canvasModule.currentPageIndex
+  );
+  const currentPage = computed(
+    () => store.state.canvasModule.pages[currentPageIndex.value]
+  );
+  const animationSpeed = computed(
+    () => store.state.canvasModule.animationSpeed
+  );
+  function getDownloadImageUrl() {
+    // console.log(tempCanvasCtx.value);
+    const { width, height } = tempCanvasCtx.value.canvas;
+    tempCanvasCtx.value.clearRect(0, 0, width, height);
+    const { imageData } = currentPage.value;
+    const scale = 10;
+    const scaleImageDataResult = scaleImageData(
+      imageData,
+      scale,
+      tempCanvasCtx.value
+    );
+    tempCanvasCtx.value.canvas.width = width * scale;
+    tempCanvasCtx.value.canvas.height = height * scale;
+    // console.log(scaleImageDataResult);
+    // tempCanvasCtx.value.imageSmoothingEnabled = false;
+    tempCanvasCtx.value.putImageData(scaleImageDataResult, 0, 0);
+    const url = tempCanvasCtx.value.canvas.toDataURL("image/png", 1);
+    tempCanvasCtx.value.canvas.width = width;
+    tempCanvasCtx.value.canvas.height = height;
+    return url;
+  }
+  function getImage(imageData: ImageData, scale: number) {
+    const { width, height } = tempCanvasCtx.value.canvas;
+    tempCanvasCtx.value.clearRect(0, 0, width, height);
+    const scaleImageDataResult = scaleImageData(
+      imageData,
+      scale,
+      tempCanvasCtx.value
+    );
+    tempCanvasCtx.value.canvas.width = width * scale;
+    tempCanvasCtx.value.canvas.height = height * scale;
+    tempCanvasCtx.value.putImageData(scaleImageDataResult, 0, 0);
+    const url = tempCanvasCtx.value.canvas.toDataURL("image/png", 1);
+    const img = document.createElement("img");
+    document.body.appendChild(img);
+    img.style.position = "fixed";
+    img.style.left = "0";
+    img.style.top = "0";
+    img.style.zIndex = "-99";
+    img.src = url;
+    tempCanvasCtx.value.canvas.width = width;
+    tempCanvasCtx.value.canvas.height = height;
+    return new Promise(resolve => {
+      img.onload = () => {
+        resolve(img);
+      };
+    });
+  }
+  /* https://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas */
+  function scaleImageData(
+    imageData: ImageData,
+    scale: number,
+    canvasCtx: CanvasRenderingContext2D
+  ) {
+    var scaled = canvasCtx.createImageData(
+      imageData.width * scale,
+      imageData.height * scale
+    );
+    for (var row = 0; row < imageData.height; row++) {
+      for (var col = 0; col < imageData.width; col++) {
+        var sourcePixel = [
+          imageData.data[(row * imageData.width + col) * 4 + 0],
+          imageData.data[(row * imageData.width + col) * 4 + 1],
+          imageData.data[(row * imageData.width + col) * 4 + 2],
+          imageData.data[(row * imageData.width + col) * 4 + 3]
+        ];
+        for (var y = 0; y < scale; y++) {
+          var destRow = row * scale + y;
+          for (var x = 0; x < scale; x++) {
+            var destCol = col * scale + x;
+            for (var i = 0; i < 4; i++) {
+              scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
+                sourcePixel[i];
+            }
+          }
+        }
+      }
+    }
 
-  function downloadGIF() {
-    // const imgs: any = window.document.querySelectorAll(
-    //   ".preview-page .page-preview-image"
-    // );
-    // const GIF = (window as any).GIF;
-    // const gif = new GIF({
-    //   workers: 4,
-    //   quality: 10,
-    // });
+    return scaled;
+  }
+  function downloadImage() {}
+  function downloadImageGIF() {
+    var gif = new GIF({
+      workers: 2,
+      quality: 10
+    });
 
-    // // add an image element
-    // imgs.forEach((img: any) =>
-    //   gif.addFrame(img, {
-    //     delay: 1000
-    //   })
-    // );
-    // gif.on("finished", function(blob: any) {
-    //   window.open(URL.createObjectURL(blob));
-    // });
-    // gif.render();
+    gif.on("finished", function(blob: any) {
+      window.open(URL.createObjectURL(blob));
+    });
+    const pages = store.state.canvasModule.pages;
+    const imgs = [];
+    for (let i = 0; i < pages.length; i++) {
+      const { imageData } = pages[i];
+      const imgPromise = getImage(imageData, 20);
+      imgs.push(imgPromise);
+      // imgPromise.then(img => gif.addFrame(img, {}));
+      // img.onload = () => {
+      //   gif.addFrame(img, {});
+      // };
+    }
+    Promise.all(imgs).then(imgs => {
+      imgs.forEach(img => gif.addFrame(img, { delay: animationSpeed.value }));
+      gif.render();
+      imgs.forEach((img: any) => document.body.removeChild(img));
+    });
   }
   return {
-    downloadGIF
+    downloadImage,
+    getDownloadImageUrl,
+    downloadImageGIF
   };
 }

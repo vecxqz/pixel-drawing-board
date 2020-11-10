@@ -25,4 +25,5 @@ export interface CanvasState {
   previewUrl: string /**预览图片url */;
   redo: Array<any>;
   undo: Array<any>;
+  animationSpeed: number;
 }

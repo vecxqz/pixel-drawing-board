@@ -1,7 +1,10 @@
 <template>
   <div id="preview">
     <div class="preview-aniamtion">
-      <div class="preview-title"><img src="../assets/preview.svg" />预览</div>
+      <div class="preview-title">
+        <img src="../assets/preview.svg" />预览
+        <input class="speed-control" type="text" v-model="speed" />ms
+      </div>
       <div class="page-preview-item">
         <img
           v-if="animationPreviewUrl"
@@ -52,11 +55,18 @@
 
 <script lang="ts">
 import { usePage } from "../composables/usePage";
+import { useStore } from "../composables/useStore";
 import { useDoState } from "../composables/useDoState";
+import { ref, onMounted, watch } from "vue";
 export default {
   name: "Page",
   setup() {
+    const store: any = useStore();
     const { toUndoStack, TYPE } = useDoState();
+    const speed = ref(store.state.canvasModule.animationSpeed);
+    watch(speed, newVal => {
+      store.state.canvasModule.animationSpeed = +newVal;
+    });
     const {
       pages,
       create,
@@ -67,6 +77,9 @@ export default {
       currentPageIndex,
       move
     } = usePage();
+    onMounted(() => {
+      setAnimationPreview();
+    });
     function createPage(index: number) {
       const data: any = create(index);
       toUndoStack({ ...data, type: TYPE.PAGE_CREATE }, true);
@@ -89,6 +102,30 @@ export default {
         toUndoStack({ ...data, type: TYPE.PAGE_TO_RIGHT }, true);
       }
     }
+    function setAnimationPreview() {
+      let index = 0;
+      function animation() {
+        if (index != store.state.canvasModule.pages.length - 1) {
+          index += 1;
+        } else {
+          index = 0;
+        }
+        try {
+          const { previewUrl } = store.state.canvasModule.pages[index];
+          if (previewUrl) {
+            animationPreviewUrl.value = previewUrl;
+          }
+        } catch (e) {
+          // console.log(e);
+          index = 0;
+        }
+        setTimeout(() => {
+          animation();
+        }, speed.value);
+      }
+      animation();
+    }
+    setAnimationPreview();
     return {
       pages,
       createPage,
@@ -97,7 +134,8 @@ export default {
       choose,
       animationPreviewUrl,
       currentPageIndex,
-      movePage
+      movePage,
+      speed
     };
   }
 };
@@ -114,7 +152,7 @@ export default {
   font-size: 14px;
 }
 .preview-aniamtion {
-  min-width: 100px;
+  min-width: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -162,5 +200,9 @@ export default {
 }
 .preview-title {
   display: flex;
+}
+.speed-control {
+  width: 40px;
+  height: 18px;
 }
 </style>

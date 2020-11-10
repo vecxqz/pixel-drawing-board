@@ -4,8 +4,8 @@
       id="canvas-container"
       class="pos-relative"
       :style="
-        `width:${$store.state.canvasModule.width * 10}px;
-        height:${$store.state.canvasModule.height * 10}px`
+        `width:${800}px;
+        height:${800}px`
       "
     >
       <canvas
@@ -240,6 +240,7 @@ export default {
       belowCanvas,
       tempCanvas
     } = this.$refs;
+    this.setCanvasData();
     const canvasContainer: HTMLElement = window.document.getElementById(
       "canvas-container"
     ) as HTMLElement;
@@ -265,7 +266,7 @@ export default {
       );
     });
     const document = window.document.body;
-    fromEvent(document, "keyup").subscribe(e => {
+    fromEvent(document, "keydown").subscribe(e => {
       const { code, ctrlKey } = e as KeyboardEvent;
       if (code === "KeyZ" && ctrlKey) {
         this.undo();
@@ -305,6 +306,10 @@ export default {
       });
   },
   methods: {
+    setCanvasData(this: any) {
+      const { width } = this.$store.state.canvasModule;
+      this.$store.state.canvasModule.size = 800 / width;
+    },
     mergeCanvas(this: any) {
       const { width, height } = this.$store.state.canvasModule;
       this.$store.state.canvasModule.pages[
@@ -312,15 +317,15 @@ export default {
       ].layers[
         this.$store.state.canvasModule.currentLayerIndex
       ].canvasImageData = this.canvasCtx.getImageData(0, 0, width, height);
-      const backgroundMeta = {
-        layerName: "background",
-        canvasImageData: this.backgroundCanvasCtx.getImageData(
-          0,
-          0,
-          width,
-          height
-        )
-      };
+      // const backgroundMeta = {
+      //   layerName: "background",
+      //   canvasImageData: this.backgroundCanvasCtx.getImageData(
+      //     0,
+      //     0,
+      //     width,
+      //     height
+      //   )
+      // };
       const belowMeta = {
         layerName: "below",
         canvasImageData: this.belowCanvasCtx.getImageData(0, 0, width, height)
@@ -333,7 +338,13 @@ export default {
         layerName: "current",
         canvasImageData: this.canvasCtx.getImageData(0, 0, width, height)
       };
-      const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
+      const canvasArray = [belowMeta, currentMeta, aboveMeta];
+      this.tempCanvasCtx.drawImage(this.belowCanvasCtx.canvas, 0, 0);
+      this.tempCanvasCtx.drawImage(this.canvasCtx.canvas, 0, 0);
+      this.tempCanvasCtx.drawImage(this.aboveCanvasCtx.canvas, 0, 0);
+      this.$store.state.canvasModule.pages[
+        this.$store.state.canvasModule.currentPageIndex
+      ].imageData = this.tempCanvasCtx.getImageData(0, 0, width, height);
       this.setCanvasPreviewByImageData(
         canvasArray,
         this.tempCanvasCtx,

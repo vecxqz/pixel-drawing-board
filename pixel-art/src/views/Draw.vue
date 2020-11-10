@@ -5,7 +5,7 @@
     <PixleCanvas class="area-canvas" />
     <CanvasAttribute class="area-attribute" />
   </div>
-  <Page class="page"/>
+  <Page class="page" />
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
@@ -40,11 +40,11 @@ export default {
   &-canvas {
     flex: 1;
     overflow: auto;
-    display: flex;
     align-items: center;
   }
 }
-.area-mid{
+.area-mid {
   flex: 1;
+  height: calc(100% - 172px);
 }
 </style>

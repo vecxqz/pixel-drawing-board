@@ -1,4 +1,4 @@
-import { computed, nextTick, onMounted, ref, toRaw } from "vue";
+import { computed, nextTick, ref, toRaw } from "vue";
 import { useStore } from "./useStore";
 import cloneDeep from "lodash/cloneDeep";
 import { initLayer } from "../utils/canvas";
@@ -148,32 +148,6 @@ export function usePage() {
       mode: mode
     };
   }
-  function setAnimationPreview() {
-    let index = 0;
-    function animation() {
-      if (index != store.state.canvasModule.pages.length - 1) {
-        index += 1;
-      } else {
-        index = 0;
-      }
-      try {
-        const { previewUrl } = store.state.canvasModule.pages[index];
-        if (previewUrl) {
-          animationPreviewUrl.value = previewUrl;
-        }
-      } catch (e) {
-        console.log(e);
-        index = 0;
-      }
-      setTimeout(() => {
-        animation();
-      }, 33.33);
-    }
-    animation();
-  }
-  onMounted(() => {
-    setAnimationPreview();
-  });
   return {
     pages,
     create,

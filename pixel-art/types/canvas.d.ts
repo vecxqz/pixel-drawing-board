@@ -24,6 +24,7 @@ declare interface page {
   pageName: string;
   key: string|number;
   previewUrl: string;
+  imageData: string;
   layers: Array<layerMeta>;
 }
 declare interface canvasData {
