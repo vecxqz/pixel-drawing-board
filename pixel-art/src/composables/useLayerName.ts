@@ -9,9 +9,14 @@ export function useLayerName() {
   const tempName = ref("");
   function changeLayerName(event: any) {
     const { currentPageIndex } = store.state.canvasModule;
-    store.state.canvasModule.pages[currentPageIndex].layers[
-      renameIndex.value
-    ].layerName = event.target.value;
+    if (
+      store.state.canvasModule.pages[currentPageIndex].layers[renameIndex.value]
+        .layerName
+    ) {
+      store.state.canvasModule.pages[currentPageIndex].layers[
+        renameIndex.value
+      ].layerName = event.target.value;
+    }
   }
   function rename(index: number) {
     console.log("rename", index);
@@ -41,16 +46,20 @@ export function useLayerName() {
       store.state.canvasModule.pages[currentPageIndex].layers[renameIndex.value]
         .layerName;
     const startName = tempName.value;
-    if (startName !== fininaName) {
+    if (startName !== fininaName && fininaName !== "") {
       toUndoStack(
         {
           currentLayerIndex,
           currentPageIndex,
           layerName: startName,
-          type:TYPE.LAYER_RENAME
+          type: TYPE.LAYER_RENAME
         },
         true
       );
+    } else {
+      store.state.canvasModule.pages[currentPageIndex].layers[
+        renameIndex.value
+      ].layerName = startName;
     }
     renameIndex.value = -1;
   }

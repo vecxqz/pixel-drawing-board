@@ -269,13 +269,17 @@ export default {
       );
     });
     const document = window.document.body;
-    fromEvent(document, "keydown").subscribe(e => {
-      const { code, ctrlKey } = e as KeyboardEvent;
-      if (code === "KeyZ" && ctrlKey) {
-        this.undo();
-      }
-      if (code === "KeyY" && ctrlKey) {
-        this.redo();
+    fromEvent(document, "keydown").subscribe((e: any) => {
+      if (e.target.tagName !== "INPUT") {
+        const { code, ctrlKey } = e as KeyboardEvent;
+        if (code === "KeyZ" && ctrlKey) {
+          this.undo();
+          e.preventDefault();
+        }
+        if (code === "KeyY" && ctrlKey) {
+          this.redo();
+          e.preventDefault();
+        }
       }
     });
     const mouseDown = fromEvent(canvasContainer, "mousedown");
