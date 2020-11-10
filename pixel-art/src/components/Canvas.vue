@@ -4,8 +4,8 @@
       id="canvas-container"
       class="pos-relative"
       :style="
-        `width:${800}px;
-        height:${800}px`
+        `width:${800 * scale}px;
+        height:${800 * scale}px`
       "
     >
       <canvas
@@ -77,6 +77,7 @@ import { isUndefined } from "../utils/common";
 import { initLayer } from "../utils/canvas";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
+import { ref } from "vue";
 export default {
   name: "Canvas",
   setup(this: any) {
@@ -140,6 +141,7 @@ export default {
     const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
     const { calcColor } = useCanvas();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
+    const scale = ref(1);
     return {
       pencilMouseDown,
       pencilMouseMove,
@@ -182,7 +184,8 @@ export default {
       toUndoStack,
       TYPE,
       redo,
-      undo
+      undo,
+      scale
     };
   },
   data() {
@@ -278,6 +281,21 @@ export default {
     const mouseDown = fromEvent(canvasContainer, "mousedown");
     const mouseMove = fromEvent(canvasContainer, "mousemove");
     const mouseUp = fromEvent(document, "mouseup");
+    const mouseWheel = fromEvent(canvasContainer, "mousewheel");
+    mouseWheel.pipe().subscribe((e: any) => {
+      const { deltaY } = e;
+      if (deltaY > 0 && this.scale > 1) {
+        this.scale = this.scale / 2;
+        this.$store.state.canvasModule.size =
+          this.$store.state.canvasModule.size / 2;
+      }
+      if (deltaY < 0 && this.scale < 8) {
+        this.scale = this.scale * 2;
+        this.$store.state.canvasModule.size =
+          this.$store.state.canvasModule.size * 2;
+      }
+      e.preventDefault();
+    });
     mouseDown
       .pipe(
         tap(e => {

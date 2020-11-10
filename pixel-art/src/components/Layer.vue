@@ -1,19 +1,11 @@
 <template>
   <div>当前选中层{{ currentLayer.layerName }}</div>
   <div class="btn-group">
-    <span class="btn-layer-operate">
-      <img
-        src="../assets/create.svg"
-        @click="createLayer"
-        class="layer-create"
-      />
+    <span class="btn-layer-operate" @click="createLayer">
+      <img src="../assets/create.svg" class="layer-create" />
     </span>
-    <span class="btn-layer-operate">
-      <img
-        src="../assets/arrow.svg"
-        @click="upLayer(currentLayerIndex)"
-        class="layer-up"
-      />
+    <span class="btn-layer-operate" @click="upLayer(currentLayerIndex)">
+      <img src="../assets/arrow.svg" class="layer-up" />
     </span>
     <span class="btn-layer-operate" @click="downLayer(currentLayerIndex)">
       <img src="../assets/arrow.svg" class="layer-down" />

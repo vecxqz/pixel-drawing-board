@@ -1,13 +1,13 @@
 <template>
   <div id="toolHeader">
     <ul class="dis-flex operators">
-      <li class="operator-item">文件</li>
-      <li class="operator-item">设置</li>
+      <!-- <li class="operator-item">文件</li>
+      <li class="operator-item">设置</li> -->
       <li class="operator-item" @click="downloadImage">下载</li>
       <li class="operator-item" @click="downloadImageGIF">下载GIF</li>
       <li class="operator-item" @click="undo">撤销</li>
       <li class="operator-item" @click="redo">还原</li>
-      <li class="operator-item">全屏</li>
+      <!-- <li class="operator-item">全屏</li> -->
     </ul>
   </div>
 </template>
