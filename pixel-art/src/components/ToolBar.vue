@@ -14,7 +14,7 @@
         <div class="toolbar-icon"></div>
       </li>
     </ul>
-    <colorPreview class="color-preview"/>
+    <colorPreview class="color-preview" />
   </div>
 </template>
 
@@ -183,37 +183,39 @@ export default {
   margin: 10px;
   width: 32px;
   height: 32px;
-  background: url(../assets/set_autumnfire.png);
 }
 #tool-pencil .toolbar-icon {
-  background-position: -1px -1px;
+  background: url(../assets/entypopencil.svg);
+}
+#tool-mirror-pencil .toolbar-icon{
+  background: url(../assets/mirror.svg);
 }
 #tool-eraser .toolbar-icon {
-  background-position: -34px -1px;
+  background: url(../assets/eraser.svg);
 }
-#tool-brush .toolbar-icon {
-  background-position: -1px -34px;
-}
+// #tool-brush .toolbar-icon {
+//   background: url(../assets/brush.svg);
+// }
 #tool-line .toolbar-icon {
-  background-position: -34px -34px;
+  background: url(../assets/line.svg);
 }
 #tool-square .toolbar-icon {
-  background-position: -1px -68px;
+   background: url(../assets/square.svg);
 }
 #tool-circle .toolbar-icon {
-  background-position: -34px -68px;
+   background: url(../assets/radioEmpty.svg);
 }
 #tool-bucket .toolbar-icon {
-  background-position: -1px -100px;
+   background: url(../assets/bucket.svg);
 }
 #tool-color-picker .toolbar-icon {
-  background-position: -34px -100px;
+    background: url(../assets/Colorpicker.svg);
 }
 #tool-move .toolbar-icon {
-  background-position: -1px -134px;
+  background: url(../assets/move.svg);
 }
 #tool-select .toolbar-icon {
-  background-position: -34px -134px;
+  background: url(../assets/rectangleselection.svg);
 }
 #tool-text .toolbar-icon {
   background-position: -1px -166px;
@@ -233,7 +235,7 @@ export default {
 #tool-gradient .toolbar-icon {
   background-position: -34px -232px;
 }
-.color-preview{
+.color-preview {
   margin-top: 20px;
   z-index: 2;
 }
