@@ -79,7 +79,8 @@ function ScanLineFill(
   stack.push(point);
   let x, y, xl, xr, yl;
   let ct = 0;
-  const imageData = canvasCtx.getImageData(0, 0, 80, 80);
+  const { width, height } = canvasCtx.canvas;
+  const imageData = canvasCtx.getImageData(0, 0, width, height);
   // debugger;
   while (stack.length > 0) {
     const { columnIndex, rowIndex }: any = stack.pop(); //2.取当前种子点

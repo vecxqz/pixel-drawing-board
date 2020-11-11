@@ -28,6 +28,7 @@ export function userPreview() {
   ) {
     // 这里将不同的canvas合到一个canvas上
     const { width, height, currentPageIndex } = store.state.canvasModule;
+    targetcanvasCtx.clearRect(0, 0, width, height);
     for (let i = 0; i < imageDatas.length; i++) {
       const { canvasImageData } = imageDatas[i];
       if (canvasImageData) {
@@ -45,8 +46,29 @@ export function userPreview() {
     ].previewUrl = targetcanvasCtx.canvas.toDataURL("image/png", 1);
   }
 
+  function setPageImageData(
+    imageDatas: Array<any>,
+    tempcanvasCtx: CanvasRenderingContext2D,
+    targetcanvasCtx: CanvasRenderingContext2D
+  ) {
+    // 这里将不同的canvas合到一个canvas上
+    const { width, height, currentPageIndex } = store.state.canvasModule;
+    targetcanvasCtx.clearRect(0, 0, width, height);
+    for (let i = 0; i < imageDatas.length; i++) {
+      const { canvasImageData } = imageDatas[i];
+      if (canvasImageData) {
+        tempcanvasCtx.putImageData(canvasImageData, 0, 0);
+        const { canvas } = tempcanvasCtx;
+        targetcanvasCtx.drawImage(canvas, 0, 0);
+      }
+    }
+    store.state.canvasModule.pages[
+      currentPageIndex
+    ].imageData = targetcanvasCtx.getImageData(0, 0, width, height);
+  }
   return {
     setCanvasPreview,
+    setPageImageData,
     setCanvasPreviewByImageData
   };
 }

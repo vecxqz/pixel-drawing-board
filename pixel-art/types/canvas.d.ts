@@ -16,6 +16,9 @@ declare interface layer {
 }
 declare interface layerMeta {
   layerName: string;
+  width: number;
+  height: number;
+  canvasImageDataString: string;
   canvasImageData!: CanvasImageData;
   key: string | number;
 }
@@ -25,6 +28,9 @@ declare interface page {
   key: string|number;
   previewUrl: string;
   imageData: string;
+  imageDataString: string;
+  width: number;
+  height: number;
   layers: Array<layerMeta>;
 }
 declare interface canvasData {

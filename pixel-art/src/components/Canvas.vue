@@ -72,9 +72,11 @@ import { userPreview } from "../composables/userPreview";
 import { useCanvas } from "../composables/useCanvas";
 import { useMove } from "../composables/useMove";
 import { useDoState } from "../composables/useDoState";
+import { usePage } from "../composables/usePage";
 import { initGrid } from "../utils/canvas";
 import { isUndefined } from "../utils/common";
 import { initLayer } from "../utils/canvas";
+import { useFile } from "../composables/useFile";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 import { ref } from "vue";
@@ -138,9 +140,15 @@ export default {
       mouseUp: moveMouseUp
     } = useMove();
     const { setCurrentColor } = useColor();
-    const { setCanvasPreview, setCanvasPreviewByImageData } = userPreview();
+    const {
+      setCanvasPreview,
+      setCanvasPreviewByImageData,
+      setPageImageData
+    } = userPreview();
     const { calcColor } = useCanvas();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
+    const { choose: choosePage } = usePage();
+    const { loadLocal } = useFile();
     const scale = ref(1);
     return {
       pencilMouseDown,
@@ -173,6 +181,7 @@ export default {
       setCurrentColor,
       setCanvasPreview,
       setCanvasPreviewByImageData,
+      setPageImageData,
       mirrorPencilMouseDown,
       mirrorPencilMouseMove,
       mirrorPencilMouseUp,
@@ -185,7 +194,9 @@ export default {
       TYPE,
       redo,
       undo,
-      scale
+      scale,
+      choosePage,
+      loadLocal
     };
   },
   data() {
@@ -243,11 +254,11 @@ export default {
       belowCanvas,
       tempCanvas
     } = this.$refs;
+    const pages = JSON.parse(localStorage.getItem("pages") as string);
     this.setCanvasData();
     const canvasContainer: HTMLElement = window.document.getElementById(
       "canvas-container"
     ) as HTMLElement;
-    this.$store.dispatch("canvasModule/CREATE_PAGE");
     this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
     this.$store.dispatch(
       "canvasModule/SET_BACKGROUND_CANVAS_CANVASCTX",
@@ -261,12 +272,20 @@ export default {
     this.$store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas);
     this.$store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas);
     this.$store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas);
+    this.loadLocal();
     this.parseBackground();
+    if (pages === null) {
+      this.$store.dispatch("canvasModule/CREATE_PAGE");
+    } else {
+      const { currentPageIndex } = this.$store.state.canvasModule;
+      this.choosePage(currentPageIndex);
+    }
     this.$nextTick(() => {
-      this.setCanvasPreview(
-        [this.backgroundCanvasCtx, this.canvasCtx],
-        this.shadowCanvasCtx
-      );
+      // this.setCanvasPreview(
+      //   [this.backgroundCanvasCtx, this.canvasCtx],
+      //   this.shadowCanvasCtx
+      // );
+      this.mergeCanvas();
     });
     const document = window.document.body;
     fromEvent(document, "keydown").subscribe((e: any) => {
@@ -339,15 +358,15 @@ export default {
       ].layers[
         this.$store.state.canvasModule.currentLayerIndex
       ].canvasImageData = this.canvasCtx.getImageData(0, 0, width, height);
-      // const backgroundMeta = {
-      //   layerName: "background",
-      //   canvasImageData: this.backgroundCanvasCtx.getImageData(
-      //     0,
-      //     0,
-      //     width,
-      //     height
-      //   )
-      // };
+      const backgroundMeta = {
+        layerName: "background",
+        canvasImageData: this.backgroundCanvasCtx.getImageData(
+          0,
+          0,
+          width,
+          height
+        )
+      };
       const belowMeta = {
         layerName: "below",
         canvasImageData: this.belowCanvasCtx.getImageData(0, 0, width, height)
@@ -360,7 +379,8 @@ export default {
         layerName: "current",
         canvasImageData: this.canvasCtx.getImageData(0, 0, width, height)
       };
-      const canvasArray = [belowMeta, currentMeta, aboveMeta];
+      const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
+      const pageImageArray = [belowMeta, currentMeta, aboveMeta];
       this.tempCanvasCtx.drawImage(this.belowCanvasCtx.canvas, 0, 0);
       this.tempCanvasCtx.drawImage(this.canvasCtx.canvas, 0, 0);
       this.tempCanvasCtx.drawImage(this.aboveCanvasCtx.canvas, 0, 0);
@@ -369,6 +389,11 @@ export default {
       ].imageData = this.tempCanvasCtx.getImageData(0, 0, width, height);
       this.setCanvasPreviewByImageData(
         canvasArray,
+        this.tempCanvasCtx,
+        this.shadowCanvasCtx
+      );
+      this.setPageImageData(
+        pageImageArray,
         this.tempCanvasCtx,
         this.shadowCanvasCtx
       );
@@ -583,7 +608,9 @@ export default {
       if (mode === "move") {
         this.moveMouseUp(e);
       }
-      this.mergeCanvas();
+      this.$nextTick(() => {
+        this.mergeCanvas();
+      });
       // this.setCanvasPreview(
       //   [this.backgroundCanvasCtx, this.canvasCtx],
       //   this.shadowCanvasCtx

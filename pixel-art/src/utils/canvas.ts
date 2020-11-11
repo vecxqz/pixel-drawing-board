@@ -121,7 +121,16 @@ function clearGridB(
     size: number;
   }
 ): void {
-  canvasCtx.clearRect(columnIndex, rowIndex, size, size);
+  const { width, height } = canvasCtx.canvas;
+  const imageData = canvasCtx.getImageData(0, 0, width, height);
+  const { data } = imageData;
+  const index = (columnIndex + rowIndex * height) * 4;
+  data[index] = 0; // r
+  data[index + 1] = 0; // g
+  data[index + 2] = 0; // b
+  data[index + 3] = 0; // a
+  canvasCtx.putImageData(imageData, 0, 0);
+  // canvasCtx.clearRect(columnIndex, rowIndex, size, size);
 }
 function initGrid(
   canvasCtx: CanvasRenderingContext2D,

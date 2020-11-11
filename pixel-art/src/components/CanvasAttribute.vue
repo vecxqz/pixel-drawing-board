@@ -46,8 +46,23 @@ export default {
     girdMeta(this: any) {
       return this.$store.getters["canvasModule/currentGridMeta"];
     },
+    currentPageIndex(this: any) {
+      return this.$store.state.canvasModule.currentPageIndex;
+    },
     previewUrl(this: any) {
-      return this.$store.state.canvasModule.previewUrl;
+      // console.log(this.currentPageIndex);
+      // console.log(this.$store.state.canvasModule.pages);
+      // console.log(this.$store.state.canvasModule.pages[this.currentPageIndex]);
+      const pages = this.$store.state.canvasModule.pages;
+      const length = pages.length;
+      if (length < 1) return "";
+      const { previewUrl } = this.$store.state.canvasModule.pages[
+        this.currentPageIndex
+      ];
+      if (previewUrl) {
+        return previewUrl;
+      }
+      return "";
     },
     width(this: any) {
       const { width } = this.$store.state.canvasModule;

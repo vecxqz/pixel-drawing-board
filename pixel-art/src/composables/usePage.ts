@@ -23,24 +23,34 @@ export function usePage() {
   const shadowCanvasCtx = computed(
     () => store.state.canvasModule.shadowLayerCanvasCtx
   );
+  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
   const belowCanvasCtx = computed(
     () => store.state.canvasModule.belowCanvasCtx
   );
   const aboveCanvasCtx = computed(
     () => store.state.canvasModule.aboveCanvasCtx
   );
-  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
   const animationPreviewUrl = ref("");
   const { setCanvasPreview } = userPreview();
   function create(index: number) {
+    const imageData = tempCanvasCtx.value.createImageData(
+      width.value,
+      height.value
+    );
     const layerMeta = {
       pageName: `page${currentPageIndex.value + 1}`,
       key: "0",
       previewUrl: "",
+      imageData,
+      width: width.value,
+      height: height.value,
       layers: [
         {
           layerName: "layer0",
-          key: "0"
+          key: "0",
+          width: width.value,
+          height: height.value,
+          canvasImageData: imageData
         }
       ]
     };
