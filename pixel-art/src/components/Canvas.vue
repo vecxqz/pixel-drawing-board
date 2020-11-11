@@ -57,6 +57,7 @@
 </template>
 
 <script lang="ts">
+import { v4 } from "uuid";
 import { useColor } from "../composables/useColor";
 import { usePencil } from "../composables/usePencil";
 import { useMirrorPencil } from "../composables/useMirrorPencil";
@@ -245,6 +246,15 @@ export default {
     window.oncontextmenu = function(e: MouseEvent) {
       e.preventDefault();
     };
+    // console.log(v4());
+    console.log(
+      this.$router.push({
+        name: "DrawPixelDetail",
+        params: {
+          id: v4()
+        }
+      })
+    );
     const {
       canvas,
       selectcanvas,

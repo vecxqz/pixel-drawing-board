@@ -11,3 +11,5 @@ declare class GIF {
   addFrame(ctx: any, options: any) {}
   render() {}
 }
+
+declare module "uuid";
