@@ -77,6 +77,14 @@ import Color from "color";
 interface rgbMeat {
   [key: string]: number;
 }
+interface SetupPrps {
+  [key: string]: unknown;
+  emitColor: string;
+  visible: boolean;
+}
+interface SetupContext {
+  emit: (event: string, ...args: unknown[]) => void;
+}
 export default {
   props: {
     emitColor: String,
@@ -88,7 +96,7 @@ export default {
   directives: {
     clickOutSide
   },
-  setup(props: any, context: any) {
+  setup(props: SetupPrps, context: SetupContext) {
     const color = computed(() => props.emitColor);
     const newColor = ref("rgb(0, 0, 0)");
     const satWidth = ref(150);
