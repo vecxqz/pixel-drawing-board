@@ -13,70 +13,61 @@
     <div class="attribute-box">
       <layer />
     </div>
-    <!-- <div class="color-choose">
-      <ul>
-        <li
-          v-for="color in colors"
-          :key="color"
-          :style="{ backgroundColor: color, height: '30px', width: '30px' }"
-          @click="colorSetByChoose(color)"
-        />
-      </ul>
-    </div> -->
-    <!-- <div class="btn-group-operator">
-      <div class="btn-operator" @click="redo()">redo</div>
-      <div class="btn-operator" @click="undo()">undo</div>
-    </div> -->
   </div>
 </template>
 
 <script lang="ts">
+import { computed, reactive } from "vue";
+import { useStore } from "../composables/useStore";
 import layer from "./Layer.vue";
 export default {
   name: "CanvasAttribute",
   components: {
     layer
   },
-  data() {
-    return {
-      colors: ["red", "yellow", "blue", "green", "black", "white"]
-    };
-  },
-  computed: {
-    girdMeta(this: any) {
-      return this.$store.getters["canvasModule/currentGridMeta"];
-    },
-    currentPageIndex(this: any) {
-      return this.$store.state.canvasModule.currentPageIndex;
-    },
-    previewUrl(this: any) {
-      // console.log(this.currentPageIndex);
-      // console.log(this.$store.state.canvasModule.pages);
-      // console.log(this.$store.state.canvasModule.pages[this.currentPageIndex]);
-      const pages = this.$store.state.canvasModule.pages;
+  setup() {
+    const store: any = useStore();
+    const colors = reactive([
+      "red",
+      "yellow",
+      "blue",
+      "green",
+      "black",
+      "white"
+    ]);
+    const girdMeta = computed(
+      () => store.getters["canvasModule/currentGridMeta"]
+    );
+    const currentPageIndex = computed(
+      () => store.state.canvasModule.currentPageIndex
+    );
+    const previewUrl = computed(() => {
+      const pages = store.state.canvasModule.pages;
       const length = pages.length;
       if (length < 1) return "";
-      const { previewUrl } = this.$store.state.canvasModule.pages[
-        this.currentPageIndex
+      const { previewUrl } = store.state.canvasModule.pages[
+        currentPageIndex.value
       ];
       if (previewUrl) {
         return previewUrl;
       }
       return "";
-    },
-    width(this: any) {
-      const { width } = this.$store.state.canvasModule;
-      return width;
-    },
-    height(this: any) {
-      const { height } = this.$store.state.canvasModule;
+    });
+    const height = computed(() => {
+      const { height } = store.state.canvasModule;
       return height;
-    }
-  },
-  methods: {
-    colorSetByChoose(this: any, color: string) {
-      this.$store.dispatch("canvasModule/SET_COLOR", color);
-    }
+    });
+    const width = computed(() => {
+      const { width } = store.state.canvasModule;
+      return width;
+    });
+    return {
+      colors,
+      previewUrl,
+      width,
+      height,
+      girdMeta
+    };
   }
 };
 </script>

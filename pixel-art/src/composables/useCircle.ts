@@ -2,7 +2,7 @@ import { bresenhamLineCircle, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
-export function useCircle(this: any) {
+export function useCircle() {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
@@ -12,11 +12,11 @@ export function useCircle(this: any) {
 
   const { startX, startY, endX, endY } = useMousePosition();
 
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     console.log("circle mouseDown");
   }
   // 拖拽时绘制圆形
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     // 防止圆贴着圆心形成的直角坐标系的边飘逸
     let midX1, midY1, r1, ya1;
     // 一三象限
@@ -53,7 +53,7 @@ export function useCircle(this: any) {
     );
   }
   // 鼠标松开时，把矩形绘制，并修改数据
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     // 防止圆贴着圆心形成的直角坐标系的边飘逸
     let midX1, midY1, r1, ya1;
     midX1 = Math.floor((endX.value + startX.value) / 2);

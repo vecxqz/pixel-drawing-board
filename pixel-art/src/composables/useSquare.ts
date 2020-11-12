@@ -2,7 +2,7 @@ import { drawSquare, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
-export function useSquare(this: any) {
+export function useSquare() {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
@@ -11,11 +11,11 @@ export function useSquare(this: any) {
   });
   const { startX, startY, endX, endY } = useMousePosition();
 
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     console.log("square mouseDown");
   }
   // 拖拽时绘制矩形
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     drawSquare(
       startX.value,
       startY.value,
@@ -32,7 +32,7 @@ export function useSquare(this: any) {
     );
   }
   // 鼠标松开时，把矩形绘制，并修改数据
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     drawSquare(
       startX.value,
       startY.value,

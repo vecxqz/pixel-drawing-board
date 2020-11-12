@@ -2,7 +2,7 @@ import { drawGrid } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useCanvas } from "./useCanvas";
-export function useColorPicker(this: any) {
+export function useColorPicker() {
   const { calcColor } = useCanvas();
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
@@ -13,7 +13,7 @@ export function useColorPicker(this: any) {
     return store.state.canvasModule.size;
   });
 
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     const imageData = canvasCtx.value.getImageData(
       0,
       0,
@@ -26,7 +26,7 @@ export function useColorPicker(this: any) {
     store.dispatch("canvasModule/SET_COLOR", color);
   }
 
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     const imageData = canvasCtx.value.getImageData(
       0,
       0,
@@ -38,7 +38,7 @@ export function useColorPicker(this: any) {
     const { rgb: color } = calcColor(imageData, columnIndex, rowIndex);
     store.dispatch("canvasModule/SET_COLOR", color);
   }
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     const imageData = canvasCtx.value.getImageData(
       0,
       0,

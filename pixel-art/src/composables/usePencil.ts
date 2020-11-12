@@ -1,7 +1,7 @@
 import { drawGridB, bresenhamLine } from "../utils/canvas";
 import { computed, reactive } from "vue";
 import { useStore } from "./useStore";
-export function usePencil(this: any) {
+export function usePencil() {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const width = computed(() => store.state.canvasModule.width);
@@ -20,7 +20,7 @@ export function usePencil(this: any) {
     currentY: 0
   });
 
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     drawGridB(canvasCtx.value, {
@@ -33,7 +33,7 @@ export function usePencil(this: any) {
     mouseMoveStart.lastY = rowIndex;
   }
 
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     mouseMoveStart.currentX = columnIndex;
@@ -68,7 +68,7 @@ export function usePencil(this: any) {
     mouseMoveStart.lastX = columnIndex;
     mouseMoveStart.lastY = rowIndex;
   }
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     console.log("pencil mouseUp");
     mouseMoveStart.currentX = 0;
     mouseMoveStart.currentY = 0;

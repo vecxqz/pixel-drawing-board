@@ -2,7 +2,7 @@ import { drawGridB, clearGridB } from "../utils/canvas";
 import { computed, reactive, nextTick, toRaw, ref } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
-export function useSelect(this: any) {
+export function useSelect() {
   const { startX, startY, endX, endY } = useMousePosition();
   const isSet = ref(false);
   const isMove = ref(false);
@@ -80,7 +80,7 @@ export function useSelect(this: any) {
     if (selectArea.diffY !== 0) selectArea.diffY += 1;
   }
 
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     // 没设置选取区域前存储画布像素信息
     if (!isSet.value) {
       tempImageData.value = canvasCtx.value.getImageData(
@@ -205,7 +205,7 @@ export function useSelect(this: any) {
       }
     }
   }
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     // 点击外部区域或是没有绘制才记录
     if (isClickOutSide.value) {
       setSelectArea({
@@ -292,7 +292,7 @@ export function useSelect(this: any) {
       canvasCtx.value.fillStyle = tempColor;
     }
   }
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     const tempFillStyle = canvasCtx.value.fillStyle;
     // 点击外部区域或是没有绘制才记录
     if (isClickOutSide.value) {

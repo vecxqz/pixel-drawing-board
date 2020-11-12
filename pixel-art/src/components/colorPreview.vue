@@ -29,12 +29,21 @@
 </template>
 
 <script lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { useStore } from "../composables/useStore";
 import colorPicker from "./colorPicker/main.vue";
 export default {
+  components: {
+    colorPicker
+  },
   setup() {
+    const store: any = useStore();
     const primaryColorVisible = ref(false);
     const secondaryColorVisible = ref(false);
+    const primaryColor = computed(() => store.state.canvasModule.primaryColor);
+    const secondaryColor = computed(
+      () => store.state.canvasModule.secondaryColor
+    );
 
     function primaryColorShow() {
       primaryColorVisible.value = !primaryColorVisible.value;
@@ -44,36 +53,23 @@ export default {
       secondaryColorVisible.value = !secondaryColorVisible.value;
       primaryColorVisible.value = false;
     }
+    function exhcangePsColor() {
+      const [newPrimaryColor, newSecondaryColor] = [
+        secondaryColor.value,
+        primaryColor.value
+      ];
+      store.dispatch("canvasModule/SET_PRIMARY_COLOR", newPrimaryColor);
+      store.dispatch("canvasModule/SET_SECONDARY_COLOR", newSecondaryColor);
+    }
     return {
       primaryColorVisible,
       secondaryColorVisible,
       primaryColorShow,
-      secondaryColorShow
+      secondaryColorShow,
+      primaryColor,
+      secondaryColor,
+      exhcangePsColor
     };
-  },
-  components: {
-    colorPicker
-  },
-  computed: {
-    primaryColor(this: any) {
-      return this.$store.state.canvasModule.primaryColor;
-    },
-    secondaryColor(this: any) {
-      return this.$store.state.canvasModule.secondaryColor;
-    }
-  },
-  methods: {
-    exhcangePsColor(this: any) {
-      const [newPrimaryColor, newSecondaryColor] = [
-        this.secondaryColor,
-        this.primaryColor
-      ];
-      this.$store.dispatch("canvasModule/SET_PRIMARY_COLOR", newPrimaryColor);
-      this.$store.dispatch(
-        "canvasModule/SET_SECONDARY_COLOR",
-        newSecondaryColor
-      );
-    }
   }
 };
 </script>

@@ -11,26 +11,26 @@
       <canvas
         class="pos-absoulte pe-none layer-shadow layer-background"
         ref="backgroundCanvas"
-        :width="$store.state.canvasModule.width"
-        :height="$store.state.canvasModule.height"
+        :width="store.state.canvasModule.width"
+        :height="store.state.canvasModule.height"
       />
       <canvas
         class="pos-absoulte pe-none layer-shadow layer-below"
         ref="belowCanvas"
-        :width="$store.state.canvasModule.width"
-        :height="$store.state.canvasModule.height"
+        :width="store.state.canvasModule.width"
+        :height="store.state.canvasModule.height"
       />
       <canvas
         class="pos-absoulte layer-main"
         ref="canvas"
-        :width="$store.state.canvasModule.width"
-        :height="$store.state.canvasModule.height"
+        :width="store.state.canvasModule.width"
+        :height="store.state.canvasModule.height"
       />
       <canvas
         class="pos-absoulte pe-none layer-shadow layer-above"
         ref="aboveCanvas"
-        :width="$store.state.canvasModule.width"
-        :height="$store.state.canvasModule.height"
+        :width="store.state.canvasModule.width"
+        :height="store.state.canvasModule.height"
       />
       <canvas
         class="pos-absoulte pe-none layer-select"
@@ -42,15 +42,15 @@
         class="pos-absoulte pe-none layer-shadow"
         ref="layerShandowCanvas"
         style="visibility: hidden"
-        :width="$store.state.canvasModule.width"
-        :height="$store.state.canvasModule.height"
+        :width="store.state.canvasModule.width"
+        :height="store.state.canvasModule.height"
       />
       <canvas
         class="pos-absoulte pe-none layer-shadow layer-temp"
         ref="tempCanvas"
         style="visibility: hidden"
-        :width="$store.state.canvasModule.width"
-        :height="$store.state.canvasModule.height"
+        :width="store.state.canvasModule.width"
+        :height="store.state.canvasModule.height"
       />
     </div>
   </div>
@@ -70,7 +70,6 @@ import { useEraser } from "../composables/useEraser";
 import { useSelect } from "../composables/useSelect";
 import { useMousePosition } from "../composables/usePosition";
 import { userPreview } from "../composables/userPreview";
-import { useCanvas } from "../composables/useCanvas";
 import { useMove } from "../composables/useMove";
 import { useDoState } from "../composables/useDoState";
 import { usePage } from "../composables/usePage";
@@ -80,10 +79,14 @@ import { initLayer } from "../utils/canvas";
 import { useFile } from "../composables/useFile";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
-import { ref } from "vue";
+import { useStore } from "../composables/useStore";
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 export default {
   name: "Canvas",
-  setup(this: any) {
+  setup() {
+    const router = useRouter();
+    const store: any = useStore();
     const {
       mouseDown: pencilMouseDown,
       mouseMove: pencilMouseMove,
@@ -132,8 +135,8 @@ export default {
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
-      mouseMove: recordMouseMovePosition,
-      mouseUp: recordMouseUpPosition
+      mouseMove: recordMouseMovePosition
+      // mouseUp: recordMouseUpPosition
     } = useMousePosition();
     const {
       mouseDown: moveMouseDown,
@@ -141,233 +144,167 @@ export default {
       mouseUp: moveMouseUp
     } = useMove();
     const { setCurrentColor } = useColor();
-    const {
-      setCanvasPreview,
-      setCanvasPreviewByImageData,
-      setPageImageData
-    } = userPreview();
-    const { calcColor } = useCanvas();
+    const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
     const { choose: choosePage } = usePage();
     const { loadLocal } = useFile();
     const scale = ref(1);
-    return {
-      pencilMouseDown,
-      pencilMouseMove,
-      pencilMouseUp,
-      bucketMouseDown,
-      bucketMouseMove,
-      bucketMouseUp,
-      lineMouseDown,
-      lineMouseMove,
-      lineMouseUp,
-      squareMouseDown,
-      squareMouseMove,
-      squareMouseUp,
-      colorPickerMouseDown,
-      colorPickerMouseMove,
-      colorPickerMouseUp,
-      circleMouseDown,
-      circleMouseMove,
-      circleMouseUp,
-      eraserMouseDown,
-      eraserMouseMove,
-      eraserMouseUp,
-      recordMouseDownPosition,
-      recordMouseMovePosition,
-      recordMouseUpPosition,
-      selectMouseDown,
-      selectMouseMove,
-      selectMouseUp,
-      setCurrentColor,
-      setCanvasPreview,
-      setCanvasPreviewByImageData,
-      setPageImageData,
-      mirrorPencilMouseDown,
-      mirrorPencilMouseMove,
-      mirrorPencilMouseUp,
-      calcColor,
-      moveMouseDown,
-      moveMouseMove,
-      moveMouseUp,
-      selectArea,
-      toUndoStack,
-      TYPE,
-      redo,
-      undo,
-      scale,
-      choosePage,
-      loadLocal
-    };
-  },
-  data() {
-    return {
-      imageData: undefined,
-      isboundary: false,
-      boundaryMeta: {
-        startX: 0,
-        startY: 0,
-        endX: 0,
-        endY: 0
-      }
-    };
-  },
-  computed: {
-    canvasCtx(this: any) {
-      return this.$store.state.canvasModule.canvasCtx;
-    },
-    backgroundCanvasCtx(this: any) {
-      return this.$store.state.canvasModule.backgroundCanvasCtx;
-    },
-    shadowCanvasCtx(this: any) {
-      return this.$store.state.canvasModule.shadowLayerCanvasCtx;
-    },
-    tempCanvasCtx(this: any) {
-      return this.$store.state.canvasModule.tempCanvasCtx;
-    },
-    belowCanvasCtx(this: any): CanvasRenderingContext2D {
-      return this.$store.state.canvasModule.belowCanvasCtx;
-    },
-    aboveCanvasCtx(this: any): CanvasRenderingContext2D {
-      return this.$store.state.canvasModule.aboveCanvasCtx;
-    },
-    currentLayer(this: any) {
-      const {
-        currentPageIndex,
-        currentLayerIndex
-      } = this.$store.state.canvasModule;
-      return this.$store.state.canvasModule.pages[currentPageIndex].layers[
-        currentLayerIndex
-      ];
-    }
-  },
-  mounted(this: any) {
-    // 屏蔽右键菜单
-    window.oncontextmenu = function(e: MouseEvent) {
-      e.preventDefault();
-    };
-    this.$router.push({
-      name: "DrawPixelDetail",
-      params: {
-        id: v4()
-      }
+    const canvas = ref(undefined);
+    const selectcanvas = ref(undefined);
+    const layerShandowCanvas = ref(undefined);
+    const backgroundCanvas = ref(undefined);
+    const aboveCanvas = ref(undefined);
+    const belowCanvas = ref(undefined);
+    const tempCanvas = ref(undefined);
+    const imageData = ref(undefined);
+    // const isboundary = ref(false);
+    const boundaryMeta = reactive({
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0
     });
-    const {
-      canvas,
-      selectcanvas,
-      layerShandowCanvas,
-      backgroundCanvas,
-      aboveCanvas,
-      belowCanvas,
-      tempCanvas
-    } = this.$refs;
-    const pages = JSON.parse(localStorage.getItem("pages") as string);
-    this.setCanvasData();
-    const canvasContainer: HTMLElement = window.document.getElementById(
-      "canvas-container"
-    ) as HTMLElement;
-    this.$store.dispatch("canvasModule/SET_CANVASCTX", canvas);
-    this.$store.dispatch(
-      "canvasModule/SET_BACKGROUND_CANVAS_CANVASCTX",
-      backgroundCanvas
+    const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
+    const backgroundCanvasCtx = computed(
+      () => store.state.canvasModule.backgroundCanvasCtx
     );
-    this.$store.dispatch(
-      "canvasModule/SET_SHDOW_LAYER_CANVASCTX",
-      layerShandowCanvas
+    const shadowCanvasCtx = computed(
+      () => store.state.canvasModule.shadowLayerCanvasCtx
     );
-    this.$store.dispatch("canvasModule/SET_SELECT_CANVASCTX", selectcanvas);
-    this.$store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas);
-    this.$store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas);
-    this.$store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas);
-    this.loadLocal();
-    this.parseBackground();
-    if (pages === null) {
-      this.$store.dispatch("canvasModule/CREATE_PAGE");
-    } else {
-      const { currentPageIndex } = this.$store.state.canvasModule;
-      this.choosePage(currentPageIndex);
-    }
-    this.$nextTick(() => {
-      // this.setCanvasPreview(
-      //   [this.backgroundCanvasCtx, this.canvasCtx],
-      //   this.shadowCanvasCtx
-      // );
-      this.mergeCanvas();
-    });
-    const document = window.document.body;
-    fromEvent(document, "keydown").subscribe((e: any) => {
-      if (e.target.tagName !== "INPUT") {
-        const { code, ctrlKey } = e as KeyboardEvent;
-        if (code === "KeyZ" && ctrlKey) {
-          this.undo();
-          e.preventDefault();
+    const tempCanvasCtx = computed(
+      () => store.state.canvasModule.tempCanvasCtx
+    );
+    const belowCanvasCtx = computed(
+      () => store.state.canvasModule.belowCanvasCtx
+    );
+    const aboveCanvasCtx = computed(
+      () => store.state.canvasModule.aboveCanvasCtx
+    );
+    onMounted(() => {
+      // 屏蔽右键菜单
+      window.oncontextmenu = function(e: MouseEvent) {
+        e.preventDefault();
+      };
+      router.push({
+        name: "DrawPixelDetail",
+        params: {
+          id: v4()
         }
-        if (code === "KeyY" && ctrlKey) {
-          this.redo();
-          e.preventDefault();
+      });
+      const pages = JSON.parse(localStorage.getItem("pages") as string);
+      setCanvasData();
+      const canvasContainer: HTMLElement = window.document.getElementById(
+        "canvas-container"
+      ) as HTMLElement;
+      store.dispatch("canvasModule/SET_CANVASCTX", canvas.value);
+      store.dispatch(
+        "canvasModule/SET_BACKGROUND_CANVAS_CANVASCTX",
+        backgroundCanvas.value
+      );
+      store.dispatch(
+        "canvasModule/SET_SHDOW_LAYER_CANVASCTX",
+        layerShandowCanvas.value
+      );
+      store.dispatch("canvasModule/SET_SELECT_CANVASCTX", selectcanvas.value);
+      store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas.value);
+      store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas.value);
+      store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas.value);
+
+      loadLocal();
+      parseBackground();
+      // 根据有没有本地数据判断是新建工程还是读取本地工程
+      if (pages === null) {
+        store.dispatch("canvasModule/CREATE_PAGE");
+      } else {
+        const { currentPageIndex } = store.state.canvasModule;
+        choosePage(currentPageIndex);
+      }
+      nextTick(() => {
+        mergeCanvas();
+      });
+
+      const document = window.document.body;
+      fromEvent(document, "keydown").subscribe((e: any) => {
+        if (e.target.tagName !== "INPUT") {
+          const { code, ctrlKey } = e as KeyboardEvent;
+          if (code === "KeyZ" && ctrlKey) {
+            undo();
+            e.preventDefault();
+          }
+          if (code === "KeyY" && ctrlKey) {
+            redo();
+            e.preventDefault();
+          }
         }
-      }
-    });
-    const mouseDown = fromEvent(canvasContainer, "mousedown");
-    const mouseMove = fromEvent(canvasContainer, "mousemove");
-    const mouseUp = fromEvent(document, "mouseup");
-    const mouseWheel = fromEvent(canvasContainer, "mousewheel");
-    mouseWheel.pipe().subscribe((e: any) => {
-      const { deltaY } = e;
-      if (deltaY > 0 && this.scale > 1) {
-        this.scale = this.scale / 2;
-        this.$store.state.canvasModule.size =
-          this.$store.state.canvasModule.size / 2;
-      }
-      if (deltaY < 0 && this.scale < 8) {
-        this.scale = this.scale * 2;
-        this.$store.state.canvasModule.size =
-          this.$store.state.canvasModule.size * 2;
-      }
-      e.preventDefault();
-    });
-    mouseDown
-      .pipe(
-        tap(e => {
-          this.handleMouseDown(e);
-        }),
-        // mouseDown事件转化为mouseMove事件
-        map(() =>
-          mouseMove.pipe(
-            // mouseUp后结束事件
-            takeUntil(
-              mouseUp.pipe(
-                tap(e => {
-                  console.log("mouseUp");
-                  this.handleMouseUp(e);
-                })
+      });
+      const mouseDown = fromEvent(canvasContainer, "mousedown");
+      const mouseMove = fromEvent(canvasContainer, "mousemove");
+      const mouseUp = fromEvent(document, "mouseup");
+      const mouseWheel = fromEvent(canvasContainer, "mousewheel");
+      mouseWheel.pipe().subscribe((e: any) => {
+        const { deltaY } = e;
+        if (deltaY > 0 && scale.value > 1) {
+          scale.value = scale.value / 2;
+          store.state.canvasModule.size = store.state.canvasModule.size / 2;
+        }
+        if (deltaY < 0 && scale.value < 8) {
+          scale.value = scale.value * 2;
+          store.state.canvasModule.size = store.state.canvasModule.size * 2;
+        }
+        e.preventDefault();
+      });
+      mouseDown
+        .pipe(
+          tap(e => {
+            handleMouseDown(e as MouseEvent);
+          }),
+          // mouseDown事件转化为mouseMove事件
+          map(() =>
+            mouseMove.pipe(
+              // mouseUp后结束事件
+              takeUntil(
+                mouseUp.pipe(
+                  tap(e => {
+                    console.log("mouseUp");
+                    handleMouseUp(e as MouseEvent);
+                  })
+                )
               )
             )
-          )
-        ),
-        throttleTime(0, animationFrameScheduler),
-        // 拍平
-        concatAll()
-      )
-      .subscribe(e => {
-        this.handleMouseMove(e);
-      });
-  },
-  methods: {
-    setCanvasData(this: any) {
-      const { width } = this.$store.state.canvasModule;
-      this.$store.state.canvasModule.size = 800 / width;
-    },
-    mergeCanvas(this: any) {
-      const { width, height } = this.$store.state.canvasModule;
-      this.$store.state.canvasModule.pages[
-        this.$store.state.canvasModule.currentPageIndex
+          ),
+          throttleTime(0, animationFrameScheduler),
+          // 拍平
+          concatAll()
+        )
+        .subscribe(e => {
+          handleMouseMove(e as MouseEvent);
+        });
+    });
+    function parseBackground() {
+      const { width, height, gridSize } = store.state.canvasModule;
+      const layer: layer = initLayer(width, height, gridSize);
+      for (let i = 0; i < layer.length; i++)
+        for (let j = 0; j < layer.length; j++) {
+          const cell = layer[i][j];
+          const { backgroundColor } = cell;
+          initGrid(backgroundCanvasCtx.value, layer, i, j, backgroundColor);
+        }
+    }
+    function setCanvasData() {
+      const { width } = store.state.canvasModule;
+      store.state.canvasModule.size = 800 / width;
+    }
+
+    function mergeCanvas() {
+      const { width, height } = store.state.canvasModule;
+      store.state.canvasModule.pages[
+        store.state.canvasModule.currentPageIndex
       ].layers[
-        this.$store.state.canvasModule.currentLayerIndex
-      ].canvasImageData = this.canvasCtx.getImageData(0, 0, width, height);
+        store.state.canvasModule.currentLayerIndex
+      ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
       const backgroundMeta = {
         layerName: "background",
-        canvasImageData: this.backgroundCanvasCtx.getImageData(
+        canvasImageData: backgroundCanvasCtx.value.getImageData(
           0,
           0,
           width,
@@ -376,136 +313,122 @@ export default {
       };
       const belowMeta = {
         layerName: "below",
-        canvasImageData: this.belowCanvasCtx.getImageData(0, 0, width, height)
+        canvasImageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
       };
       const aboveMeta = {
         layerName: "above",
-        canvasImageData: this.aboveCanvasCtx.getImageData(0, 0, width, height)
+        canvasImageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
       };
       const currentMeta = {
         layerName: "current",
-        canvasImageData: this.canvasCtx.getImageData(0, 0, width, height)
+        canvasImageData: canvasCtx.value.getImageData(0, 0, width, height)
       };
       const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
       const pageImageArray = [belowMeta, currentMeta, aboveMeta];
-      this.tempCanvasCtx.drawImage(this.belowCanvasCtx.canvas, 0, 0);
-      this.tempCanvasCtx.drawImage(this.canvasCtx.canvas, 0, 0);
-      this.tempCanvasCtx.drawImage(this.aboveCanvasCtx.canvas, 0, 0);
-      this.$store.state.canvasModule.pages[
-        this.$store.state.canvasModule.currentPageIndex
-      ].imageData = this.tempCanvasCtx.getImageData(0, 0, width, height);
-      this.setCanvasPreviewByImageData(
+      tempCanvasCtx.value.drawImage(belowCanvasCtx.value.canvas, 0, 0);
+      tempCanvasCtx.value.drawImage(canvasCtx.value.canvas, 0, 0);
+      tempCanvasCtx.value.drawImage(aboveCanvasCtx.value.canvas, 0, 0);
+      store.state.canvasModule.pages[
+        store.state.canvasModule.currentPageIndex
+      ].imageData = tempCanvasCtx.value.getImageData(0, 0, width, height);
+      setCanvasPreviewByImageData(
         canvasArray,
-        this.tempCanvasCtx,
-        this.shadowCanvasCtx
+        tempCanvasCtx.value,
+        shadowCanvasCtx.value
       );
-      this.setPageImageData(
+      setPageImageData(
         pageImageArray,
-        this.tempCanvasCtx,
-        this.shadowCanvasCtx
+        tempCanvasCtx.value,
+        shadowCanvasCtx.value
       );
-    },
-    handleMouseMove(this: any, e: any) {
-      const { mode } = this.$store.state.canvasModule;
-      let columnIndex = Math.floor(
-          e.offsetX / this.$store.state.canvasModule.size
-        ),
-        rowIndex = Math.floor(e.offsetY / this.$store.state.canvasModule.size);
-      this.recordMouseMovePosition(e);
+    }
+    function handleMouseMove(e: MouseEvent) {
+      const { mode } = store.state.canvasModule;
+      let columnIndex = Math.floor(e.offsetX / store.state.canvasModule.size),
+        rowIndex = Math.floor(e.offsetY / store.state.canvasModule.size);
+      recordMouseMovePosition(e);
       // console.log(columnIndex, rowIndex);
-      this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
-      this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
+      store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
+      store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       if (mode === "pencil") {
-        this.pencilMouseMove(e);
+        pencilMouseMove(e);
       }
       if (mode === "line") {
-        this.canvasImageDataSave();
-        this.canvasImageDataUse();
-        this.lineMouseMove(e);
+        canvasImageDataSave();
+        canvasImageDataUse();
+        lineMouseMove(e);
       }
       if (mode === "eraser") {
-        this.eraserMouseMove(e);
+        eraserMouseMove(e);
       }
       if (mode === "bucket") {
-        this.bucketMouseMove(e);
+        bucketMouseMove();
       }
       if (mode === "square") {
-        this.canvasImageDataSave();
-        this.canvasImageDataUse();
-        this.squareMouseMove(e);
+        canvasImageDataSave();
+        canvasImageDataUse();
+        squareMouseMove(e);
       }
       if (mode === "colorPicker") {
-        this.colorPickerMouseMove(e);
+        colorPickerMouseMove(e);
       }
       if (mode === "circle") {
-        this.canvasImageDataSave();
-        this.canvasImageDataUse();
-        this.circleMouseMove(e);
+        canvasImageDataSave();
+        canvasImageDataUse();
+        circleMouseMove(e);
       }
       if (mode === "select") {
-        this.canvasImageDataSave();
-        this.canvasImageDataUse();
-        this.selectMouseMove(e);
+        canvasImageDataSave();
+        canvasImageDataUse();
+        selectMouseMove(e);
       }
       if (mode === "mirrorPencil") {
-        this.mirrorPencilMouseMove(e);
+        mirrorPencilMouseMove(e);
       }
       if (mode === "move") {
-        this.moveMouseMove(e);
+        moveMouseMove(e);
       }
-    },
-    parseBackground(this: any) {
-      const { width, height, gridSize } = this.$store.state.canvasModule;
-      const layer: layer = initLayer(width, height, gridSize);
-      for (let i = 0; i < layer.length; i++)
-        for (let j = 0; j < layer.length; j++) {
-          const cell = layer[i][j];
-          const { backgroundColor } = cell;
-          initGrid(this.backgroundCanvasCtx, layer, i, j, backgroundColor);
-        }
-    },
-    canvasImageDataSave(this: any) {
+    }
+    function canvasImageDataSave() {
       // console.log("canvasImageDataSave");
-      const { width, height } = this.$store.state.canvasModule;
-      const { canvasCtx } = this;
+      const { width, height } = store.state.canvasModule;
       // 存储在进行绘制之前的画布数据
-      if (isUndefined(this.imageData)) {
-        this.imageData = canvasCtx.getImageData(0, 0, width, height);
+      if (isUndefined(imageData.value)) {
+        imageData.value = canvasCtx.value.getImageData(0, 0, width, height);
       }
-    },
-    canvasImageDataUse(this: any) {
+    }
+    function canvasImageDataUse() {
       // console.log("canvasImageDataUse");
-      const { canvasCtx } = this;
-      if (!isUndefined(this.imageData)) {
-        canvasCtx.putImageData(this.imageData, 0, 0);
+      if (!isUndefined(imageData.value)) {
+        canvasCtx.value.putImageData(imageData.value, 0, 0);
       }
-    },
-    canvasImageDataSaveClean(this: any) {
-      this.imageData = undefined;
-    },
-    handleMouseDown(this: any, e: MouseWheelEvent) {
+    }
+    function canvasImageDataSaveClean() {
+      imageData.value = undefined;
+    }
+    function handleMouseDown(e: MouseEvent) {
       const {
         currentPageIndex,
         currentLayerIndex,
         width: layerWidth,
         height: layerHeight
-      } = this.$store.state.canvasModule;
-      this.toUndoStack(
+      } = store.state.canvasModule;
+      toUndoStack(
         {
           currentLayerIndex,
           currentPageIndex,
           layerData: {
-            ...this.$store.state.canvasModule.pages[currentPageIndex].layers[
+            ...store.state.canvasModule.pages[currentPageIndex].layers[
               currentLayerIndex
             ],
-            canvasImageData: this.canvasCtx.getImageData(
+            canvasImageData: canvasCtx.value.getImageData(
               0,
               0,
               layerWidth,
               layerHeight
             )
           },
-          type: this.TYPE.LAYER_DATA_CHANGE
+          type: TYPE.LAYER_DATA_CHANGE
         },
         true
       );
@@ -518,110 +441,116 @@ export default {
         height,
         top
       } = canvasContainer.getBoundingClientRect();
-      this.boundaryMeta.startX = left;
-      this.boundaryMeta.endX = left + width;
-      this.boundaryMeta.startY = left;
-      this.boundaryMeta.endY = top + height;
-      const { mode } = this.$store.state.canvasModule;
-      this.setCurrentColor(e);
-      this.recordMouseDownPosition(e);
+      boundaryMeta.startX = left;
+      boundaryMeta.endX = left + width;
+      boundaryMeta.startY = left;
+      boundaryMeta.endY = top + height;
+      const { mode } = store.state.canvasModule;
+      setCurrentColor(e);
+      recordMouseDownPosition(e);
       if (mode === "pencil") {
-        this.pencilMouseDown(e);
-        // const imageData = (this
-        //   .canvasCtx as CanvasRenderingContext2D).getImageData(0, 0, 80, 80);
-        // const color = this.calcColor(imageData, 0, 0);
-        // console.log(color);
+        pencilMouseDown(e);
       }
       if (mode === "line") {
-        this.lineMouseDown(e);
+        lineMouseDown(e);
       }
       if (mode === "bucket") {
-        this.bucketMouseDown(e);
+        bucketMouseDown(e);
       }
       if (mode === "square") {
-        this.squareMouseDown(e);
+        squareMouseDown(e);
       }
       if (mode === "colorPicker") {
-        this.colorPickerMouseDown(e);
+        colorPickerMouseDown(e);
       }
       if (mode === "circle") {
-        this.circleMouseDown(e);
+        circleMouseDown(e);
       }
       if (mode === "eraser") {
-        this.eraserMouseDown(e);
+        eraserMouseDown(e);
       }
       if (mode === "select") {
-        this.selectMouseDown(e);
+        selectMouseDown(e);
       }
       if (mode === "mirrorPencil") {
-        this.mirrorPencilMouseDown(e);
+        mirrorPencilMouseDown(e);
       }
       if (mode === "move") {
-        this.moveMouseDown(e);
+        moveMouseDown(e);
       }
-    },
-    handleMouseUp(this: any, e: MouseWheelEvent) {
+    }
+    function handleMouseUp(e: MouseEvent) {
       const { clientX, clientY } = e;
-      const { mode, size } = this.$store.state.canvasModule;
+      const { mode, size } = store.state.canvasModule;
       if (
-        clientX > this.boundaryMeta.startX &&
-        clientX < this.boundaryMeta.endX &&
-        clientY > this.boundaryMeta.startY &&
-        clientY < this.boundaryMeta.endY
+        clientX > boundaryMeta.startX &&
+        clientX < boundaryMeta.endX &&
+        clientY > boundaryMeta.startY &&
+        clientY < boundaryMeta.endY
       ) {
-        this.$store.dispatch("canvasModule/SET_END_POINT", { e });
+        store.dispatch("canvasModule/SET_END_POINT", { e });
         let columnIndex = Math.floor(e.offsetX / size),
           rowIndex = Math.floor(e.offsetY / size);
-        this.$store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
-        this.$store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
+        store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
+        store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       }
       if (mode === "pencil") {
-        this.canvasImageDataSaveClean();
-        this.pencilMouseUp(e);
+        canvasImageDataSaveClean();
+        pencilMouseUp(e);
       }
       if (mode === "line") {
-        this.canvasImageDataSaveClean();
-        this.lineMouseUp(e);
+        canvasImageDataSaveClean();
+        lineMouseUp(e);
       }
       if (mode === "bucket") {
-        this.canvasImageDataSaveClean();
-        this.bucketMouseUp(e);
+        canvasImageDataSaveClean();
+        bucketMouseUp();
       }
       if (mode === "square") {
-        this.canvasImageDataSaveClean();
-        this.squareMouseUp(e);
+        canvasImageDataSaveClean();
+        squareMouseUp(e);
       }
       if (mode === "circle") {
-        this.canvasImageDataSaveClean();
-        this.circleMouseUp(e);
+        canvasImageDataSaveClean();
+        circleMouseUp(e);
       }
       if (mode === "bucket") {
-        this.canvasImageDataSaveClean();
+        canvasImageDataSaveClean();
       }
       if (mode === "colorPicker") {
-        this.colorPickerMouseUp(e);
+        colorPickerMouseUp(e);
       }
       if (mode === "eraser") {
-        this.eraserMouseUp(e);
+        eraserMouseUp(e);
       }
       if (mode === "select") {
-        this.canvasImageDataSaveClean();
-        this.selectMouseUp(e);
+        canvasImageDataSaveClean();
+        selectMouseUp(e);
       }
       if (mode === "mirrorPencil") {
-        this.canvasImageDataSaveClean();
-        this.mirrorPencilMouseUp(e);
+        canvasImageDataSaveClean();
+        mirrorPencilMouseUp(e);
       }
       if (mode === "move") {
-        this.moveMouseUp(e);
+        moveMouseUp(e);
       }
-      this.$nextTick(() => {
-        this.mergeCanvas();
+      nextTick(() => {
+        mergeCanvas();
       });
-      // this.setCanvasPreview(
-      //   [this.backgroundCanvasCtx, this.canvasCtx],
-      //   this.shadowCanvasCtx
     }
+    return {
+      store,
+      scale,
+      selectArea,
+      canvas,
+      selectcanvas,
+      layerShandowCanvas,
+      backgroundCanvas,
+      aboveCanvas,
+      belowCanvas,
+      tempCanvas,
+      imageData
+    };
   }
 };
 </script>

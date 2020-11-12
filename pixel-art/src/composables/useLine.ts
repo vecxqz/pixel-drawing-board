@@ -2,7 +2,7 @@ import { bresenhamLine, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
-export function useLine(this: any) {
+export function useLine() {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
@@ -11,10 +11,10 @@ export function useLine(this: any) {
   });
   const { startX, startY, endX, endY } = useMousePosition();
 
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     console.log("line mouse move");
   }
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     bresenhamLine(
       startX.value,
       startY.value,
@@ -30,7 +30,7 @@ export function useLine(this: any) {
       }
     );
   }
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     console.log(startX.value, startY.value, endX.value, endY.value);
     bresenhamLine(
       startX.value,

@@ -4,7 +4,7 @@ import { useChoose } from "./useChoose";
 import { useLayer } from "./useLayer";
 import { usePage } from "./usePage";
 import cloneDeep from "lodash/cloneDeep";
-export function useDoState(this: any) {
+export function useDoState() {
   enum TYPE {
     LAYER_DATA_CHANGE = "LAYER_DATA_CHANGE", //只修改了单页单层页面数据
     PAGE_CREATE = "PAGE_CREATE", // 创建页面

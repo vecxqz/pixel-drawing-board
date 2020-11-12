@@ -1,6 +1,6 @@
 import { computed } from "vue";
 import { useStore } from "./useStore";
-export function useFile(this: any) {
+export function useFile() {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);

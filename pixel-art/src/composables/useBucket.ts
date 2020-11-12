@@ -4,7 +4,7 @@ import { useCanvas } from "./useCanvas";
 import { useStore } from "./useStore";
 import Color from "color";
 
-export function useBucket(this: any) {
+export function useBucket() {
   const { calcColor } = useCanvas();
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
@@ -18,7 +18,7 @@ export function useBucket(this: any) {
   const height = computed(() => {
     return store.state.canvasModule.height;
   });
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     // const oldColor = currentLayer.value[columnIndex][rowIndex].color,

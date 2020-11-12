@@ -37,7 +37,7 @@ export function useMousePosition() {
       store.state.canvasModule.eventPoint.endPoint.e.offsetY / size.value
     )
   );
-  function mouseDown(this: any, e: MouseEvent) {
+  function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     store.dispatch("canvasModule/SET_START_POINT", {
@@ -46,19 +46,19 @@ export function useMousePosition() {
       y: rowIndex
     });
   }
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    this.$store.dispatch("canvasModule/SET_END_POINT", {
+    store.dispatch("canvasModule/SET_END_POINT", {
       e,
       x: columnIndex,
       y: rowIndex
     });
   }
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
-    this.$store.dispatch("canvasModule/SET_END_POINT", {
+    store.dispatch("canvasModule/SET_END_POINT", {
       e,
       x: columnIndex,
       y: rowIndex
