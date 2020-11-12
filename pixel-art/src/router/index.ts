@@ -1,4 +1,8 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory
+} from "vue-router";
 
 const routes = [
   {
@@ -12,11 +16,17 @@ const routes = [
     name: "DrawPixelDetail",
     component: () =>
       import(/* webpackChunkName: "drawPixel" */ "../views/Draw.vue")
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "404",
+    component: () => import(/* webpackChunkName: "404" */ "../views/404.vue")
   }
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  // history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
 });
 

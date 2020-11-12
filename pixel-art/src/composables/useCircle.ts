@@ -1,26 +1,22 @@
-import { bresenhamLineCircle, drawGrid } from "../util/canvas";
+import { bresenhamLineCircle, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
 import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
-export function useCircle(this: any) {
+export function useCircle() {
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const currentLayer = computed(
-    () =>
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex].layer
-  );
+
   const { startX, startY, endX, endY } = useMousePosition();
-  
-  function mouseDown(this: any, e: MouseEvent) {
+
+  function mouseDown(e: MouseEvent) {
     console.log("circle mouseDown");
   }
   // 拖拽时绘制圆形
-  function mouseMove(this: any, e: MouseEvent) {
+  function mouseMove(e: MouseEvent) {
     // 防止圆贴着圆心形成的直角坐标系的边飘逸
     let midX1, midY1, r1, ya1;
     // 一三象限
@@ -42,24 +38,22 @@ export function useCircle(this: any) {
       r1 = Math.abs(Math.floor((ya1 - startY.value) / 2));
     }
     bresenhamLineCircle(
-      currentLayer.value,
       midX1,
       midY1,
       r1,
       false,
       (columnIndex: number, rowIndex: number) => {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
+          color: color.value,
+          size: 1
+        });
       }
     );
   }
   // 鼠标松开时，把矩形绘制，并修改数据
-  function mouseUp(this: any, e: MouseEvent) {
+  function mouseUp(e: MouseEvent) {
     // 防止圆贴着圆心形成的直角坐标系的边飘逸
     let midX1, midY1, r1, ya1;
     midX1 = Math.floor((endX.value + startX.value) / 2);
@@ -80,25 +74,16 @@ export function useCircle(this: any) {
       r1 = Math.abs(Math.floor((ya1 - startY.value) / 2));
     }
     bresenhamLineCircle(
-      currentLayer.value,
       midX1,
       midY1,
       r1,
       false,
       (columnIndex: number, rowIndex: number) => {
-        drawGrid(
-          canvasCtx.value,
-          currentLayer.value,
+        drawGridB(canvasCtx.value, {
           columnIndex,
           rowIndex,
-          color.value
-        );
-        store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          columnIndex,
-          rowIndex,
-          data: {
-            color: color.value
-          }
+          color: color.value,
+          size: 1
         });
       }
     );

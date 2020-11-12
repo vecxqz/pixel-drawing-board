@@ -80,16 +80,57 @@ function drawGrid(
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
   canvasCtx.fillStyle = color;
+  // console.log(color, x, y, size, size);
   canvasCtx.fillRect(x, y, size, size);
+}
+function drawGridB(
+  canvasCtx: CanvasRenderingContext2D,
+  {
+    columnIndex,
+    rowIndex,
+    size,
+    color
+  }: {
+    columnIndex: number;
+    rowIndex: number;
+    size: number;
+    color: string;
+  }
+): void {
+  canvasCtx.fillStyle = color;
+  canvasCtx.fillRect(columnIndex, rowIndex, size, size);
 }
 function clearGrid(
   canvasCtx: CanvasRenderingContext2D,
   layerMeta: layer,
   columnIndex: number,
-  rowIndex: number,
+  rowIndex: number
 ): void {
   const { x, y, size } = layerMeta[columnIndex][rowIndex];
   canvasCtx.clearRect(x, y, size, size);
+}
+function clearGridB(
+  canvasCtx: CanvasRenderingContext2D,
+  {
+    columnIndex,
+    rowIndex,
+    size
+  }: {
+    columnIndex: number;
+    rowIndex: number;
+    size: number;
+  }
+): void {
+  const { width, height } = canvasCtx.canvas;
+  const imageData = canvasCtx.getImageData(0, 0, width, height);
+  const { data } = imageData;
+  const index = (columnIndex + rowIndex * height) * 4;
+  data[index] = 0; // r
+  data[index + 1] = 0; // g
+  data[index + 2] = 0; // b
+  data[index + 3] = 0; // a
+  canvasCtx.putImageData(imageData, 0, 0);
+  // canvasCtx.clearRect(columnIndex, rowIndex, size, size);
 }
 function initGrid(
   canvasCtx: CanvasRenderingContext2D,
@@ -165,7 +206,6 @@ function _draw_circle_8(
 }
 
 function bresenhamLineCircle(
-  layer: layer,
   xc: number,
   yc: number,
   r: number,
@@ -312,5 +352,7 @@ export {
   drawGridGroup,
   drawSelectArea,
   drawSquare,
-  clearGrid
+  clearGrid,
+  drawGridB,
+  clearGridB
 };

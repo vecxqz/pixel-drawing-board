@@ -7,69 +7,67 @@
       <div class="title">画布信息</div>
       <div class="info-layer-size">{{ width }} * {{ height }}</div>
       <div v-if="girdMeta">
-        x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }} color:{{
-          girdMeta.color
-        }}
+        x:{{ girdMeta.columnIndex + 1 }} y:{{ girdMeta.rowIndex + 1 }}
       </div>
     </div>
     <div class="attribute-box">
       <layer />
     </div>
-    <!-- <div class="current-color" :style="currentGirdColor">
-      {{ currentGirdColor }}
-    </div> -->
-    <!-- <div class="color-choose">
-      <ul>
-        <li
-          v-for="color in colors"
-          :key="color"
-          :style="{ backgroundColor: color, height: '30px', width: '30px' }"
-          @click="colorSetByChoose(color)"
-        />
-      </ul>
-    </div> -->
-    <!-- <div class="btn-group-operator">
-      <div class="btn-operator" @click="redo()">redo</div>
-      <div class="btn-operator" @click="undo()">undo</div>
-    </div> -->
   </div>
 </template>
 
 <script lang="ts">
+import { computed, reactive } from "vue";
+import { useStore } from "../composables/useStore";
 import layer from "./Layer.vue";
 export default {
   name: "CanvasAttribute",
   components: {
     layer
   },
-  data() {
+  setup() {
+    const store: any = useStore();
+    const colors = reactive([
+      "red",
+      "yellow",
+      "blue",
+      "green",
+      "black",
+      "white"
+    ]);
+    const girdMeta = computed(
+      () => store.getters["canvasModule/currentGridMeta"]
+    );
+    const currentPageIndex = computed(
+      () => store.state.canvasModule.currentPageIndex
+    );
+    const previewUrl = computed(() => {
+      const pages = store.state.canvasModule.pages;
+      const length = pages.length;
+      if (length < 1) return "";
+      const { previewUrl } = store.state.canvasModule.pages[
+        currentPageIndex.value
+      ];
+      if (previewUrl) {
+        return previewUrl;
+      }
+      return "";
+    });
+    const height = computed(() => {
+      const { height } = store.state.canvasModule;
+      return height;
+    });
+    const width = computed(() => {
+      const { width } = store.state.canvasModule;
+      return width;
+    });
     return {
-      colors: ["red", "yellow", "blue", "green", "black", "white"]
+      colors,
+      previewUrl,
+      width,
+      height,
+      girdMeta
     };
-  },
-  computed: {
-    girdMeta(this: any) {
-      return this.$store.getters["canvasModule/currentGridMeta"];
-    },
-    previewUrl(this: any) {
-      return this.$store.state.canvasModule.previewUrl;
-    },
-    currentGirdColor(this: any) {
-      return `background:${this.$store.getters["canvasModule/currentGridMeta"].color}`;
-    },
-    width(this: any) {
-      const { width, size } = this.$store.state.canvasModule;
-      return width / size;
-    },
-    height(this: any) {
-      const { height, size } = this.$store.state.canvasModule;
-      return height / size;
-    }
-  },
-  methods: {
-    colorSetByChoose(this: any, color: string) {
-      this.$store.dispatch("canvasModule/SET_COLOR", color);
-    }
   }
 };
 </script>
@@ -122,8 +120,8 @@ ul {
   border: 2px solid rgba(122, 139, 235, 0.315);
 }
 .image-preview {
-  width: 200px;
-  height: 200px;
+  width: 100px;
+  height: 100px;
 }
 .attribute-box {
   .title {

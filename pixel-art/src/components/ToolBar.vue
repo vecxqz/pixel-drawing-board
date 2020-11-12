@@ -1,6 +1,6 @@
 <template>
   <div id="toolbar">
-    <div class="title">TOOLS</div>
+    <div class="title">工具</div>
     <ul class="toolbar-list">
       <li
         class="toolbar-item"
@@ -14,139 +14,141 @@
         <div class="toolbar-icon"></div>
       </li>
     </ul>
-    <colorPreview />
+    <colorPreview class="color-preview" />
   </div>
 </template>
 
 <script lang="ts">
+import { computed, reactive, ref } from "vue";
 import colorPreview from "./colorPreview.vue";
+import { useStore } from "../composables/useStore";
 export default {
   name: "ToolBar",
   components: {
     colorPreview
   },
-  computed: {
-    activeTools(this: any) {
-      return this.tools.filter((tool: any) => tool.active);
-    }
-  },
-  data() {
-    return {
-      toolActiveIndex: 0,
-      tools: [
-        {
-          id: "tool-pencil",
-          title: "Pencil Tool",
-          mode: "pencil",
-          active: true
-        },
-        {
-          id: "tool-mirror-pencil",
-          title: "Mirror Tool",
-          mode: "mirrorPencil",
-          active: true
-        },
-        {
-          id: "tool-eraser",
-          title: "Eraser Tool",
-          mode: "eraser",
-          active: true
-        },
-        {
-          id: "tool-brush",
-          title: "Brush Tool",
-          mode: "brush",
-          active: false
-        },
-        {
-          id: "tool-line",
-          title: "Line Tool",
-          mode: "line",
-          active: true
-        },
-        {
-          id: "tool-square",
-          title: "Square Tool",
-          mode: "square",
-          active: true
-        },
-        {
-          id: "tool-circle",
-          title: "Circle Tool",
-          mode: "circle",
-          active: true
-        },
-        {
-          id: "tool-bucket",
-          title: "Bucket Tool",
-          mode: "bucket",
-          active: true
-        },
-        {
-          id: "tool-color-picker",
-          title: "Color Picker Tool",
-          mode: "colorPicker",
-          active: true
-        },
-        {
-          id: "tool-move",
-          title: "Move Tool",
-          mode: "move",
-          active: true
-        },
-        {
-          id: "tool-select",
-          title: "Select Tool",
-          mode: "select",
-          active: true
-        },
-        {
-          id: "tool-text",
-          title: "Text Tool",
-          mode: "text",
-          active: false
-        },
-        {
-          id: "tool-lighten-darken",
-          title: "Lighten/Darken Tool",
-          mode: "lighten/darken",
-          active: false
-        },
-        {
-          id: "tool-dithering",
-          title: "Dithering Tool",
-          mode: "dithering",
-          active: false
-        },
-        {
-          id: "tool-stamp",
-          title: "Stamp Tool",
-          mode: "stamp",
-          active: false
-        },
-        {
-          id: "tool-crop",
-          title: "Crop Tool - Resize Drawing Canvas",
-          mode: "crop",
-          active: false
-        },
-        {
-          id: "tool-gradient",
-          title: "Gradient Tool",
-          mode: "gradient",
-          active: false
-        }
-      ]
-    };
-  },
-  methods: {
-    toolSelect(this: any, index: number) {
-      this.toolActiveIndex = index;
-      this.$store.dispatch(
+  setup() {
+    const store: any = useStore();
+    const toolActiveIndex = ref(0);
+    const tools = reactive([
+      {
+        id: "tool-pencil",
+        title: "Pencil Tool",
+        mode: "pencil",
+        active: true
+      },
+      {
+        id: "tool-mirror-pencil",
+        title: "Mirror Tool",
+        mode: "mirrorPencil",
+        active: true
+      },
+      {
+        id: "tool-eraser",
+        title: "Eraser Tool",
+        mode: "eraser",
+        active: true
+      },
+      {
+        id: "tool-brush",
+        title: "Brush Tool",
+        mode: "brush",
+        active: false
+      },
+      {
+        id: "tool-line",
+        title: "Line Tool",
+        mode: "line",
+        active: true
+      },
+      {
+        id: "tool-square",
+        title: "Square Tool",
+        mode: "square",
+        active: true
+      },
+      {
+        id: "tool-circle",
+        title: "Circle Tool",
+        mode: "circle",
+        active: true
+      },
+      {
+        id: "tool-bucket",
+        title: "Bucket Tool",
+        mode: "bucket",
+        active: true
+      },
+      {
+        id: "tool-color-picker",
+        title: "Color Picker Tool",
+        mode: "colorPicker",
+        active: true
+      },
+      {
+        id: "tool-move",
+        title: "Move Tool",
+        mode: "move",
+        active: true
+      },
+      {
+        id: "tool-select",
+        title: "Select Tool",
+        mode: "select",
+        active: true
+      },
+      {
+        id: "tool-text",
+        title: "Text Tool",
+        mode: "text",
+        active: false
+      },
+      {
+        id: "tool-lighten-darken",
+        title: "Lighten/Darken Tool",
+        mode: "lighten/darken",
+        active: false
+      },
+      {
+        id: "tool-dithering",
+        title: "Dithering Tool",
+        mode: "dithering",
+        active: false
+      },
+      {
+        id: "tool-stamp",
+        title: "Stamp Tool",
+        mode: "stamp",
+        active: false
+      },
+      {
+        id: "tool-crop",
+        title: "Crop Tool - Resize Drawing Canvas",
+        mode: "crop",
+        active: false
+      },
+      {
+        id: "tool-gradient",
+        title: "Gradient Tool",
+        mode: "gradient",
+        active: false
+      }
+    ]);
+    const activeTools = computed(() =>
+      tools.filter((tool: any) => tool.active)
+    );
+    function toolSelect(index: number) {
+      toolActiveIndex.value = index;
+      store.dispatch(
         "canvasModule/SET_PAINT_MODE",
-        this.activeTools[index].mode
+        activeTools.value[index].mode
       );
     }
+    return {
+      activeTools,
+      toolActiveIndex,
+      toolSelect
+    };
   }
 };
 </script>
@@ -183,37 +185,39 @@ export default {
   margin: 10px;
   width: 32px;
   height: 32px;
-  background: url(../assets/set_autumnfire.png);
 }
 #tool-pencil .toolbar-icon {
-  background-position: -1px -1px;
+  background: url(../assets/entypopencil.svg);
+}
+#tool-mirror-pencil .toolbar-icon {
+  background: url(../assets/mirror.svg);
 }
 #tool-eraser .toolbar-icon {
-  background-position: -34px -1px;
+  background: url(../assets/eraser.svg);
 }
-#tool-brush .toolbar-icon {
-  background-position: -1px -34px;
-}
+// #tool-brush .toolbar-icon {
+//   background: url(../assets/brush.svg);
+// }
 #tool-line .toolbar-icon {
-  background-position: -34px -34px;
+  background: url(../assets/line.svg);
 }
 #tool-square .toolbar-icon {
-  background-position: -1px -68px;
+  background: url(../assets/square.svg);
 }
 #tool-circle .toolbar-icon {
-  background-position: -34px -68px;
+  background: url(../assets/radioEmpty.svg);
 }
 #tool-bucket .toolbar-icon {
-  background-position: -1px -100px;
+  background: url(../assets/bucket.svg);
 }
 #tool-color-picker .toolbar-icon {
-  background-position: -34px -100px;
+  background: url(../assets/Colorpicker.svg);
 }
 #tool-move .toolbar-icon {
-  background-position: -1px -134px;
+  background: url(../assets/move.svg);
 }
 #tool-select .toolbar-icon {
-  background-position: -34px -134px;
+  background: url(../assets/rectangleselection.svg);
 }
 #tool-text .toolbar-icon {
   background-position: -1px -166px;
@@ -232,5 +236,9 @@ export default {
 }
 #tool-gradient .toolbar-icon {
   background-position: -34px -232px;
+}
+.color-preview {
+  margin-top: 20px;
+  z-index: 2;
 }
 </style>

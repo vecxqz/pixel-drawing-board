@@ -1,120 +1,47 @@
-import {
-  drawSelectArea,
-  drawGrid,
-  clearGrid,
-  drawGridGroup
-} from "../util/canvas";
-import { computed, reactive, nextTick, toRaw } from "vue";
+import { drawGridB, clearGridB } from "../utils/canvas";
+import { computed, reactive, nextTick, toRaw, ref } from "vue";
 import { useStore } from "./useStore";
-export function useSelect(this: any) {
-  const distance = reactive({
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0,
-    diffX: 0,
-    diffY: 0,
-    move: {
-      // 存储移动时产生的数据
-      startX: 0, // 开始移动时鼠标x坐标
-      startY: 0, // 开始移动时鼠标y轴坐标
-      endX: 0, // 移动过程中以以及移动结束时鼠标y轴坐标
-      endY: 0, // 移动过程中以以及移动结束时鼠标y轴坐标
-      moveFlag: true // 标志
-    }
-  });
-  const selectArea: {
-    isSet: boolean;
-    isMove: boolean;
-    isClickOutSide: boolean;
-    startX: number;
-    startY: number;
-    endX: number;
-    endY: number;
-    data: Array<any>;
-  } = reactive({
-    isSet: false,
-    isMove: false,
-    isClickOutSide: false,
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0,
-    data: []
-  });
+import { useMousePosition } from "./usePosition";
+export function useSelect() {
+  const { startX, startY, endX, endY } = useMousePosition();
+  const isSet = ref(false);
+  const isMove = ref(false);
+  const isClickOutSide = ref(true);
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const selectCanvasCtx = computed(
     () => store.state.canvasModule.selectCanvasCtx
   );
-  const width = computed(
-    () => store.state.canvasModule.width / store.state.canvasModule.size
-  );
-  const height = computed(
-    () => store.state.canvasModule.height / store.state.canvasModule.size
-  );
+  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
+  const width = computed(() => store.state.canvasModule.width);
+  const height = computed(() => store.state.canvasModule.height);
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const currentLayer = computed(
-    () =>
-      store.state.canvasModule.pages[store.state.canvasModule.currentPageIndex]
-        .layers[store.state.canvasModule.currentLayerIndex].layer
-  );
-  const startX = computed(() => Math.floor(selectArea.startX));
-  const startY = computed(() => Math.floor(selectArea.startY));
-  const endX = computed(() => Math.floor(selectArea.endX));
-  const endY = computed(() => Math.floor(selectArea.endY));
+  const selectImageData = ref(null); //选择区域数据
+  const tempImageData = ref(null);
+  const selectClearImageData = ref(null); //没有被选取区域的大画布数据
+  const firstClear = ref(false);
+  const selectArea = reactive({
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+    diffX: 0,
+    diffY: 0
+  });
 
-  function setCoordinateStart({ x, y }: { x: number; y: number }) {
-    selectArea.startX = x;
-    selectArea.startY = y;
-  }
-  function setCoordinateEnd({ x, y }: { x: number; y: number }) {
-    selectArea.endX = x;
-    selectArea.endY = y;
-  }
   function setSetStatus(status: boolean) {
-    selectArea.isSet = status;
+    isSet.value = status;
   }
   function setMoveStatus(status: boolean) {
-    selectArea.isMove = status;
+    isMove.value = status;
   }
   function setClickOutSideStatus(status: boolean) {
-    selectArea.isClickOutSide = status;
+    isClickOutSide.value = status;
   }
 
-  function setSelectAreaData({
-    currentLayer,
-    startX,
-    startY,
-    endX,
-    endY
-  }: {
-    currentLayer: layer;
-    startX: number;
-    startY: number;
-    endX: number;
-    endY: number;
-  }) {
-    const minX = Math.min(startX, endX);
-    const minY = Math.min(startY, endY);
-    const maxX = Math.max(startX, endX);
-    const maxY = Math.max(startY, endY);
-    let data: Array<any> = [];
-    for (let x = minX; x <= maxX; x++) {
-      for (let y = minY; y <= maxY; y++) {
-        const dataIndexX = x - minX;
-        const dataIndexY = y - minY;
-        if (!Array.isArray(data[dataIndexX])) {
-          data[dataIndexX] = [];
-        }
-        data[dataIndexX][dataIndexY] = { ...currentLayer[x][y] };
-      }
-    }
-    selectArea.data = data;
-  }
   function isInSelectArea(
     x: number,
     y: number,
@@ -132,256 +59,311 @@ export function useSelect(this: any) {
     }
     return false;
   }
+  function setSelectArea({
+    startX,
+    startY,
+    endX,
+    endY
+  }: {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  }) {
+    selectArea.startX = Math.min(startX, endX);
+    selectArea.startY = Math.min(startY, endY);
+    selectArea.endX = Math.max(startX, endX);
+    selectArea.endY = Math.max(startY, endY);
+    selectArea.diffX = selectArea.endX - selectArea.startX;
+    selectArea.diffY = selectArea.endY - selectArea.startY;
+    if (selectArea.diffX !== 0) selectArea.diffX += 1;
+    if (selectArea.diffY !== 0) selectArea.diffY += 1;
+  }
 
-  function mouseDown(this: any, e: MouseEvent) {
-    const columnIndex = Math.floor(e.offsetX / size.value),
-      rowIndex = Math.floor(e.offsetY / size.value);
-    const {
-      data,
-      isSet,
-      isMove,
-      isClickOutSide
-    }: {
-      data: Array<any>;
-      isSet: boolean;
-      isMove: boolean;
-      isClickOutSide: boolean;
-    } = selectArea;
-    // console.log("开始绘制");
-    // console.log(`
-    // down
-    //   isSet:${isSet},
-    //   isMove:${isMove},
-    //   isClickOutSide:${isClickOutSide}
-    // `);
-    // 没有创建选择区域，则创建选择区域
-    if (isSet) {
-      // 说明点击的是选择区域内部，
-      if (
-        isInSelectArea(
-          columnIndex,
-          rowIndex,
-          startX.value,
-          startY.value,
-          endX.value,
-          endY.value
-        )
-      ) {
-        // console.log("进入拖拽状态");
-        // 设置为可拖拽状态
+  function mouseDown(e: MouseEvent) {
+    // 没设置选取区域前存储画布像素信息
+    if (!isSet.value) {
+      tempImageData.value = canvasCtx.value.getImageData(
+        0,
+        0,
+        width.value,
+        height.value
+      );
+    }
+    tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
+    // 如果设置了选择区域则判断是否点击在选择区域内
+    if (isSet.value) {
+      const isInSelectAreaFlag = isInSelectArea(
+        startX.value,
+        startY.value,
+        selectArea.startX,
+        selectArea.startY,
+        selectArea.endX,
+        selectArea.endY
+      );
+
+      if (isInSelectAreaFlag) {
+        setSetStatus(true);
+        setClickOutSideStatus(false);
         setMoveStatus(true);
-        // 设置拖拽起点
-        distance.startX = columnIndex;
-        distance.startY = rowIndex;
+        // 初次移动，时清除当前画布上选择区域数据
+        tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+        tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+        const clearImageData = tempCanvasCtx.value.getImageData(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        // 清除选择阴影
+        canvasCtx.value.clearRect(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        // 绘制被选择阴影清除时,同时被清除的原区域数据
+        selectCanvasCtx.value.clearRect(
+          0,
+          0,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+        canvasCtx.value.drawImage(
+          selectCanvasCtx.value.canvas,
+          selectArea.startX,
+          selectArea.startY
+        );
+        // 说明在点击区域内,进入移动
       } else {
-        // console.log("点击的是已创建的区域，外部,再次拖拽绘制新选择区域");
-        // 说明点击的是区域外部,取消选择区域
+        // 不在点击区域内，取消选择区域
+        console.log("释放");
+        const maxX = selectArea.startX;
+        const maxY = selectArea.startY;
+        // 获取被选择区域合并的画布上的数据
+        tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+        tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+        const clearImageData = tempCanvasCtx.value.getImageData(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        // 清除选择阴影
+        canvasCtx.value.clearRect(
+          selectArea.startX,
+          selectArea.startY,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+
+        // 绘制被选择阴影清除时同时被清除的原区域数据
+        selectCanvasCtx.value.clearRect(
+          0,
+          0,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+        canvasCtx.value.drawImage(
+          selectCanvasCtx.value.canvas,
+          selectArea.startX,
+          selectArea.startY
+        );
+        // 绘制被选择区域
+        selectCanvasCtx.value.clearRect(
+          0,
+          0,
+          selectArea.diffX,
+          selectArea.diffY
+        );
+        selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
+        canvasCtx.value.drawImage(
+          selectCanvasCtx.value.canvas,
+          selectArea.startX,
+          selectArea.startY
+        );
+        // 结束 状态重置
         setClickOutSideStatus(true);
-        // data数组了只存了有color属性的格子信息
-        const minX = Math.min(startX.value, endX.value);
-        const minY = Math.min(startY.value, endY.value);
-        for (let x = 0; x < data.length; x++) {
-          for (let y = 0; y < data[x].length; y++) {
-            const { color } = data[x][y];
-            if (
-              color &&
-              minX + x >= 0 &&
-              minX + x < width.value &&
-              minY + y >= 0 &&
-              minY + y < height.value
-            ) {
-              // console.log(minX + x, minY + y, color);
-              drawGrid(
-                canvasCtx.value,
-                currentLayer.value,
-                minX + x,
-                minY + y,
-                color
-              );
-              store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-                columnIndex: minX + x,
-                rowIndex: minY + y,
-                data: {
-                  color
-                }
-              });
-            }
-          }
-        }
         setSetStatus(false);
-        setCoordinateStart({
-          x: columnIndex,
-          y: rowIndex
+        setMoveStatus(false);
+        tempImageData.value = canvasCtx.value.getImageData(
+          0,
+          0,
+          width.value,
+          height.value
+        );
+        selectClearImageData.value = null;
+        selectImageData.value = null;
+        setSelectArea({
+          startX: 0,
+          startY: 0,
+          endX: 0,
+          endY: 0
         });
-        setCoordinateEnd({
-          x: 0,
-          y: 0
-        });
-        distance.startX = 0;
-        distance.startY = 0;
-        distance.endX = 0;
-        distance.endY = 0;
-        distance.diffX = 0;
-        distance.diffY = 0;
-        distance.move.startX = 0;
-        distance.move.startY = 0;
-        distance.move.endX = 0;
-        distance.move.endY = 0;
-        distance.move.startX = 0;
-        distance.move.startX = 0;
-        distance.move.moveFlag = true;
       }
-    } else {
-      // console.log("创建新区域，设置起始坐标");
-      setClickOutSideStatus(false);
-      setCoordinateStart({
-        x: columnIndex,
-        y: rowIndex
-      });
     }
   }
-  function mouseMove(this: any, e: MouseEvent) {
-    // console.log("select mouseMove");
-    const columnIndex = Math.floor(e.offsetX / size.value),
-      rowIndex = Math.floor(e.offsetY / size.value);
-    const { data, isSet, isMove, isClickOutSide } = selectArea;
-    // 如果设置了,则是拖拽事件
-    // console.log("绘制中");
-    // console.log(`
-    // move
-    //   isSet:${isSet},
-    //   isMove:${isMove},
-    //   isClickOutSide:${isClickOutSide}
-    // `);
-    if (isMove) {
-      distance.endX = columnIndex;
-      distance.endY = rowIndex;
-      distance.diffX = distance.endX - distance.startX;
-      distance.diffY = distance.endY - distance.startY;
-      // 拖拽时重新设置拖拽区域的起点和终点坐标
-      if (distance.move.moveFlag) {
-        distance.move.startX = startX.value;
-        distance.move.startY = startY.value;
-        distance.move.endX = endX.value;
-        distance.move.endY = endY.value;
-        distance.move.moveFlag = false;
-      }
-      setCoordinateStart({
-        x: distance.move.startX + distance.diffX,
-        y: distance.move.startY + distance.diffY
-      });
-      setCoordinateEnd({
-        x: distance.move.endX + distance.diffX,
-        y: distance.move.endY + distance.diffY
-      });
-    }
-    if (!isSet) {
-      // 创建选择区域
-      // console.log("绘制中");
-      const endX = columnIndex,
-        endY = rowIndex;
-      drawGridGroup(
-        canvasCtx.value,
-        currentLayer.value,
-        startX.value,
-        startY.value,
-        endX,
-        endY,
-        "black"
-      );
-      // 在这里设置，就可以把mouseUp里的nextTick去掉
-      setCoordinateEnd({
-        x: endX,
-        y: endY
-      });
-    }
-  }
-  function mouseUp(this: any, e: MouseEvent) {
-    // console.log("select mouseUp");
-    const columnIndex = Math.floor(e.offsetX / size.value),
-      rowIndex = Math.floor(e.offsetY / size.value);
-    const { data, isSet, isMove, isClickOutSide } = selectArea;
-    // console.log("绘制完成");
-    // console.log(`
-    // up
-    //   isSet:${isSet},
-    //   isMove:${isMove},
-    //   isClickOutSide:${isClickOutSide}
-    //   distance.move.startX + distance.diffX ${distance.move.startX +
-    //     distance.diffX}
-    //   `);
-    if (
-      (isMove && distance.move.startX + distance.diffX !== 0) ||
-      distance.move.startY + distance.diffY !== 0
-    ) {
-      // distance.move.startX + distance.diffX === 0
-      // distance.move.startY + distance.diffY === 0
-      // 说明没有移动过，则也不进入该逻辑
-      setCoordinateStart({
-        x: distance.move.startX + distance.diffX,
-        y: distance.move.startY + distance.diffY
-      });
-      setCoordinateEnd({
-        x: distance.move.endX + distance.diffX,
-        y: distance.move.endY + distance.diffY
-      });
-      distance.move.moveFlag = true;
-      setMoveStatus(false);
-    }
-    if (!isSet) {
-      const { isSet, isMove, isClickOutSide } = selectArea;
-      // console.log(isClickOutSide);
-      // 绘制完成
-      setClickOutSideStatus(false);
-      setSetStatus(true);
-      setCoordinateEnd({
-        x: columnIndex,
-        y: rowIndex
-      });
-      const currentLayerRaw: layer = toRaw(currentLayer.value);
-      // 1.宽高采用计算属性，有延迟，会导致绘制的时候没有宽高，所以将该函数放入nextTick
-      // 2.这里如果使用了nextTick，下面去除主画布上格子信息的函数执行后才进入该函数，该函数读到的layer会变空所以不使用nextTick了
-      // nextTick(() => {
-      drawSelectArea(
-        canvasCtx.value,
-        selectCanvasCtx.value,
-        currentLayerRaw,
-        startX.value,
-        startY.value,
-        endX.value,
-        endY.value,
-        size.value,
-        "black"
-      );
-      // });
-      setSetStatus(true);
-      setSelectAreaData({
-        currentLayer: currentLayer.value,
+  function mouseMove(e: MouseEvent) {
+    // 点击外部区域或是没有绘制才记录
+    if (isClickOutSide.value) {
+      setSelectArea({
         startX: startX.value,
         startY: startY.value,
         endX: endX.value,
         endY: endY.value
       });
+    }
+    // 设置起始坐标
+    // console.log(startX.value, startY.value, diffX, diffY);
+    const {
+      startX: selectAreaStartX,
+      startY: selectAreaStartY,
+      diffX: selectAreaDiffX,
+      diffY: selectAreaDiffY
+    } = selectArea;
+    if (!isSet.value && selectAreaDiffX !== 0 && selectAreaDiffY !== 0) {
+      // console.log(
+      //   selectAreaStartX,
+      //   selectAreaStartY,
+      //   selectAreaDiffX,
+      //   selectAreaDiffY
+      // );
+      const tempColor = color.value;
+      canvasCtx.value.globalAlpha = 0.5;
+      canvasCtx.value.fillStyle = "rgb(0,0,0)";
+      canvasCtx.value.fillRect(
+        selectAreaStartX,
+        selectAreaStartY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      canvasCtx.value.globalAlpha = 1;
+      canvasCtx.value.fillStyle = tempColor;
+    }
+    // 移动状态
+    if (isMove.value) {
+      const diffX = endX.value - startX.value;
+      const diffY = endY.value - startY.value;
+      const tempColor = color.value;
+      tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+      tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+      const clearImageData = tempCanvasCtx.value.getImageData(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      // 清除选择阴影
+      canvasCtx.value.clearRect(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
 
-      const { data }: { data: Array<any> } = selectArea;
-      // 暂时清除真实画布上的该选择区域的像素
-      const minX = Math.min(startX.value, endX.value);
-      const minY = Math.min(startY.value, endY.value);
-      for (let x = 0; x < data.length; x++) {
-        for (let y = 0; y < data[x].length; y++) {
-          const { color } = data[x][y];
-          clearGrid(canvasCtx.value, currentLayer.value, minX + x, minY + y);
-          // 提升性能
-          currentLayerRaw[minX + x][minY + y].color = undefined;
-          // store.dispatch("canvasModule/SET_LAYER_GRID_DATA", {
-          //   columnIndex: minX + x,
-          //   rowIndex: minY + y,
-          //   data: {
-          //     color: undefined
-          //   }
-          // });
-        }
-      }
+      // 绘制被选择阴影清除时,同时被清除的原区域数据
+      selectCanvasCtx.value.clearRect(0, 0, selectAreaDiffX, selectAreaDiffY);
+      selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+      canvasCtx.value.drawImage(
+        selectCanvasCtx.value.canvas,
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY
+      );
+      // 绘制被选择区域
+      selectCanvasCtx.value.clearRect(0, 0, selectAreaDiffX, selectAreaDiffY);
+      selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
+      canvasCtx.value.drawImage(
+        selectCanvasCtx.value.canvas,
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY
+      );
+      canvasCtx.value.globalAlpha = 0.5;
+      canvasCtx.value.fillStyle = "rgb(0,0,0)";
+      // 绘制阴影区域
+      canvasCtx.value.fillRect(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      canvasCtx.value.globalAlpha = 1;
+      canvasCtx.value.fillStyle = tempColor;
+    }
+  }
+  function mouseUp(e: MouseEvent) {
+    const tempFillStyle = canvasCtx.value.fillStyle;
+    // 点击外部区域或是没有绘制才记录
+    if (isClickOutSide.value) {
+      setSelectArea({
+        startX: startX.value,
+        startY: startY.value,
+        endX: endX.value,
+        endY: endY.value
+      });
+    }
+    const {
+      startX: selectAreaStartX,
+      startY: selectAreaStartY,
+      endX: selectAreaEndX,
+      endY: selectAreaEndY,
+      diffX: selectAreaDiffX,
+      diffY: selectAreaDiffY
+    } = selectArea;
+    // 设置区域颜色
+    if (!isSet.value && selectAreaDiffX !== 0 && selectAreaDiffY !== 0) {
+      // 先获取选择区域像素信息再绘制阴影
+      canvasCtx.value.putImageData(tempImageData.value, 0, 0);
+      // 存储被选中区域的imagedata
+      selectImageData.value = canvasCtx.value.getImageData(
+        selectAreaStartX,
+        selectAreaStartY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      // 存储没有被选择区域的画布数据
+      tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
+      tempCanvasCtx.value.clearRect(
+        selectAreaStartX,
+        selectAreaStartY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      selectClearImageData.value = tempCanvasCtx.value.getImageData(
+        0,
+        0,
+        width.value,
+        height.value
+      );
+      // 开始 绘制阴影
+      canvasCtx.value.globalAlpha = 0.5;
+      canvasCtx.value.fillStyle = "rgb(0,0,0)";
+      canvasCtx.value.fillRect(
+        selectAreaStartX,
+        selectAreaStartY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      // 重置
+      canvasCtx.value.globalAlpha = 1;
+      canvasCtx.value.fillStyle = tempFillStyle;
+      // 结束 绘制阴影
+      setSetStatus(true);
+    }
+    // 移动状态
+    if (isMove.value) {
+      const diffX = endX.value - startX.value;
+      const diffY = endY.value - startY.value;
+      // console.log(diffX, diffY);
+      // console.log(startX.value, startY.value);
+      // 更新移动区域数据
+      setSelectArea({
+        startX: selectAreaStartX + diffX,
+        startY: selectAreaStartY + diffY,
+        endX: selectAreaEndX + diffX,
+        endY: selectAreaEndY + diffY
+      });
     }
   }
 

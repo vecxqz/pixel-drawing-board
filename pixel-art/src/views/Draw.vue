@@ -1,25 +1,25 @@
 <template>
   <ToolHeader />
-  <div class="dis-flex">
+  <div class="dis-flex area-mid">
     <ToolBar class="area-tool" />
     <PixleCanvas class="area-canvas" />
     <CanvasAttribute class="area-attribute" />
   </div>
-  <AnimationPreview />
+  <Page class="page" />
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
 import ToolHeader from "@/components/ToolHeader.vue";
 import ToolBar from "@/components/ToolBar.vue";
 import CanvasAttribute from "@/components/CanvasAttribute.vue";
-import AnimationPreview from "@/components/AnimationPreview.vue";
+import Page from "@/components/Page.vue";
 export default {
   components: {
     PixleCanvas,
     ToolBar,
     CanvasAttribute,
     ToolHeader,
-    AnimationPreview
+    Page
   }
 };
 </script>
@@ -40,6 +40,11 @@ export default {
   &-canvas {
     flex: 1;
     overflow: auto;
+    align-items: center;
   }
+}
+.area-mid {
+  flex: 1;
+  height: calc(100% - 172px);
 }
 </style>

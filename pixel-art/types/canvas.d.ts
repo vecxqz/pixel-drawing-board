@@ -15,9 +15,11 @@ declare interface layer {
   length: number;
 }
 declare interface layerMeta {
-  layer: layer;
   layerName: string;
-  canvaImageData!: CanvasImageData;
+  width: number;
+  height: number;
+  canvasImageDataString: string;
+  canvasImageData!: CanvasImageData;
   key: string | number;
 }
 /** 单页数据类型*/
@@ -25,6 +27,10 @@ declare interface page {
   pageName: string;
   key: string|number;
   previewUrl: string;
+  imageData: string;
+  imageDataString: string;
+  width: number;
+  height: number;
   layers: Array<layerMeta>;
 }
 declare interface canvasData {

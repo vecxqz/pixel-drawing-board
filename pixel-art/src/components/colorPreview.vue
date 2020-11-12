@@ -2,10 +2,12 @@
   <div class="color-preview-container">
     <div
       class="color-primary color-public-attr"
+      @click="primaryColorShow"
       :style="`background:${primaryColor}`"
     ></div>
     <div
       class="color-secondary color-public-attr"
+      @click="secondaryColorShow"
       :style="`background:${secondaryColor}`"
     ></div>
     <img
@@ -13,31 +15,61 @@
       src="../assets/double_arrow.svg"
       class="color-ps-exchange"
     />
+    <colorPicker
+      class="color-primary-choose"
+      v-model:visible="primaryColorVisible"
+      v-model:emitColor="$store.state.canvasModule.primaryColor"
+    />
+    <colorPicker
+      class="color-secondary-choose"
+      v-model:visible="secondaryColorVisible"
+      v-model:emitColor="$store.state.canvasModule.secondaryColor"
+    />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { computed, ref } from "vue";
+import { useStore } from "../composables/useStore";
+import colorPicker from "./colorPicker/main.vue";
 export default {
-  computed: {
-    primaryColor() {
-      return this.$store.state.canvasModule.primaryColor;
-    },
-    secondaryColor() {
-      return this.$store.state.canvasModule.secondaryColor;
-    }
+  components: {
+    colorPicker
   },
-  methods: {
-    exhcangePsColor() {
-      const [newPrimaryColor, newSecondaryColor] = [
-        this.secondaryColor,
-        this.primaryColor
-      ];
-      this.$store.dispatch("canvasModule/SET_PRIMARY_COLOR", newPrimaryColor);
-      this.$store.dispatch(
-        "canvasModule/SET_SECONDARY_COLOR",
-        newSecondaryColor
-      );
+  setup() {
+    const store: any = useStore();
+    const primaryColorVisible = ref(false);
+    const secondaryColorVisible = ref(false);
+    const primaryColor = computed(() => store.state.canvasModule.primaryColor);
+    const secondaryColor = computed(
+      () => store.state.canvasModule.secondaryColor
+    );
+
+    function primaryColorShow() {
+      primaryColorVisible.value = !primaryColorVisible.value;
+      secondaryColorVisible.value = false;
     }
+    function secondaryColorShow() {
+      secondaryColorVisible.value = !secondaryColorVisible.value;
+      primaryColorVisible.value = false;
+    }
+    function exhcangePsColor() {
+      const [newPrimaryColor, newSecondaryColor] = [
+        secondaryColor.value,
+        primaryColor.value
+      ];
+      store.dispatch("canvasModule/SET_PRIMARY_COLOR", newPrimaryColor);
+      store.dispatch("canvasModule/SET_SECONDARY_COLOR", newSecondaryColor);
+    }
+    return {
+      primaryColorVisible,
+      secondaryColorVisible,
+      primaryColorShow,
+      secondaryColorShow,
+      primaryColor,
+      secondaryColor,
+      exhcangePsColor
+    };
   }
 };
 </script>
@@ -65,11 +97,21 @@ export default {
   }
   &-ps-exchange {
     position: relative;
-    bottom: 26px;
-    left: -22px;
+    bottom: 22px;
+    left: 14px;
     width: 24px;
     transform: rotate(45deg);
     cursor: pointer;
+  }
+}
+.color {
+  &-primary-choose {
+    top: 50px;
+    left: 16px;
+  }
+  &-secondary-choose {
+    top: 70px;
+    left: 40px;
   }
 }
 </style>

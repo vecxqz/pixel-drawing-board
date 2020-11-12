@@ -1,19 +1,38 @@
 <template>
   <div id="toolHeader">
     <ul class="dis-flex operators">
-      <li class="operator-item">FILE</li>
-      <li class="operator-item">SETTINGS</li>
-      <li class="operator-item">DOWNLOAD</li>
-      <li class="operator-item">UNDO</li>
-      <li class="operator-item">REDO</li>
-      <li class="operator-item">FULL SCREEN</li>
+      <!-- <li class="operator-item">文件</li>
+      <li class="operator-item">设置</li> -->
+      <li class="operator-item" @click="downloadImage">下载</li>
+      <li class="operator-item" @click="downloadImageGIF">下载GIF</li>
+      <li class="operator-item" @click="undo">撤销</li>
+      <li class="operator-item" @click="redo">还原</li>
+      <li class="operator-item" @click="save">保存</li>
+      <li class="operator-item" @click="clear">清除</li>
+      <!-- <li class="operator-item">全屏</li> -->
     </ul>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { useDoState } from "../composables/useDoState";
+import { useDownload } from "../composables/useDownload";
+import { useFile } from "../composables/useFile";
 export default {
-  name: "ToolHeader"
+  name: "ToolHeader",
+  setup() {
+    const { redo, undo } = useDoState();
+    const { save, clear } = useFile();
+    const { downloadImage, downloadImageGIF } = useDownload();
+    return {
+      redo,
+      undo,
+      downloadImage,
+      downloadImageGIF,
+      save,
+      clear
+    };
+  }
 };
 </script>
 

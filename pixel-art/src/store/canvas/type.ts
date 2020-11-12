@@ -23,4 +23,7 @@ export interface CanvasState {
   eventPoint: eventPoint /**鼠标事件点 */;
   selectArea: selectArea /**选中区域 */;
   previewUrl: string /**预览图片url */;
+  redo: Array<any>;
+  undo: Array<any>;
+  animationSpeed: number;
 }

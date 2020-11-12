@@ -1,3 +1,4 @@
+import { RootState } from "@/store/type";
 import { provide, inject } from "vue";
 const StoreSymbol = Symbol();
 
@@ -10,5 +11,6 @@ export function useStore() {
   if (!store) {
     // 抛出错误，不提供 store
   }
+
   return store;
 }
