@@ -57,7 +57,6 @@
 </template>
 
 <script lang="ts">
-import { v4 } from "uuid";
 import { useColor } from "../composables/useColor";
 import { usePencil } from "../composables/usePencil";
 import { useMirrorPencil } from "../composables/useMirrorPencil";
@@ -81,11 +80,9 @@ import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 import { useStore } from "../composables/useStore";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
 export default {
   name: "Canvas",
   setup() {
-    const router = useRouter();
     const store: any = useStore();
     const {
       mouseDown: pencilMouseDown,
@@ -185,12 +182,6 @@ export default {
       window.oncontextmenu = function(e: MouseEvent) {
         e.preventDefault();
       };
-      router.push({
-        name: "DrawPixelDetail",
-        params: {
-          id: v4()
-        }
-      });
       const pages = JSON.parse(localStorage.getItem("pages") as string);
       setCanvasData();
       const canvasContainer: HTMLElement = window.document.getElementById(
@@ -301,10 +292,10 @@ export default {
         store.state.canvasModule.currentPageIndex
       ].layers[
         store.state.canvasModule.currentLayerIndex
-      ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
+      ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
       const backgroundMeta = {
         layerName: "background",
-        canvasImageData: backgroundCanvasCtx.value.getImageData(
+        imageData: backgroundCanvasCtx.value.getImageData(
           0,
           0,
           width,
@@ -313,15 +304,15 @@ export default {
       };
       const belowMeta = {
         layerName: "below",
-        canvasImageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
+        imageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
       };
       const aboveMeta = {
         layerName: "above",
-        canvasImageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
+        imageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
       };
       const currentMeta = {
         layerName: "current",
-        canvasImageData: canvasCtx.value.getImageData(0, 0, width, height)
+        imageData: canvasCtx.value.getImageData(0, 0, width, height)
       };
       const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
       const pageImageArray = [belowMeta, currentMeta, aboveMeta];
@@ -354,8 +345,8 @@ export default {
         pencilMouseMove(e);
       }
       if (mode === "line") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         lineMouseMove(e);
       }
       if (mode === "eraser") {
@@ -365,21 +356,21 @@ export default {
         bucketMouseMove();
       }
       if (mode === "square") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         squareMouseMove(e);
       }
       if (mode === "colorPicker") {
         colorPickerMouseMove(e);
       }
       if (mode === "circle") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         circleMouseMove(e);
       }
       if (mode === "select") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         selectMouseMove(e);
       }
       if (mode === "mirrorPencil") {
@@ -389,21 +380,21 @@ export default {
         moveMouseMove(e);
       }
     }
-    function canvasImageDataSave() {
-      // console.log("canvasImageDataSave");
+    function imageDataSave() {
+      // console.log("imageDataSave");
       const { width, height } = store.state.canvasModule;
       // 存储在进行绘制之前的画布数据
       if (isUndefined(imageData.value)) {
         imageData.value = canvasCtx.value.getImageData(0, 0, width, height);
       }
     }
-    function canvasImageDataUse() {
-      // console.log("canvasImageDataUse");
+    function imageDataUse() {
+      // console.log("imageDataUse");
       if (!isUndefined(imageData.value)) {
         canvasCtx.value.putImageData(imageData.value, 0, 0);
       }
     }
-    function canvasImageDataSaveClean() {
+    function imageDataSaveClean() {
       imageData.value = undefined;
     }
     function handleMouseDown(e: MouseEvent) {
@@ -421,7 +412,7 @@ export default {
             ...store.state.canvasModule.pages[currentPageIndex].layers[
               currentLayerIndex
             ],
-            canvasImageData: canvasCtx.value.getImageData(
+            imageData: canvasCtx.value.getImageData(
               0,
               0,
               layerWidth,
@@ -495,27 +486,27 @@ export default {
         store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       }
       if (mode === "pencil") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         pencilMouseUp(e);
       }
       if (mode === "line") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         lineMouseUp(e);
       }
       if (mode === "bucket") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         bucketMouseUp();
       }
       if (mode === "square") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         squareMouseUp(e);
       }
       if (mode === "circle") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         circleMouseUp(e);
       }
       if (mode === "bucket") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
       }
       if (mode === "colorPicker") {
         colorPickerMouseUp(e);
@@ -524,11 +515,11 @@ export default {
         eraserMouseUp(e);
       }
       if (mode === "select") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         selectMouseUp(e);
       }
       if (mode === "mirrorPencil") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         mirrorPencilMouseUp(e);
       }
       if (mode === "move") {

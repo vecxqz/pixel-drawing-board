@@ -59,7 +59,7 @@ export function useLayer() {
     store.state.canvasModule.pages[currentPageIndex].layers.push({
       layerName: `layer${index}`,
       key: `${index}`,
-      canvasImageData: undefined
+      imageData: undefined
     });
     chooseLayer(index);
     return { currentPageIndex, currentLayerIndex: index };
@@ -82,10 +82,10 @@ export function useLayer() {
   function up(index: number) {
     if (currentLayerIndex.value !== layers.value.length - 1) {
       const { currentPageIndex } = store.state.canvasModule;
-      const { canvasImageData } = store.state.canvasModule.pages[
+      const { imageData } = store.state.canvasModule.pages[
         currentPageIndex
       ].layers[index + 1];
-      canvasCtx.value.putImageData(canvasImageData, 0, 0);
+      canvasCtx.value.putImageData(imageData, 0, 0);
       const temp =
         store.state.canvasModule.pages[
           store.state.canvasModule.currentPageIndex
@@ -113,7 +113,7 @@ export function useLayer() {
       // 不这么做的话在下面进行数据交换之后，在choose函数内，执行
       // store.state.canvasModule.pages[currentPageIndex].layers[
       //   currentLayerIndex
-      // ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);会导致数据异常
+      // ].imageData = canvasCtx.value.getImageData(0, 0, width, height);会导致数据异常
       // 实际上，是把当前的画布信息写入了 被交换前的下层canvas imagedata中
       // 举例 执行down(1)
       //  当前index 1 ,canvasCtx里的图像是1
@@ -130,7 +130,7 @@ export function useLayer() {
       // 执行
       // store.state.canvasModule.pages[currentPageIndex].layers[
       //   currentLayerIndex
-      // ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
+      // ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
       // 后，当前index是 1, 所以
       // |index| layer| 绘制图像 |
       // |0    |  1   |  1      |
@@ -138,10 +138,10 @@ export function useLayer() {
       // 修复
       // 会导致绘制异常,所以在交换两层数据之前，手动把要被交换的那一层的数据先绘制到当前画布
       // const { currentPageIndex } = store.state.canvasModule;
-      // const { canvasImageData } = store.state.canvasModule.pages[
+      // const { imageData } = store.state.canvasModule.pages[
       //   currentPageIndex
       // ].layers[index - 1];
-      // canvasCtx.value.putImageData(canvasImageData, 0, 0);
+      // canvasCtx.value.putImageData(imageData, 0, 0);
       //  当前index是 1 ,canvasCtx里的图像 1->0
       // |index| layer| 绘制图像|
       // |1    |  1   |  1     |
@@ -151,17 +151,17 @@ export function useLayer() {
       // 执行
       // store.state.canvasModule.pages[currentPageIndex].layers[
       //   currentLayerIndex
-      // ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
+      // ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
       // 后，当前index是 1, canvasCtx里的图像是0 所以
       // |index| layer| 绘制图像 |
       // |0    |  1   |  1      |
       // |1    |  0   |  0 ->  0|
       // 数据就对了
       const { currentPageIndex } = store.state.canvasModule;
-      const { canvasImageData } = store.state.canvasModule.pages[
+      const { imageData } = store.state.canvasModule.pages[
         currentPageIndex
       ].layers[index - 1];
-      canvasCtx.value.putImageData(canvasImageData, 0, 0);
+      canvasCtx.value.putImageData(imageData, 0, 0);
       const temp =
         store.state.canvasModule.pages[
           store.state.canvasModule.currentPageIndex
@@ -201,33 +201,33 @@ export function useLayer() {
       store.state.canvasModule.pages[currentPageIndex].layers.length;
     if (index !== 0) {
       if (newLength === 1) {
-        const { canvasImageData } = store.state.canvasModule.pages[
+        const { imageData } = store.state.canvasModule.pages[
           currentPageIndex
         ].layers[0];
-        canvasCtx.value.putImageData(canvasImageData, 0, 0);
+        canvasCtx.value.putImageData(imageData, 0, 0);
         store.state.canvasModule.currentLayerIndex = 0;
         chooseLayer(0);
       } else {
-        const { canvasImageData } = store.state.canvasModule.pages[
+        const { imageData } = store.state.canvasModule.pages[
           currentPageIndex
         ].layers[index - 1];
-        canvasCtx.value.putImageData(canvasImageData, 0, 0);
+        canvasCtx.value.putImageData(imageData, 0, 0);
         store.state.canvasModule.currentLayerIndex = index - 1;
         chooseLayer(index - 1);
       }
     } else {
       if (newLength === 1) {
-        const { canvasImageData } = store.state.canvasModule.pages[
+        const { imageData } = store.state.canvasModule.pages[
           currentPageIndex
         ].layers[0];
-        canvasCtx.value.putImageData(canvasImageData, 0, 0);
+        canvasCtx.value.putImageData(imageData, 0, 0);
         store.state.canvasModule.currentLayerIndex = 0;
         chooseLayer(0);
       } else {
-        const { canvasImageData } = store.state.canvasModule.pages[
+        const { imageData } = store.state.canvasModule.pages[
           currentPageIndex
         ].layers[index + 1];
-        canvasCtx.value.putImageData(canvasImageData, 0, 0);
+        canvasCtx.value.putImageData(imageData, 0, 0);
         store.state.canvasModule.currentLayerIndex = index + 1;
         chooseLayer(index + 1);
       }
@@ -247,7 +247,7 @@ export function useLayer() {
     } = store.state.canvasModule;
     store.state.canvasModule.pages[currentPageIndex].layers[
       index
-    ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
+    ].imageData = canvasCtx.getImageData(0, 0, width, height);
     const mergeUpData = cloneDeep({
       currentLayerData: {
         currentPageIndex,
@@ -262,10 +262,10 @@ export function useLayer() {
           store.state.canvasModule.pages[currentPageIndex].layers[index + 1]
       }
     });
-    const { canvasImageData } = store.state.canvasModule.pages[
+    const { imageData } = store.state.canvasModule.pages[
       currentPageIndex
     ].layers[index];
-    const { canvasImageData: upImageData } = store.state.canvasModule.pages[
+    const { imageData: upImageData } = store.state.canvasModule.pages[
       currentPageIndex
     ].layers[index + 1];
     canvasCtx.clearRect(0, 0, width, height);
@@ -273,11 +273,11 @@ export function useLayer() {
     tempCanvasCtx.value.putImageData(upImageData, 0, 0);
     canvasCtx.drawImage(tempCanvasCtx.value.canvas, 0, 0);
     tempCanvasCtx.value.clearRect(0, 0, width, height);
-    tempCanvasCtx.value.putImageData(canvasImageData, 0, 0);
+    tempCanvasCtx.value.putImageData(imageData, 0, 0);
     canvasCtx.drawImage(tempCanvasCtx.value.canvas, 0, 0);
     store.state.canvasModule.pages[currentPageIndex].layers[
       index + 1
-    ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
+    ].imageData = canvasCtx.getImageData(0, 0, width, height);
     deleteLayer(index);
     return mergeUpData;
   }
@@ -293,7 +293,7 @@ export function useLayer() {
     } = store.state.canvasModule;
     store.state.canvasModule.pages[currentPageIndex].layers[
       index
-    ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
+    ].imageData = canvasCtx.getImageData(0, 0, width, height);
     const mergeDownData = cloneDeep({
       currentLayerData: {
         currentPageIndex,
@@ -310,10 +310,10 @@ export function useLayer() {
         )
       }
     });
-    const { canvasImageData } = store.state.canvasModule.pages[
+    const { imageData } = store.state.canvasModule.pages[
       currentPageIndex
     ].layers[index];
-    const { canvasImageData: downImageData } = store.state.canvasModule.pages[
+    const { imageData: downImageData } = store.state.canvasModule.pages[
       currentPageIndex
     ].layers[index - 1];
     canvasCtx.clearRect(0, 0, width, height);
@@ -321,11 +321,11 @@ export function useLayer() {
     tempCanvasCtx.value.putImageData(downImageData, 0, 0);
     canvasCtx.drawImage(tempCanvasCtx.value.canvas, 0, 0);
     tempCanvasCtx.value.clearRect(0, 0, width, height);
-    tempCanvasCtx.value.putImageData(canvasImageData, 0, 0);
+    tempCanvasCtx.value.putImageData(imageData, 0, 0);
     canvasCtx.drawImage(tempCanvasCtx.value.canvas, 0, 0);
     store.state.canvasModule.pages[currentPageIndex].layers[
       index - 1
-    ].canvasImageData = canvasCtx.getImageData(0, 0, width, height);
+    ].imageData = canvasCtx.getImageData(0, 0, width, height);
     deleteLayer(index);
     return mergeDownData;
   }
@@ -336,7 +336,7 @@ export function useLayer() {
     );
     newLayerData.key = `${newLayerData.key}_copy_${Math.random() * 100}`;
     newLayerData.layerName = `${newLayerData.layerName}_copy`;
-    newLayerData.canvasImageData = canvasCtx.value.getImageData(
+    newLayerData.imageData = canvasCtx.value.getImageData(
       0,
       0,
       width,
@@ -344,7 +344,7 @@ export function useLayer() {
     );
     store.state.canvasModule.pages[currentPageIndex].layers[
       index
-    ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
+    ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
     store.state.canvasModule.pages[currentPageIndex].layers.splice(
       index + 1,
       0,
@@ -361,7 +361,7 @@ export function useLayer() {
     const { width, height } = store.state.canvasModule;
     const backgroundMeta = {
       layerName: "background",
-      canvasImageData: backgroundCanvasCtx.value.getImageData(
+      imageData: backgroundCanvasCtx.value.getImageData(
         0,
         0,
         width,
@@ -370,15 +370,15 @@ export function useLayer() {
     };
     const belowMeta = {
       layerName: "below",
-      canvasImageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
+      imageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
     };
     const aboveMeta = {
       layerName: "above",
-      canvasImageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
+      imageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
     };
     const currentMeta = {
       layerName: "current",
-      canvasImageData: canvasCtx.value.getImageData(0, 0, width, height)
+      imageData: canvasCtx.value.getImageData(0, 0, width, height)
     };
     const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
     setCanvasPreviewByImageData(

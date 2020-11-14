@@ -18,8 +18,8 @@ declare interface layerMeta {
   layerName: string;
   width: number;
   height: number;
-  canvasImageDataString: string;
-  canvasImageData!: CanvasImageData;
+  imageDataString: string;
+  imageData: imageData;
   key: string | number;
 }
 /** 单页数据类型*/
