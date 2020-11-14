@@ -80,6 +80,7 @@ import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 import { useStore } from "../composables/useStore";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 export default {
   name: "Canvas",
   setup() {
@@ -140,11 +141,12 @@ export default {
       mouseMove: moveMouseMove,
       mouseUp: moveMouseUp
     } = useMove();
+    const route = useRoute();
     const { setCurrentColor } = useColor();
     const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
     const { choose: choosePage } = usePage();
-    const { loadLocal } = useFile();
+    const { loadLocal, loadServer } = useFile();
     const scale = ref(1);
     const canvas = ref(undefined);
     const selectcanvas = ref(undefined);
@@ -177,12 +179,14 @@ export default {
     const aboveCanvasCtx = computed(
       () => store.state.canvasModule.aboveCanvasCtx
     );
-    onMounted(() => {
+    onMounted(async () => {
       // 屏蔽右键菜单
       window.oncontextmenu = function(e: MouseEvent) {
         e.preventDefault();
       };
       const pages = JSON.parse(localStorage.getItem("pages") as string);
+      const { params } = route;
+      const { id: guid } = params;
       setCanvasData();
       const canvasContainer: HTMLElement = window.document.getElementById(
         "canvas-container"
@@ -200,16 +204,19 @@ export default {
       store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas.value);
       store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas.value);
       store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas.value);
-
-      loadLocal();
       parseBackground();
       // 根据有没有本地数据判断是新建工程还是读取本地工程
-      if (pages === null) {
-        store.dispatch("canvasModule/CREATE_PAGE");
+      if (guid) {
+        await loadServer();
       } else {
-        const { currentPageIndex } = store.state.canvasModule;
-        choosePage(currentPageIndex);
+        if (pages === null) {
+          store.dispatch("canvasModule/CREATE_PAGE");
+        } else {
+          loadLocal();
+        }
       }
+      const { currentPageIndex } = store.state.canvasModule;
+      choosePage(currentPageIndex);
       nextTick(() => {
         mergeCanvas();
       });
@@ -295,12 +302,7 @@ export default {
       ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
       const backgroundMeta = {
         layerName: "background",
-        imageData: backgroundCanvasCtx.value.getImageData(
-          0,
-          0,
-          width,
-          height
-        )
+        imageData: backgroundCanvasCtx.value.getImageData(0, 0, width, height)
       };
       const belowMeta = {
         layerName: "below",

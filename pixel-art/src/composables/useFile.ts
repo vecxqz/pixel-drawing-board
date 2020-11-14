@@ -1,11 +1,18 @@
 import { computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "./useStore";
-import { getGuid, setCanvasData, setPagesData } from "../utils/request/canvas";
+import {
+  getGuid,
+  getPagesData,
+  setCanvasData,
+  setPagesData,
+  getCanvasData
+} from "../utils/request/canvas";
 
 import cloneDeep from "lodash/cloneDeep";
 export function useFile() {
   const router = useRouter();
+  const route = useRoute();
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
@@ -45,9 +52,9 @@ export function useFile() {
   async function saveServer() {
     let { guid, pages } = store.state.canvasModule;
     if (!guid) {
-      const { data } = await getGuid();
+      const { data }: any = await getGuid();
       guid = data;
-      store.state.canvasModule.guid = data.guid;
+      store.state.canvasModule.guid = data;
     }
     router.push({
       name: "DrawPixelDetail",
@@ -87,7 +94,12 @@ export function useFile() {
       }
     }
     setCanvasData(formData);
-    setPagesData(pagesClone);
+    setPagesData({
+      userId: 1,
+      canvasId: guid,
+      data: pagesClone
+    });
+
     // fetch("/canvas", {
     //   method: "POST",
     //   body: formData
@@ -111,6 +123,42 @@ export function useFile() {
     const { pages } = store.state.canvasModule;
     localStorage.setItem("pages", JSON.stringify(pages));
   }
+  async function loadServer() {
+    const { params } = route;
+    const { id: guid } = params;
+    const { data: pageData } = await getPagesData({
+      userId: 1,
+      canvasId: guid
+    });
+    const { data: canvasData } = await getCanvasData({
+      userId: 1,
+      canvasId: guid
+    });
+    const { data: pages } = pageData;
+    const pagesJson = JSON.parse(pages);
+    const o: { pages: any } = { pages: pagesJson };
+    for (let i = 0; i < canvasData.length; i++) {
+      const {
+        width,
+        height,
+        key,
+        data: { data: buffer }
+      } = canvasData[i];
+      const imgBuffer = new Uint8ClampedArray(buffer);
+      const imageData = new ImageData(imgBuffer, width, height);
+      // o.[`${key}`].imaegData = imageData;
+      const { type, pageIndex, layerIndex } = JSON.parse(key);
+      if (type === "page") {
+        o.pages[+`${pageIndex}`].imageData = imageData;
+      }
+      if (type === "layer") {
+        o.pages[+`${pageIndex}`].layers[+`${layerIndex}`].imageData = imageData;
+      }
+    }
+    store.state.canvasModule.guid = guid
+    store.state.canvasModule.pages = o.pages;
+  }
+
   function loadLocal() {
     const pages = JSON.parse(localStorage.getItem("pages") as string);
     if (pages) {
@@ -141,5 +189,5 @@ export function useFile() {
       targetImageData.data[i] = data[i];
     }
   }
-  return { save, loadLocal, clear, saveServer };
+  return { save, loadLocal, loadServer, clear, saveServer };
 }
