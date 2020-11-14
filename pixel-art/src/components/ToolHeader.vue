@@ -8,6 +8,7 @@
       <li class="operator-item" @click="undo">撤销</li>
       <li class="operator-item" @click="redo">还原</li>
       <li class="operator-item" @click="save">保存</li>
+      <li class="operator-item" @click="saveServer">保存</li>
       <li class="operator-item" @click="clear">清除</li>
       <!-- <li class="operator-item">全屏</li> -->
     </ul>
@@ -22,13 +23,14 @@ export default {
   name: "ToolHeader",
   setup() {
     const { redo, undo } = useDoState();
-    const { save, clear } = useFile();
+    const { save, clear, saveServer } = useFile();
     const { downloadImage, downloadImageGIF } = useDownload();
     return {
       redo,
       undo,
       downloadImage,
       downloadImageGIF,
+      saveServer,
       save,
       clear
     };
