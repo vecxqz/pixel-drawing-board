@@ -30,9 +30,9 @@ export function userPreview() {
     const { width, height, currentPageIndex } = store.state.canvasModule;
     targetcanvasCtx.clearRect(0, 0, width, height);
     for (let i = 0; i < imageDatas.length; i++) {
-      const { canvasImageData } = imageDatas[i];
-      if (canvasImageData) {
-        tempcanvasCtx.putImageData(canvasImageData, 0, 0);
+      const { imageData } = imageDatas[i];
+      if (imageData) {
+        tempcanvasCtx.putImageData(imageData, 0, 0);
         const { canvas } = tempcanvasCtx;
         targetcanvasCtx.drawImage(canvas, 0, 0);
       }
@@ -55,9 +55,9 @@ export function userPreview() {
     const { width, height, currentPageIndex } = store.state.canvasModule;
     targetcanvasCtx.clearRect(0, 0, width, height);
     for (let i = 0; i < imageDatas.length; i++) {
-      const { canvasImageData } = imageDatas[i];
-      if (canvasImageData) {
-        tempcanvasCtx.putImageData(canvasImageData, 0, 0);
+      const { imageData } = imageDatas[i];
+      if (imageData) {
+        tempcanvasCtx.putImageData(imageData, 0, 0);
         const { canvas } = tempcanvasCtx;
         targetcanvasCtx.drawImage(canvas, 0, 0);
       }

@@ -70,7 +70,7 @@ export function useDoState() {
       currentLayerIndex,
       currentPageIndex,
       layerData,
-      layerData: { canvasImageData }
+      layerData: { imageData }
     } = data;
     const previousData = {
       ...data,
@@ -85,7 +85,7 @@ export function useDoState() {
     store.state.canvasModule.pages[currentPageIndex].layers[
       currentLayerIndex
     ] = layerData;
-    canvasCtx.value.putImageData(canvasImageData, 0, 0);
+    canvasCtx.value.putImageData(imageData, 0, 0);
     chooseLayer(currentLayerIndex);
     setPreview();
     return previousData;
