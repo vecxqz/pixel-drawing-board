@@ -8,8 +8,9 @@ import {
   setPagesData,
   getCanvasData
 } from "../utils/request/canvas";
-
 import cloneDeep from "lodash/cloneDeep";
+import { get } from "js-cookie";
+
 export function useFile() {
   const router = useRouter();
   const route = useRoute();
@@ -46,15 +47,22 @@ export function useFile() {
         // store.state.canvasModule.pages[i].layers[li].imageData = null;
       }
     }
-    saveLocal();
+    const token = get("token");
+    if (token) {
+      saveServer();
+    } else {
+      saveLocal();
+    }
   }
 
   async function saveServer() {
     let { guid, pages } = store.state.canvasModule;
     if (!guid) {
-      const { data }: any = await getGuid();
-      guid = data;
-      store.state.canvasModule.guid = data;
+      const {
+        data: { guid: guidServer }
+      } = (await getGuid()) as any;
+      guid = guidServer;
+      store.state.canvasModule.guid = guid;
     }
     router.push({
       name: "DrawPixelDetail",
@@ -95,7 +103,6 @@ export function useFile() {
     }
     setCanvasData(formData);
     setPagesData({
-      userId: 1,
       canvasId: guid,
       data: pagesClone
     });
@@ -123,18 +130,21 @@ export function useFile() {
     const { pages } = store.state.canvasModule;
     localStorage.setItem("pages", JSON.stringify(pages));
   }
+
+  // https://stackoverflow.com/questions/55620592/react-node-trouble-sending-imagedata-to-server
   async function loadServer() {
     const { params } = route;
     const { id: guid } = params;
-    const { data: pageData } = await getPagesData({
-      userId: 1,
+    const {
+      data: { data: pages }
+    } = await getPagesData({
       canvasId: guid
     });
-    const { data: canvasData } = await getCanvasData({
-      userId: 1,
+    const {
+      data: { data: canvasData }
+    } = await getCanvasData({
       canvasId: guid
     });
-    const { data: pages } = pageData;
     const pagesJson = JSON.parse(pages);
     const o: { pages: any } = { pages: pagesJson };
     for (let i = 0; i < canvasData.length; i++) {
@@ -155,7 +165,7 @@ export function useFile() {
         o.pages[+`${pageIndex}`].layers[+`${layerIndex}`].imageData = imageData;
       }
     }
-    store.state.canvasModule.guid = guid
+    store.state.canvasModule.guid = guid;
     store.state.canvasModule.pages = o.pages;
   }
 

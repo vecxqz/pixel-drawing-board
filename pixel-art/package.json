@@ -9,9 +9,11 @@
   },
   "dependencies": {
     "@types/cookie": "^0.4.0",
+    "@types/js-cookie": "^2.2.6",
     "axios": "^0.21.0",
     "core-js": "^3.6.5",
     "gif.js": "^0.2.0",
+    "js-cookie": "^2.2.1",
     "vue": "^3.0.0-0",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.0.0-0",

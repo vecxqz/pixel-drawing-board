@@ -12,15 +12,9 @@ export const setCanvasData = (data: any) =>
     data: data
   });
 
-export const getCanvasData = ({
-  userId,
-  canvasId
-}: {
-  userId: any;
-  canvasId: any;
-}) =>
+export const getCanvasData = ({ canvasId }: { canvasId: any }) =>
   request({
-    url: `/api/canvas/imagedata/${userId}/${canvasId}`,
+    url: `/api/canvas/imagedata/${canvasId}`,
     method: "get"
   });
 
@@ -31,14 +25,24 @@ export const setPagesData = (data: any) =>
     data: data
   });
 
-export const getPagesData = ({
-  userId,
-  canvasId
+export const getPagesData = ({ canvasId }: { canvasId: any }) =>
+  request({
+    url: `/api/pages/imagedata/${canvasId}`,
+    method: "get"
+  });
+
+export const login = ({
+  username,
+  password
 }: {
-  userId: any;
-  canvasId: any;
+  username: string;
+  password: string;
 }) =>
   request({
-    url: `/api/pages/imagedata/${userId}/${canvasId}`,
-    method: "get"
+    url: `/api/auth/jwt-login`,
+    method: "post",
+    data: {
+      username,
+      password
+    }
   });
