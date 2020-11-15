@@ -97,10 +97,12 @@ export function useDownload() {
       createDownload(`image${Math.random() * 100}.png`, blob);
     });
   }
+  // https://github.com/jnordberg/gif.js/issues/115
   function downloadImageGIF() {
     var gif = new GIF({
       workers: 2,
-      quality: 10
+      quality: 10,
+      workerScript: "/gif.worker.js"
     });
 
     const pages = store.state.canvasModule.pages;
@@ -113,7 +115,7 @@ export function useDownload() {
     Promise.all(imgs).then(imgs => {
       imgs.forEach(img => gif.addFrame(img, { delay: animationSpeed.value }));
       gif.render();
-      imgs.forEach((img: any) => document.body.removeChild(img));
+      // imgs.forEach((img: any) => document.body.removeChild(img));
     });
     gif.on("finished", function(blob: any) {
       // window.open(URL.createObjectURL(blob));

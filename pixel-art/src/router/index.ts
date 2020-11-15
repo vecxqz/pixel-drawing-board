@@ -18,6 +18,12 @@ const routes = [
       import(/* webpackChunkName: "drawPixel" */ "../views/Draw.vue")
   },
   {
+    path: "/login",
+    name: "Login",
+    component: () =>
+      import(/* webpackChunkName: "Login" */ "../views/Login.vue")
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "404",
     component: () => import(/* webpackChunkName: "404" */ "../views/404.vue")
