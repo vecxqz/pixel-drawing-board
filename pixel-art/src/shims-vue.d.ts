@@ -4,7 +4,6 @@ declare module "*.vue" {
   export default component;
 }
 declare module "color";
-// declare const GIF: (args: any) => any;
 declare class GIF {
   constructor(arg: any) {}
   on(lifeCyle: string, hook: any) {}

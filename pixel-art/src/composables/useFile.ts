@@ -56,7 +56,7 @@ export function useFile() {
   }
 
   async function saveServer() {
-    let { guid, pages } = store.state.canvasModule;
+    let { guid, pages, width, height } = store.state.canvasModule;
     if (!guid) {
       const {
         data: { guid: guidServer }
@@ -104,7 +104,12 @@ export function useFile() {
     setCanvasData(formData);
     setPagesData({
       canvasId: guid,
-      data: pagesClone
+      data: {
+        title: "untitled",
+        width,
+        height,
+        pages: pagesClone
+      }
     });
 
     // fetch("/canvas", {
@@ -145,7 +150,7 @@ export function useFile() {
     } = await getCanvasData({
       canvasId: guid
     });
-    const pagesJson = JSON.parse(pages);
+    const { width, height, title, pages: pagesJson } = JSON.parse(pages);
     const o: { pages: any } = { pages: pagesJson };
     for (let i = 0; i < canvasData.length; i++) {
       const {
@@ -165,6 +170,8 @@ export function useFile() {
         o.pages[+`${pageIndex}`].layers[+`${layerIndex}`].imageData = imageData;
       }
     }
+    store.state.canvasModule.width = width;
+    store.state.canvasModule.height = height;
     store.state.canvasModule.guid = guid;
     store.state.canvasModule.pages = o.pages;
   }

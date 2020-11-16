@@ -122,6 +122,7 @@ ul {
 .image-preview {
   width: 100px;
   height: 100px;
+  image-rendering: pixelated;
 }
 .attribute-box {
   .title {

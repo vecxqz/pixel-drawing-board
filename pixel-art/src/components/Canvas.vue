@@ -4,8 +4,8 @@
       id="canvas-container"
       class="pos-relative"
       :style="
-        `width:${800 * scale}px;
-        height:${800 * scale}px`
+        `width:${canvasMeta.width * scale}px;
+        height:${canvasMeta.height * scale}px`
       "
     >
       <canvas
@@ -85,6 +85,10 @@ export default {
   name: "Canvas",
   setup() {
     const store: any = useStore();
+    const canvasMeta = reactive({
+      width: 0,
+      height: 0
+    });
     const {
       mouseDown: pencilMouseDown,
       mouseMove: pencilMouseMove,
@@ -187,7 +191,6 @@ export default {
       const pages = JSON.parse(localStorage.getItem("pages") as string);
       const { params } = route;
       const { id: guid } = params;
-      setCanvasData();
       const canvasContainer: HTMLElement = window.document.getElementById(
         "canvas-container"
       ) as HTMLElement;
@@ -204,7 +207,6 @@ export default {
       store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas.value);
       store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas.value);
       store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas.value);
-      parseBackground();
       // 根据有没有本地数据判断是新建工程还是读取本地工程
       if (guid) {
         await loadServer();
@@ -215,6 +217,8 @@ export default {
           loadLocal();
         }
       }
+      parseBackground();
+      setCanvasData();
       const { currentPageIndex } = store.state.canvasModule;
       choosePage(currentPageIndex);
       nextTick(() => {
@@ -282,15 +286,41 @@ export default {
       const { width, height, gridSize } = store.state.canvasModule;
       const layer: layer = initLayer(width, height, gridSize);
       for (let i = 0; i < layer.length; i++)
-        for (let j = 0; j < layer.length; j++) {
+        for (let j = 0; j < layer[i].length; j++) {
           const cell = layer[i][j];
           const { backgroundColor } = cell;
           initGrid(backgroundCanvasCtx.value, layer, i, j, backgroundColor);
         }
     }
     function setCanvasData() {
-      const { width } = store.state.canvasModule;
-      store.state.canvasModule.size = 800 / width;
+      const { width, height } = store.state.canvasModule;
+      if (width === height) {
+        canvasMeta.width = 800;
+        canvasMeta.height = 800;
+        store.state.canvasModule.size = 800 / width;
+      }
+      if (width > height) {
+        let base = 1;
+        canvasMeta.width = width;
+        canvasMeta.height = height;
+        while (canvasMeta.width < 1400) {
+          base++;
+          canvasMeta.width = width * base;
+          canvasMeta.height = height * base;
+        }
+        store.state.canvasModule.size = canvasMeta.width / width;
+      }
+      if (width < height) {
+        let base = 1;
+        canvasMeta.width = width;
+        canvasMeta.height = height;
+        while (canvasMeta.height < 1400) {
+          base++;
+          canvasMeta.width = width * base;
+          canvasMeta.height = height * base;
+        }
+        store.state.canvasModule.size = canvasMeta.height / height;
+      }
     }
 
     function mergeCanvas() {
@@ -542,7 +572,8 @@ export default {
       aboveCanvas,
       belowCanvas,
       tempCanvas,
-      imageData
+      imageData,
+      canvasMeta
     };
   }
 };
@@ -550,6 +581,7 @@ export default {
 
 <style lang="scss" scoped>
 #canvas {
+  user-select: none;
   border-top: 1px solid rgba(0, 0, 0, 0.5);
   background-color: #141518;
 }

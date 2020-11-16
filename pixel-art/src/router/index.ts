@@ -12,6 +12,12 @@ const routes = [
       import(/* webpackChunkName: "drawPixel" */ "../views/Draw.vue")
   },
   {
+    path: "/draw",
+    name: "EntryDrawPixelDetail",
+    component: () =>
+      import(/* webpackChunkName: "drawPixel" */ "../views/Draw.vue")
+  },
+  {
     path: "/draw/:id",
     name: "DrawPixelDetail",
     component: () =>
@@ -22,6 +28,36 @@ const routes = [
     name: "Login",
     component: () =>
       import(/* webpackChunkName: "Login" */ "../views/Login.vue")
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () =>
+      import(/* webpackChunkName: "Register" */ "../views/Register.vue")
+  },
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: () =>
+      import(/* webpackChunkName: "Dashboard" */ "../views/Dashboard.vue"),
+    children: [
+      {
+        path: "",
+        component: () =>
+          import(
+            /* webpackChunkName: "Project" */ "../views/Dashboard/Project.vue"
+          )
+      },
+      {
+        path: "project",
+        name: "Project",
+        component: () =>
+          import(
+            /* webpackChunkName: "Project" */ "../views/Dashboard/Project.vue"
+          )
+      }
+    ],
+    redirect: { path: "" }
   },
   {
     path: "/:pathMatch(.*)*",

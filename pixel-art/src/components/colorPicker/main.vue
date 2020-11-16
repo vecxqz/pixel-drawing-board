@@ -217,6 +217,7 @@ export default {
       const [r, g, b] = Color.hsv([h, s, v]).rgb().color;
       const [newH, newS, newL] = Color.hsv([h, s, v]).hsl().color;
       chooseColor.value = `hsl(${newH}, ${newS}%, ${newL}%)`;
+      console.log(r, g, b);
       rgbMeta.r = Math.round(r);
       rgbMeta.g = Math.round(g);
       rgbMeta.b = Math.round(b);
