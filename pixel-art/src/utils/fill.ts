@@ -55,11 +55,7 @@ function changeColorByImageData(
 ) {
   const { width, height, data } = imageData;
   let index = 0;
-  if (width <= height) {
-    index = (columnIndex + rowIndex * width) * 4;
-  } else {
-    index = (columnIndex * height + rowIndex) * 4;
-  }
+  index = (columnIndex + rowIndex * width) * 4;
   data[index] = r; // r
   data[index + 1] = g; // g
   data[index + 2] = b; // b

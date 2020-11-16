@@ -15,7 +15,7 @@ export function useCanvas() {
     if (width <= height) {
       index = (columnIndex + rowIndex * width) * 4;
     } else {
-      index = (columnIndex * height + rowIndex) * 4;
+      index = (columnIndex + rowIndex * width) * 4;
     }
     // console.log(columnIndex, rowIndex, index);
     const r = data[index];
