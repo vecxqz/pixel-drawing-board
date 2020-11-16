@@ -1,6 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { get } from "js-cookie";
+import { useMessage } from "element3";
 const request = axios.create();
+const message = useMessage();
 request.interceptors.request.use(config => {
   const token = get("token");
   if (token) {
@@ -10,12 +12,14 @@ request.interceptors.request.use(config => {
 });
 request.interceptors.response.use(
   response => {
-    const { data, status } = response;
-    if (status >= 400) {
+    const { data } = response;
+    const { code, msg } = data;
+    if (code >= 400) {
+      message.error(msg);
       return Promise.reject(data);
     }
     return Promise.resolve(data);
   },
-  error => Promise.reject(error)
+  error => error
 );
 export { request };

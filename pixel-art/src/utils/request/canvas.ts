@@ -31,18 +31,8 @@ export const getPagesData = ({ canvasId }: { canvasId: any }) =>
     method: "get"
   });
 
-export const login = ({
-  username,
-  password
-}: {
-  username: string;
-  password: string;
-}) =>
+export const getAllPagesData = () =>
   request({
-    url: `/api/auth/jwt-login`,
-    method: "post",
-    data: {
-      username,
-      password
-    }
+    url: `/api/pages/imagedata`,
+    method: "get"
   });

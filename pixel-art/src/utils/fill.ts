@@ -53,8 +53,13 @@ function changeColorByImageData(
   rowIndex: number,
   { r, g, b }: { r: number; g: number; b: number }
 ) {
-  const { height, data } = imageData;
-  const index = (columnIndex + rowIndex * height) * 4;
+  const { width, height, data } = imageData;
+  let index = 0;
+  if (width >= height) {
+    index = (columnIndex + rowIndex * width) * 4;
+  } else {
+    index = (columnIndex * height + rowIndex) * 4;
+  }
   data[index] = r; // r
   data[index + 1] = g; // g
   data[index + 2] = b; // b
@@ -92,6 +97,7 @@ function ScanLineFill(
     // 3.向左右填充（在当前点所在扫描线扫描）
     if (color === oldColor) {
       //填充颜色
+      // debugger;
       changeColorByImageData(imageData, x, y, { r, g, b });
       const { x: nxl, y: nyl1 } = Fill(
         imageData,

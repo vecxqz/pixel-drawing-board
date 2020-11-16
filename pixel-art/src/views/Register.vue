@@ -1,11 +1,11 @@
 <template>
-  <div class="login-box">
+  <div class="register-box">
     <div id="mask"></div>
-    <div class="login-container">
-      <div>登录</div>
+    <div class="register-container">
+      <div>注册</div>
       <el-form :model="form" ref="formRef" :rules="rules">
         <el-form-item label="账号" prop="username">
-          <el-input v-model="form.username" placeholder="你的账号"></el-input>
+          <el-input v-model="form.username" placeholder="账号"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input
@@ -15,21 +15,21 @@
           ></el-input>
         </el-form-item>
         <el-form-item class="btn-item">
-          <el-button @click="submitForm" class="btn-login" type="primary"
-            >登录</el-button
-          >
-          <el-button @click="toRegisterView" class="btn-register" type="normal"
+          <el-button @click="submitForm" class="btn-register" type="primary"
             >注册</el-button
           >
         </el-form-item>
       </el-form>
+      <div class="link-container">
+        <router-link :to="{ name: 'Login' }">已有账号直接登录</router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { reactive, ref } from "vue";
-import { login } from "../utils/request/user";
+import { register } from "../utils/request/user";
 import { set } from "js-cookie";
 import { useRouter } from "vue-router";
 import { useMessage } from "element3";
@@ -59,7 +59,7 @@ export default {
       (formRef.value as any).validate(async (valid: any) => {
         if (valid) {
           try {
-            const data = await login(form);
+            const data = await register(form);
             const {
               msg,
               data: { access_token }
@@ -77,14 +77,9 @@ export default {
 
       event.preventDefault();
     }
-    async function toRegisterView() {
-      router.push({
-        name: "Register"
-      });
-    }
     return {
       submitForm,
-      toRegisterView,
+      register,
       form,
       rules,
       formRef
@@ -94,7 +89,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.login {
+.register {
   &-box {
     width: 100%;
     height: 100%;
@@ -121,9 +116,8 @@ export default {
   &-item {
     margin-top: 40px;
   }
-  &-login,
   &-register {
-    width: 105px;
+    width: 220px;
     border-radius: 0.3rem;
     box-shadow: 1px 1px 4px 0px #6d6d6d66;
     text-align: center;
@@ -149,5 +143,14 @@ export default {
   height: 100%;
   z-index: -999;
   background-color: rgba(0, 0, 0, 0.65);
+}
+.link-container {
+  width: 100%;
+  text-align: right;
+  font-size: 14px;
+  a {
+    text-decoration: none;
+    color: #409eff;
+  }
 }
 </style>

@@ -10,8 +10,13 @@ export function useCanvas() {
     columnIndex: number,
     rowIndex: number
   ) {
-    const { height, data } = imageData;
-    const index = (columnIndex + rowIndex * height) * 4;
+    const { width, height, data } = imageData;
+    let index = 0;
+    if (width >= height) {
+      index = (columnIndex + rowIndex * width) * 4;
+    } else {
+      index = (columnIndex * height + rowIndex) * 4;
+    }
     // console.log(columnIndex, rowIndex, index);
     const r = data[index];
     const g = data[index + 1];
