@@ -125,7 +125,7 @@ function clearGridB(
   const imageData = canvasCtx.getImageData(0, 0, width, height);
   const { data } = imageData;
   let index = 0;
-  if (width >= height) {
+  if (width <= height) {
     index = (columnIndex + rowIndex * width) * 4;
   } else {
     index = (columnIndex * height + rowIndex) * 4;
