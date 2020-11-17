@@ -1,6 +1,11 @@
-import { computed } from "vue";
+import { computed, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "./useStore";
+import { useCanvas } from "./useCanvas";
+import { userPreview } from "./userPreview";
+import { useDoState } from "./useDoState";
+import { reactive } from "vue";
+
 import {
   getGuid,
   getPagesData,
@@ -14,8 +19,24 @@ import { get } from "js-cookie";
 export function useFile() {
   const router = useRouter();
   const route = useRoute();
+  const { parseBackground } = useCanvas();
+  const { clearRedoStack, clearUndoStack } = useDoState();
+  const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
+  const backgroundCanvasCtx = computed(
+    () => store.state.canvasModule.backgroundCanvasCtx
+  );
+  const shadowCanvasCtx = computed(
+    () => store.state.canvasModule.shadowLayerCanvasCtx
+  );
+  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
+  const belowCanvasCtx = computed(
+    () => store.state.canvasModule.belowCanvasCtx
+  );
+  const aboveCanvasCtx = computed(
+    () => store.state.canvasModule.aboveCanvasCtx
+  );
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
     return store.state.canvasModule.size;
@@ -128,8 +149,103 @@ export function useFile() {
     //   });
   }
 
-  function clear() {
+  function mergeCanvas() {
+    const { width, height } = store.state.canvasModule;
+    store.state.canvasModule.pages[
+      store.state.canvasModule.currentPageIndex
+    ].layers[
+      store.state.canvasModule.currentLayerIndex
+    ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
+    const backgroundMeta = {
+      layerName: "background",
+      imageData: backgroundCanvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const belowMeta = {
+      layerName: "below",
+      imageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const aboveMeta = {
+      layerName: "above",
+      imageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const currentMeta = {
+      layerName: "current",
+      imageData: canvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
+    const pageImageArray = [belowMeta, currentMeta, aboveMeta];
+    tempCanvasCtx.value.drawImage(belowCanvasCtx.value.canvas, 0, 0);
+    tempCanvasCtx.value.drawImage(canvasCtx.value.canvas, 0, 0);
+    tempCanvasCtx.value.drawImage(aboveCanvasCtx.value.canvas, 0, 0);
+    store.state.canvasModule.pages[
+      store.state.canvasModule.currentPageIndex
+    ].imageData = tempCanvasCtx.value.getImageData(0, 0, width, height);
+    setCanvasPreviewByImageData(
+      canvasArray,
+      tempCanvasCtx.value,
+      shadowCanvasCtx.value
+    );
+    setPageImageData(
+      pageImageArray,
+      tempCanvasCtx.value,
+      shadowCanvasCtx.value
+    );
+  }
+  function setCanvasSizeData() {
+    const { width, height } = store.state.canvasModule;
+    if (width === height) {
+      store.state.canvasModule.canvasMetaWidth = 800;
+      store.state.canvasModule.canvasMetaHeight = 800;
+      store.state.canvasModule.size = 800 / width;
+    }
+    if (width > height) {
+      let base = 1;
+      store.state.canvasModule.canvasMetaWidth = width;
+      store.state.canvasModule.canvasMetaHeight = height;
+      while (store.state.canvasModule.canvasMetaWidth < 1400) {
+        base++;
+        store.state.canvasModule.canvasMetaWidth = width * base;
+        store.state.canvasModule.canvasMetaHeight = height * base;
+      }
+      store.state.canvasModule.size =
+        store.state.canvasModule.canvasMetaWidth / width;
+    }
+    if (width < height) {
+      let base = 1;
+      store.state.canvasModule.canvasMetaWidth = width;
+      store.state.canvasModule.canvasMetaHeight = height;
+      while (store.state.canvasModule.canvasMetaHeight < 1400) {
+        base++;
+        store.state.canvasModule.canvasMetaWidth = width * base;
+        store.state.canvasModule.canvasMetaHeight = height * base;
+      }
+      store.state.canvasModule.size =
+        store.state.canvasModule.canvasMetaHeight / height;
+    }
+  }
+  function reset({ width = 40, height = 40 } = {}) {
+    console.log(width, height);
     localStorage.removeItem("pages");
+    const { width: canvasWidth, height: canvasHeight } = canvasCtx.value.canvas;
+    canvasCtx.value.clearRect(0, 0, canvasWidth, canvasHeight);
+    shadowCanvasCtx.value.clearRect(0, 0, canvasWidth, canvasHeight);
+    tempCanvasCtx.value.clearRect(0, 0, canvasWidth, canvasHeight);
+    belowCanvasCtx.value.clearRect(0, 0, canvasWidth, canvasHeight);
+    aboveCanvasCtx.value.clearRect(0, 0, canvasWidth, canvasHeight);
+    store.state.canvasModule.pages = [];
+    store.state.canvasModule.currentPageIndex = 0;
+    store.state.canvasModule.currentLayerIndex = 0;
+    store.state.canvasModule.pages = [];
+    store.state.canvasModule.width = width;
+    store.state.canvasModule.height = height;
+    clearRedoStack();
+    clearUndoStack();
+    store.dispatch("canvasModule/CREATE_PAGE");
+    nextTick(() => {
+      setCanvasSizeData();
+      parseBackground(backgroundCanvasCtx.value);
+      mergeCanvas();
+    });
   }
   function saveLocal() {
     const { pages } = store.state.canvasModule;
@@ -206,5 +322,12 @@ export function useFile() {
       targetImageData.data[i] = data[i];
     }
   }
-  return { save, loadLocal, loadServer, clear, saveServer };
+  return {
+    save,
+    loadLocal,
+    loadServer,
+    reset,
+    saveServer,
+    setCanvasSizeData
+  };
 }

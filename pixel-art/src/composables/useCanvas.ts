@@ -1,10 +1,10 @@
 import { computed, toRaw } from "vue";
 import { useStore } from "./useStore";
+import { initLayer, initGrid } from "../utils/canvas";
 
 export function useCanvas() {
-  function createImageData(width: number, height: number) {
-    return new ImageData(width, height);
-  }
+  const store: any = useStore();
+
   function calcColor(
     imageData: ImageData,
     columnIndex: number,
@@ -52,8 +52,15 @@ export function useCanvas() {
     return "#" + r + g + b;
   }
 
-  function resetCanvas(){
-    
+  function parseBackground(canvasCtx: CanvasRenderingContext2D) {
+    const { width, height, gridSize } = store.state.canvasModule;
+    const layer: layer = initLayer(width, height, gridSize);
+    for (let i = 0; i < layer.length; i++)
+      for (let j = 0; j < layer[i].length; j++) {
+        const cell = layer[i][j];
+        const { backgroundColor } = cell;
+        initGrid(canvasCtx, layer, i, j, backgroundColor);
+      }
   }
-  return { createImageData, calcColor };
+  return { calcColor, parseBackground };
 }

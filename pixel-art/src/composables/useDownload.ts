@@ -12,13 +12,32 @@ export function useDownload() {
   const animationSpeed = computed(
     () => store.state.canvasModule.animationSpeed
   );
-  function getDownloadImageBlob() {
+
+  function getDownloadImageBase64(scale = 5) {
     // console.log(tempCanvasCtx.value);
     const { pages, currentPageIndex } = store.state.canvasModule;
     const { width, height } = tempCanvasCtx.value.canvas;
     tempCanvasCtx.value.clearRect(0, 0, width, height);
     const { imageData } = pages[currentPageIndex];
-    const scale = 10;
+    const scaleImageDataResult = scaleImageData(
+      imageData,
+      scale,
+      tempCanvasCtx.value
+    );
+    tempCanvasCtx.value.canvas.width = width * scale;
+    tempCanvasCtx.value.canvas.height = height * scale;
+    tempCanvasCtx.value.putImageData(scaleImageDataResult, 0, 0);
+    const url = tempCanvasCtx.value.canvas.toDataURL("image/png", 1);
+    tempCanvasCtx.value.canvas.width = width;
+    tempCanvasCtx.value.canvas.height = height;
+    return url;
+  }
+  function getDownloadImageBlob(scale = 5) {
+    // console.log(tempCanvasCtx.value);
+    const { pages, currentPageIndex } = store.state.canvasModule;
+    const { width, height } = tempCanvasCtx.value.canvas;
+    tempCanvasCtx.value.clearRect(0, 0, width, height);
+    const { imageData } = pages[currentPageIndex];
     const scaleImageDataResult = scaleImageData(
       imageData,
       scale,
@@ -92,13 +111,13 @@ export function useDownload() {
 
     return scaled;
   }
-  function downloadImage() {
-    getDownloadImageBlob().then(blob => {
+  function downloadImage(scale = 5) {
+    getDownloadImageBlob(scale).then(blob => {
       createDownload(`image${Math.random() * 100}.png`, blob);
     });
   }
   // https://github.com/jnordberg/gif.js/issues/115
-  function downloadImageGIF() {
+  function downloadImageGIF(scale = 5) {
     var gif = new GIF({
       workers: 2,
       quality: 10,
@@ -109,7 +128,7 @@ export function useDownload() {
     const imgs = [];
     for (let i = 0; i < pages.length; i++) {
       const { imageData } = pages[i];
-      const imgPromise = getImage(imageData, 20);
+      const imgPromise = getImage(imageData, scale);
       imgs.push(imgPromise);
     }
     Promise.all(imgs).then(imgs => {

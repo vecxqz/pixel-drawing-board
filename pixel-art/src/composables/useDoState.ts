@@ -40,6 +40,12 @@ export function useDoState() {
     () => store.state.canvasModule.canvasCtx as CanvasRenderingContext2D
   );
 
+  function clearRedoStack() {
+    store.state.canvasModule.redo = [];
+  }
+  function clearUndoStack() {
+    store.state.canvasModule.undo = [];
+  }
   function toRedoStack(redoData: any) {
     store.state.canvasModule.redo.push(redoData);
   }
@@ -294,5 +300,13 @@ export function useDoState() {
     };
     return functionData[TYPE];
   }
-  return { toRedoStack, toUndoStack, redo, undo, TYPE };
+  return {
+    toRedoStack,
+    toUndoStack,
+    redo,
+    undo,
+    TYPE,
+    clearRedoStack,
+    clearUndoStack
+  };
 }

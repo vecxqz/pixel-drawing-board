@@ -72,23 +72,19 @@ import { userPreview } from "../composables/userPreview";
 import { useMove } from "../composables/useMove";
 import { useDoState } from "../composables/useDoState";
 import { usePage } from "../composables/usePage";
-import { initGrid } from "../utils/canvas";
 import { isUndefined } from "../utils/common";
-import { initLayer } from "../utils/canvas";
 import { useFile } from "../composables/useFile";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 import { useStore } from "../composables/useStore";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useCanvas } from "../composables/useCanvas";
 export default {
   name: "Canvas",
   setup() {
     const store: any = useStore();
-    const canvasMeta = reactive({
-      width: 0,
-      height: 0
-    });
+    const { parseBackground } = useCanvas();
     const {
       mouseDown: pencilMouseDown,
       mouseMove: pencilMouseMove,
@@ -150,8 +146,7 @@ export default {
     const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
     const { choose: choosePage } = usePage();
-    const { loadLocal, loadServer } = useFile();
-    const scale = ref(1);
+    const { loadLocal, loadServer, setCanvasSizeData } = useFile();
     const canvas = ref(undefined);
     const selectcanvas = ref(undefined);
     const layerShandowCanvas = ref(undefined);
@@ -183,6 +178,11 @@ export default {
     const aboveCanvasCtx = computed(
       () => store.state.canvasModule.aboveCanvasCtx
     );
+    const canvasMeta = computed(() => ({
+      width: store.state.canvasModule.canvasMetaWidth,
+      height: store.state.canvasModule.canvasMetaHeight
+    }));
+    const scale = computed(() => store.state.canvasModule.scale);
     onMounted(async () => {
       // 屏蔽右键菜单
       window.oncontextmenu = function(e: MouseEvent) {
@@ -217,8 +217,8 @@ export default {
           loadLocal();
         }
       }
-      parseBackground();
-      setCanvasData();
+      parseBackground(backgroundCanvasCtx.value);
+      setCanvasSizeData();
       const { currentPageIndex } = store.state.canvasModule;
       choosePage(currentPageIndex);
       nextTick(() => {
@@ -245,12 +245,12 @@ export default {
       const mouseWheel = fromEvent(canvasContainer, "mousewheel");
       mouseWheel.pipe().subscribe((e: any) => {
         const { deltaY } = e;
-        if (deltaY > 0 && scale.value > 1) {
-          scale.value = scale.value / 2;
+        if (deltaY > 0 && store.state.canvasModule.scale > 1) {
+          store.state.canvasModule.scale = store.state.canvasModule.scale / 2;
           store.state.canvasModule.size = store.state.canvasModule.size / 2;
         }
-        if (deltaY < 0 && scale.value < 8) {
-          scale.value = scale.value * 2;
+        if (deltaY < 0 && store.state.canvasModule.scale < 8) {
+          store.state.canvasModule.scale = store.state.canvasModule.scale * 2;
           store.state.canvasModule.size = store.state.canvasModule.size * 2;
         }
         e.preventDefault();
@@ -282,46 +282,6 @@ export default {
           handleMouseMove(e as MouseEvent);
         });
     });
-    function parseBackground() {
-      const { width, height, gridSize } = store.state.canvasModule;
-      const layer: layer = initLayer(width, height, gridSize);
-      for (let i = 0; i < layer.length; i++)
-        for (let j = 0; j < layer[i].length; j++) {
-          const cell = layer[i][j];
-          const { backgroundColor } = cell;
-          initGrid(backgroundCanvasCtx.value, layer, i, j, backgroundColor);
-        }
-    }
-    function setCanvasData() {
-      const { width, height } = store.state.canvasModule;
-      if (width === height) {
-        canvasMeta.width = 800;
-        canvasMeta.height = 800;
-        store.state.canvasModule.size = 800 / width;
-      }
-      if (width > height) {
-        let base = 1;
-        canvasMeta.width = width;
-        canvasMeta.height = height;
-        while (canvasMeta.width < 1400) {
-          base++;
-          canvasMeta.width = width * base;
-          canvasMeta.height = height * base;
-        }
-        store.state.canvasModule.size = canvasMeta.width / width;
-      }
-      if (width < height) {
-        let base = 1;
-        canvasMeta.width = width;
-        canvasMeta.height = height;
-        while (canvasMeta.height < 1400) {
-          base++;
-          canvasMeta.width = width * base;
-          canvasMeta.height = height * base;
-        }
-        store.state.canvasModule.size = canvasMeta.height / height;
-      }
-    }
 
     function mergeCanvas() {
       const { width, height } = store.state.canvasModule;
