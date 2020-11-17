@@ -1,19 +1,19 @@
 <template>
   <div class="project-data">
-    <el-row :gutter="20">
-      <el-col :span="6" v-for="project in projectList" :key="project.guid">
-        <el-card class="project-item">
-          <div v-if="project.data">
-            <router-link
-              :to="{ name: 'DrawPixelDetail', params: { id: project.guid } }"
-            >
-              <img :src="project.data.pages[0].previewUrl" alt="" srcset="" />
-              <div class="project-title">{{ project.data.title }}</div>
-            </router-link>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <el-card
+      class="project-item"
+      v-for="project in projectList"
+      :key="project.guid"
+    >
+      <div v-if="project.data">
+        <router-link
+          :to="{ name: 'DrawPixelDetail', params: { id: project.guid } }"
+        >
+          <img :src="project.data.pages[0].previewUrl" alt="" srcset="" />
+          <div class="project-title">{{ project.data.title }}</div>
+        </router-link>
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -42,12 +42,18 @@ export default {
 
 <style lang="scss" scoped>
 .project {
+  &-data {
+    display: flex;
+    flex-wrap: wrap;
+  }
   &-item {
+    margin: 10px;
     a {
       text-decoration: none;
     }
     img {
-      width: 200px;
+      // width: 200px;
+      min-height: 200px;
       image-rendering: pixelated;
     }
   }
@@ -56,9 +62,6 @@ export default {
     text-align: center;
     color: black;
   }
-}
-::v-deep .el-card {
-  max-width: 202px;
 }
 ::v-deep .el-card__body {
   padding: 0;

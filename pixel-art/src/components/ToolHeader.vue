@@ -7,10 +7,16 @@
       <li class="operator-item" @click="downloadImageGIF">下载GIF</li>
       <li class="operator-item" @click="undo">撤销</li>
       <li class="operator-item" @click="redo">还原</li>
-      <li class="operator-item" @click="save">保存</li>
+      <li class="operator-item" @click="handleClickSaveButton">保存</li>
       <li class="operator-item" @click="clear">清除</li>
       <!-- <li class="operator-item">全屏</li> -->
     </ul>
+
+    <el-dialog title="弹框" width="800px" v-model="dialogVisible">
+      <template v-slot:default>
+        <span>这是一段信息</span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -18,19 +24,26 @@
 import { useDoState } from "../composables/useDoState";
 import { useDownload } from "../composables/useDownload";
 import { useFile } from "../composables/useFile";
+import { ref } from "vue";
 export default {
   name: "ToolHeader",
   setup() {
     const { redo, undo } = useDoState();
+    const dialogVisible = ref(false);
     const { save, clear } = useFile();
     const { downloadImage, downloadImageGIF } = useDownload();
+    function handleClickSaveButton() {
+      dialogVisible.value = true;
+      console.log(save);
+    }
     return {
       redo,
       undo,
       downloadImage,
       downloadImageGIF,
-      save,
-      clear
+      handleClickSaveButton,
+      clear,
+      dialogVisible
     };
   }
 };

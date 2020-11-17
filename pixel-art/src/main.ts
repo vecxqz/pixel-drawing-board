@@ -3,17 +3,21 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import { provideStore } from "./composables/useStore";
+import "element-plus/lib/theme-chalk/index.css";
+import ElementPlus from "element-plus";
+// import installElementPlus from "./plugins/element.js";
 
-import "element3/lib/theme-chalk/index.css";
-import Element3 from "element3";
-
-createApp({
+const app = createApp({
   ...App,
   setup() {
     provideStore(store);
   }
-})
+});
+
+// installElementPlus(app);
+
+app
   .use(store)
   .use(router)
-  .use(Element3)
+  .use(ElementPlus)
   .mount("#app");

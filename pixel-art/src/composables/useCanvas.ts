@@ -12,11 +12,7 @@ export function useCanvas() {
   ) {
     const { width, height, data } = imageData;
     let index = 0;
-    if (width <= height) {
-      index = (columnIndex + rowIndex * width) * 4;
-    } else {
-      index = (columnIndex + rowIndex * width) * 4;
-    }
+    index = (columnIndex + rowIndex * width) * 4;
     // console.log(columnIndex, rowIndex, index);
     const r = data[index];
     const g = data[index + 1];
@@ -54,6 +50,10 @@ export function useCanvas() {
     if (b.length == 1) b = `0${b}`;
 
     return "#" + r + g + b;
+  }
+
+  function resetCanvas(){
+    
   }
   return { createImageData, calcColor };
 }

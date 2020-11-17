@@ -1,8 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { get } from "js-cookie";
-import { useMessage } from "element3";
+import { Message } from "element-plus/lib/message";
 const request = axios.create();
-const message = useMessage();
 request.interceptors.request.use(config => {
   const token = get("token");
   if (token) {
@@ -15,7 +14,10 @@ request.interceptors.response.use(
     const { data } = response;
     const { code, msg } = data;
     if (code >= 400) {
-      message.error(msg);
+      Message({
+        type: "error",
+        message: msg
+      });
       return Promise.reject(data);
     }
     return Promise.resolve(data);
