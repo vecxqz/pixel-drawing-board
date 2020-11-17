@@ -3,7 +3,6 @@ import { CanvasState } from "./type";
 import { Mutation } from "vuex";
 import { MutationsTypes } from "./enum";
 import { isUndefined } from "../../utils/common";
-import { useCanvas } from "../../composables/useCanvas";
 const CanvasMutations: MutationTree<CanvasState> = {
   [MutationsTypes.SET_PAINT_MODE](state: CanvasState, mode: string) {
     state.mode = mode;
@@ -14,9 +13,8 @@ const CanvasMutations: MutationTree<CanvasState> = {
     const page = state.pages[currentPageIndex];
   },
   [MutationsTypes.CREATE_PAGE](state: CanvasState) {
-    const { createImageData } = useCanvas();
     const { width, height, size } = state;
-    const imageData = createImageData(width, height);
+    const imageData = new ImageData(width, height);
     state.pages.push({
       pageName: "page0",
       key: "0",
