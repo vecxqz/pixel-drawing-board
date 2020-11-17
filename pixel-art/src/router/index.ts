@@ -9,7 +9,7 @@ const routes = [
     path: "/",
     name: "Home",
     component: () =>
-      import(/* webpackChunkName: "drawPixel" */ "../views/Draw.vue")
+      import(/* webpackChunkName: "Login" */ "../views/Login.vue")
   },
   {
     path: "/draw",
@@ -57,7 +57,7 @@ const routes = [
           )
       }
     ],
-    redirect: { path: "" }
+    redirect: { path: "/dashboard" }
   },
   {
     path: "/:pathMatch(.*)*",

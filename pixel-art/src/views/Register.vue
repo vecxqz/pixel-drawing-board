@@ -32,11 +32,11 @@ import { reactive, ref } from "vue";
 import { register } from "../utils/request/user";
 import { set } from "js-cookie";
 import { useRouter } from "vue-router";
-import { useMessage } from "element3";
+import { Message } from "element-plus/lib/message";
+
 export default {
   setup() {
     const router = useRouter();
-    const message = useMessage();
     const formRef = ref(null);
     const form = reactive({ username: "", password: "" });
     const rules = reactive({
@@ -65,7 +65,10 @@ export default {
               data: { access_token }
             } = data as any;
             if (access_token) {
-              message.success(msg);
+              Message({
+                type: "success",
+                message: msg
+              });
               set("token", access_token);
               router.push({ name: "Dashboard" });
             }

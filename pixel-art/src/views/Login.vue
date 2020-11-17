@@ -18,7 +18,7 @@
           <el-button @click="submitForm" class="btn-login" type="primary"
             >登录</el-button
           >
-          <el-button @click="toRegisterView" class="btn-register" type="normal"
+          <el-button @click="toRegisterView" class="btn-register"
             >注册</el-button
           >
         </el-form-item>
@@ -32,11 +32,10 @@ import { reactive, ref } from "vue";
 import { login } from "../utils/request/user";
 import { set } from "js-cookie";
 import { useRouter } from "vue-router";
-import { useMessage } from "element3";
+import { Message } from "element-plus/lib/message";
 export default {
   setup() {
     const router = useRouter();
-    const message = useMessage();
     const formRef = ref(null);
     const form = reactive({ username: "", password: "" });
     const rules = reactive({
@@ -65,9 +64,16 @@ export default {
               data: { access_token }
             } = data as any;
             if (access_token) {
-              message.success(msg);
+              Message({
+                type: "success",
+                message: msg
+              });
+              // (Message as any).success(msg);
               set("token", access_token);
-              router.push({ name: "Dashboard" });
+              // router.push({ path: "/dashboard" });
+              router.push({
+                name: "Dashboard"
+              });
             }
           } catch (e) {
             console.log(e);

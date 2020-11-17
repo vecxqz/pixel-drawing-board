@@ -17,7 +17,7 @@ const module: Module<CanvasState, any> = {
     previewUrl: "",
     pages: [],
     guid: "",
-    width: 80,
+    width: 40,
     height: 40,
     gridSize: 1,
     size: 1,
