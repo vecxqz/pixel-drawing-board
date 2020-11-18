@@ -19,6 +19,7 @@ export function useSelect() {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
+  const moveFinishImageData = ref(null); // 每次移动时没有阴影选择区的imagedata
   const selectImageData = ref(null); //选择区域数据
   const tempImageData = ref(null);
   const selectClearImageData = ref(null); //没有被选取区域的大画布数据
@@ -89,6 +90,13 @@ export function useSelect() {
         width.value,
         height.value
       );
+      // 存储未产生阴影前的画布数据
+      moveFinishImageData.value = canvasCtx.value.getImageData(
+        0,
+        0,
+        width.value,
+        height.value
+      );
     }
     tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
     // 如果设置了选择区域则判断是否点击在选择区域内
@@ -101,7 +109,6 @@ export function useSelect() {
         selectArea.endX,
         selectArea.endY
       );
-
       if (isInSelectAreaFlag) {
         setSetStatus(true);
         setClickOutSideStatus(false);
@@ -139,71 +146,10 @@ export function useSelect() {
       } else {
         // 不在点击区域内，取消选择区域
         console.log("释放");
-        const maxX = selectArea.startX;
-        const maxY = selectArea.startY;
-        // 获取被选择区域合并的画布上的数据
-        tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
-        tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
-        const clearImageData = tempCanvasCtx.value.getImageData(
-          selectArea.startX,
-          selectArea.startY,
-          selectArea.diffX,
-          selectArea.diffY
-        );
-        // 清除选择阴影
-        canvasCtx.value.clearRect(
-          selectArea.startX,
-          selectArea.startY,
-          selectArea.diffX,
-          selectArea.diffY
-        );
-
-        // 绘制被选择阴影清除时同时被清除的原区域数据
-        selectCanvasCtx.value.clearRect(
-          0,
-          0,
-          selectArea.diffX,
-          selectArea.diffY
-        );
-        selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
-        canvasCtx.value.drawImage(
-          selectCanvasCtx.value.canvas,
-          selectArea.startX,
-          selectArea.startY
-        );
-        // 绘制被选择区域
-        selectCanvasCtx.value.clearRect(
-          0,
-          0,
-          selectArea.diffX,
-          selectArea.diffY
-        );
-        selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
-        canvasCtx.value.drawImage(
-          selectCanvasCtx.value.canvas,
-          selectArea.startX,
-          selectArea.startY
-        );
-        // 结束 状态重置
-        setClickOutSideStatus(true);
-        setSetStatus(false);
-        setMoveStatus(false);
-        tempImageData.value = canvasCtx.value.getImageData(
-          0,
-          0,
-          width.value,
-          height.value
-        );
-        selectClearImageData.value = null;
-        selectImageData.value = null;
-        setSelectArea({
-          startX: 0,
-          startY: 0,
-          endX: 0,
-          endY: 0
-        });
+        cancelSelect();
       }
     }
+    return moveFinishImageData.value;
   }
   function mouseMove(e: MouseEvent) {
     // 点击外部区域或是没有绘制才记录
@@ -367,5 +313,61 @@ export function useSelect() {
     }
   }
 
-  return { mouseDown, mouseMove, mouseUp, selectArea };
+  function cancelSelect() {
+    const maxX = selectArea.startX;
+    const maxY = selectArea.startY;
+    // 获取被选择区域合并的画布上的数据
+    tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+    tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+    const clearImageData = tempCanvasCtx.value.getImageData(
+      selectArea.startX,
+      selectArea.startY,
+      selectArea.diffX,
+      selectArea.diffY
+    );
+    // 清除选择阴影
+    canvasCtx.value.clearRect(
+      selectArea.startX,
+      selectArea.startY,
+      selectArea.diffX,
+      selectArea.diffY
+    );
+
+    // 绘制被选择阴影清除时同时被清除的原区域数据
+    selectCanvasCtx.value.clearRect(0, 0, selectArea.diffX, selectArea.diffY);
+    selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+    canvasCtx.value.drawImage(
+      selectCanvasCtx.value.canvas,
+      selectArea.startX,
+      selectArea.startY
+    );
+    // 绘制被选择区域
+    selectCanvasCtx.value.clearRect(0, 0, selectArea.diffX, selectArea.diffY);
+    selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
+    canvasCtx.value.drawImage(
+      selectCanvasCtx.value.canvas,
+      selectArea.startX,
+      selectArea.startY
+    );
+    // 结束 状态重置
+    setClickOutSideStatus(true);
+    setSetStatus(false);
+    setMoveStatus(false);
+    tempImageData.value = canvasCtx.value.getImageData(
+      0,
+      0,
+      width.value,
+      height.value
+    );
+    selectClearImageData.value = null;
+    selectImageData.value = null;
+    setSelectArea({
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0
+    });
+  }
+
+  return { mouseDown, mouseMove, mouseUp, selectArea, cancelSelect };
 }
