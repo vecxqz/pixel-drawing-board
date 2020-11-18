@@ -77,7 +77,7 @@ import { useFile } from "../composables/useFile";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 import { useStore } from "../composables/useStore";
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useCanvas } from "../composables/useCanvas";
 export default {
@@ -129,7 +129,8 @@ export default {
       mouseDown: selectMouseDown,
       mouseMove: selectMouseMove,
       mouseUp: selectMouseUp,
-      selectArea: selectArea
+      selectArea: selectArea,
+      cancelSelect
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
@@ -183,6 +184,15 @@ export default {
       height: store.state.canvasModule.canvasMetaHeight
     }));
     const scale = computed(() => store.state.canvasModule.scale);
+    watch(
+      () => store.state.canvasModule.mode,
+      (newVal, oldVal) => {
+        if (oldVal === "select" && oldVal !== newVal) {
+          cancelSelect();
+          mergeCanvas();
+        }
+      }
+    );
     onMounted(async () => {
       // 屏蔽右键菜单
       window.oncontextmenu = function(e: MouseEvent) {
@@ -396,25 +406,6 @@ export default {
         width: layerWidth,
         height: layerHeight
       } = store.state.canvasModule;
-      toUndoStack(
-        {
-          currentLayerIndex,
-          currentPageIndex,
-          layerData: {
-            ...store.state.canvasModule.pages[currentPageIndex].layers[
-              currentLayerIndex
-            ],
-            imageData: canvasCtx.value.getImageData(
-              0,
-              0,
-              layerWidth,
-              layerHeight
-            )
-          },
-          type: TYPE.LAYER_DATA_CHANGE
-        },
-        true
-      );
       const canvasContainer: HTMLElement = window.document.getElementById(
         "canvas-container"
       ) as HTMLElement;
@@ -431,6 +422,27 @@ export default {
       const { mode } = store.state.canvasModule;
       setCurrentColor(e);
       recordMouseDownPosition(e);
+      if (mode !== "select") {
+        toUndoStack(
+          {
+            currentLayerIndex,
+            currentPageIndex,
+            layerData: {
+              ...store.state.canvasModule.pages[currentPageIndex].layers[
+                currentLayerIndex
+              ],
+              imageData: canvasCtx.value.getImageData(
+                0,
+                0,
+                layerWidth,
+                layerHeight
+              )
+            },
+            type: TYPE.LAYER_DATA_CHANGE
+          },
+          true
+        );
+      }
       if (mode === "pencil") {
         pencilMouseDown(e);
       }
@@ -453,7 +465,27 @@ export default {
         eraserMouseDown(e);
       }
       if (mode === "select") {
-        selectMouseDown(e);
+        const prevImageData = selectMouseDown(e);
+        toUndoStack(
+          {
+            currentLayerIndex,
+            currentPageIndex,
+            layerData: {
+              ...store.state.canvasModule.pages[currentPageIndex].layers[
+                currentLayerIndex
+              ],
+              imageData: prevImageData
+              // imageData: canvasCtx.value.getImageData(
+              //   0,
+              //   0,
+              //   layerWidth,
+              //   layerHeight
+              // )
+            },
+            type: TYPE.LAYER_DATA_CHANGE
+          },
+          true
+        );
       }
       if (mode === "mirrorPencil") {
         mirrorPencilMouseDown(e);
