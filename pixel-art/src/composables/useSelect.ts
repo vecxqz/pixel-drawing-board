@@ -149,7 +149,7 @@ export function useSelect() {
         cancelSelect();
       }
     }
-    return moveFinishImageData.value;
+    return isSet.value ? moveFinishImageData.value : undefined;
   }
   function mouseMove(e: MouseEvent) {
     // 点击外部区域或是没有绘制才记录
@@ -310,6 +310,50 @@ export function useSelect() {
         endX: selectAreaEndX + diffX,
         endY: selectAreaEndY + diffY
       });
+      const tempColor = color.value;
+      tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
+      tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+      const clearImageData = tempCanvasCtx.value.getImageData(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      // 清除选择阴影
+      canvasCtx.value.clearRect(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+
+      // 绘制被选择阴影清除时,同时被清除的原区域数据
+      selectCanvasCtx.value.clearRect(0, 0, selectAreaDiffX, selectAreaDiffY);
+      selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
+      canvasCtx.value.drawImage(
+        selectCanvasCtx.value.canvas,
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY
+      );
+      // 绘制被选择区域
+      selectCanvasCtx.value.clearRect(0, 0, selectAreaDiffX, selectAreaDiffY);
+      selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
+      canvasCtx.value.drawImage(
+        selectCanvasCtx.value.canvas,
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY
+      );
+      canvasCtx.value.globalAlpha = 0.5;
+      canvasCtx.value.fillStyle = "rgb(0,0,0)";
+      // 绘制阴影区域
+      canvasCtx.value.fillRect(
+        selectAreaStartX + diffX,
+        selectAreaStartY + diffY,
+        selectAreaDiffX,
+        selectAreaDiffY
+      );
+      canvasCtx.value.globalAlpha = 1;
+      canvasCtx.value.fillStyle = tempColor;
     }
   }
 

@@ -466,26 +466,28 @@ export default {
       }
       if (mode === "select") {
         const prevImageData = selectMouseDown(e);
-        toUndoStack(
-          {
-            currentLayerIndex,
-            currentPageIndex,
-            layerData: {
-              ...store.state.canvasModule.pages[currentPageIndex].layers[
-                currentLayerIndex
-              ],
-              imageData: prevImageData
-              // imageData: canvasCtx.value.getImageData(
-              //   0,
-              //   0,
-              //   layerWidth,
-              //   layerHeight
-              // )
+        if (prevImageData) {
+          toUndoStack(
+            {
+              currentLayerIndex,
+              currentPageIndex,
+              layerData: {
+                ...store.state.canvasModule.pages[currentPageIndex].layers[
+                  currentLayerIndex
+                ],
+                imageData: prevImageData
+                // imageData: canvasCtx.value.getImageData(
+                //   0,
+                //   0,
+                //   layerWidth,
+                //   layerHeight
+                // )
+              },
+              type: TYPE.LAYER_DATA_CHANGE
             },
-            type: TYPE.LAYER_DATA_CHANGE
-          },
-          true
-        );
+            true
+          );
+        }
       }
       if (mode === "mirrorPencil") {
         mirrorPencilMouseDown(e);
