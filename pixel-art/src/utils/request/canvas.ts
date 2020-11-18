@@ -36,3 +36,22 @@ export const getAllPagesData = () =>
     url: `/api/pages/imagedata`,
     method: "get"
   });
+
+export const removePagesData = (guid: string) =>
+  request({
+    url: `/api/pages/delete/${guid}`,
+    method: "post"
+  });
+
+export const setPageTitle = ({
+  guid,
+  title
+}: {
+  guid: string;
+  title: string;
+}) =>
+  request({
+    url: `/api/pages/title/${guid}`,
+    method: "post",
+    data: { title }
+  });
