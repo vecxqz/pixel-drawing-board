@@ -78,10 +78,12 @@ export default {
         data: { data }
       } = await getAllPagesData();
       projectList.value = (data as Array<any>).map((d: any) => {
+        const data = JSON.parse(d.data);
         return {
           ...d,
-          data: JSON.parse(d.data),
-          edit: false
+          data: data,
+          edit: false,
+          preTitle: data.title
         };
       });
     }
@@ -98,15 +100,19 @@ export default {
     }
 
     async function handleEditBlur(event: Event, index: number) {
-      const { msg, code } = (await setPageTitle({
-        title: (event.target as any).value,
-        guid: (projectList.value[index] as any).guid
-      })) as any;
-      if (code === 200) {
-        Message({
-          type: "success",
-          message: msg
-        });
+      const { preTitle } = projectList.value[index] as any;
+      const title = (event.target as any).value;
+      if (title !== preTitle) {
+        const { msg, code } = (await setPageTitle({
+          title: title,
+          guid: (projectList.value[index] as any).guid
+        })) as any;
+        if (code === 200) {
+          Message({
+            type: "success",
+            message: msg
+          });
+        }
       }
       (projectList.value[index] as any).edit = false;
     }
@@ -144,6 +150,7 @@ export default {
     flex-wrap: wrap;
   }
   &-item {
+    flex: 0;
     margin: 10px;
     a {
       text-decoration: none;
@@ -164,7 +171,7 @@ export default {
       color: black;
     }
     ::v-deep(.el-input) {
-      width: calc(100% - 90px);
+      width: calc(100% - 80px);
     }
     .op-group {
       width: 70px;
