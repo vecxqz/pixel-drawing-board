@@ -74,7 +74,7 @@ import { useCircle } from "../composables/useCircle";
 import { useEraser } from "../composables/useEraser";
 import { useSelect } from "../composables/useSelect";
 import { useMousePosition } from "../composables/usePosition";
-import { userPreview } from "../composables/userPreview";
+import { usePreview } from "../composables/usePreview";
 import { useMove } from "../composables/useMove";
 import { useDoState } from "../composables/useDoState";
 import { usePage } from "../composables/usePage";
@@ -150,7 +150,7 @@ export default {
     } = useMove();
     const route = useRoute();
     const { setCurrentColor } = useColor();
-    const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
+    const { mergeCanvas } = usePreview();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
     const { choose: choosePage } = usePage();
     const { loadLocal, loadServer, setCanvasSizeData } = useFile();
@@ -174,18 +174,6 @@ export default {
     const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
     const backgroundCanvasCtx = computed(
       () => store.state.canvasModule.backgroundCanvasCtx
-    );
-    const shadowCanvasCtx = computed(
-      () => store.state.canvasModule.shadowLayerCanvasCtx
-    );
-    const tempCanvasCtx = computed(
-      () => store.state.canvasModule.tempCanvasCtx
-    );
-    const belowCanvasCtx = computed(
-      () => store.state.canvasModule.belowCanvasCtx
-    );
-    const aboveCanvasCtx = computed(
-      () => store.state.canvasModule.aboveCanvasCtx
     );
     const canvasMeta = computed(() => ({
       width: store.state.canvasModule.canvasMetaWidth,
@@ -304,48 +292,6 @@ export default {
       loadingFin.value = false;
     });
 
-    function mergeCanvas() {
-      const { width, height } = store.state.canvasModule;
-      store.state.canvasModule.pages[
-        store.state.canvasModule.currentPageIndex
-      ].layers[
-        store.state.canvasModule.currentLayerIndex
-      ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
-      const backgroundMeta = {
-        layerName: "background",
-        imageData: backgroundCanvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const belowMeta = {
-        layerName: "below",
-        imageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const aboveMeta = {
-        layerName: "above",
-        imageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const currentMeta = {
-        layerName: "current",
-        imageData: canvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
-      const pageImageArray = [belowMeta, currentMeta, aboveMeta];
-      tempCanvasCtx.value.drawImage(belowCanvasCtx.value.canvas, 0, 0);
-      tempCanvasCtx.value.drawImage(canvasCtx.value.canvas, 0, 0);
-      tempCanvasCtx.value.drawImage(aboveCanvasCtx.value.canvas, 0, 0);
-      store.state.canvasModule.pages[
-        store.state.canvasModule.currentPageIndex
-      ].imageData = tempCanvasCtx.value.getImageData(0, 0, width, height);
-      setCanvasPreviewByImageData(
-        canvasArray,
-        tempCanvasCtx.value,
-        shadowCanvasCtx.value
-      );
-      setPageImageData(
-        pageImageArray,
-        tempCanvasCtx.value,
-        shadowCanvasCtx.value
-      );
-    }
     function handleMouseMove(e: MouseEvent) {
       const { mode } = store.state.canvasModule;
       let columnIndex = Math.floor(e.offsetX / store.state.canvasModule.size),

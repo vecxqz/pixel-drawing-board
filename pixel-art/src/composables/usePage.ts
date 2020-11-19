@@ -2,7 +2,7 @@ import { computed, nextTick, ref, toRaw } from "vue";
 import { useStore } from "./useStore";
 import cloneDeep from "lodash/cloneDeep";
 import { initLayer } from "../utils/canvas";
-import { userPreview } from "./userPreview";
+import { usePreview } from "./usePreview";
 import clone from "lodash/clone";
 export function usePage() {
   const store: any = useStore();
@@ -31,7 +31,7 @@ export function usePage() {
     () => store.state.canvasModule.aboveCanvasCtx
   );
   const animationPreviewUrl = ref("");
-  const { setCanvasPreview } = userPreview();
+  const { setCanvasPreview } = usePreview();
   function create(index: number) {
     const imageData = tempCanvasCtx.value.createImageData(
       width.value,

@@ -2,7 +2,7 @@ import { computed, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "./useStore";
 import { useCanvas } from "./useCanvas";
-import { userPreview } from "./userPreview";
+import { usePreview } from "./usePreview";
 import { useDoState } from "./useDoState";
 import { reactive } from "vue";
 
@@ -21,7 +21,7 @@ export function useFile() {
   const route = useRoute();
   const { parseBackground } = useCanvas();
   const { clearRedoStack, clearUndoStack } = useDoState();
-  const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
+  const { mergeCanvas } = usePreview();
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const backgroundCanvasCtx = computed(
@@ -149,48 +149,6 @@ export function useFile() {
     //   });
   }
 
-  function mergeCanvas() {
-    const { width, height } = store.state.canvasModule;
-    store.state.canvasModule.pages[
-      store.state.canvasModule.currentPageIndex
-    ].layers[
-      store.state.canvasModule.currentLayerIndex
-    ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
-    const backgroundMeta = {
-      layerName: "background",
-      imageData: backgroundCanvasCtx.value.getImageData(0, 0, width, height)
-    };
-    const belowMeta = {
-      layerName: "below",
-      imageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
-    };
-    const aboveMeta = {
-      layerName: "above",
-      imageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
-    };
-    const currentMeta = {
-      layerName: "current",
-      imageData: canvasCtx.value.getImageData(0, 0, width, height)
-    };
-    const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
-    const pageImageArray = [belowMeta, currentMeta, aboveMeta];
-    tempCanvasCtx.value.drawImage(belowCanvasCtx.value.canvas, 0, 0);
-    tempCanvasCtx.value.drawImage(canvasCtx.value.canvas, 0, 0);
-    tempCanvasCtx.value.drawImage(aboveCanvasCtx.value.canvas, 0, 0);
-    store.state.canvasModule.pages[
-      store.state.canvasModule.currentPageIndex
-    ].imageData = tempCanvasCtx.value.getImageData(0, 0, width, height);
-    setCanvasPreviewByImageData(
-      canvasArray,
-      tempCanvasCtx.value,
-      shadowCanvasCtx.value
-    );
-    setPageImageData(
-      pageImageArray,
-      tempCanvasCtx.value,
-      shadowCanvasCtx.value
-    );
-  }
   function setCanvasSizeData() {
     const { width, height } = store.state.canvasModule;
     if (width === height) {
