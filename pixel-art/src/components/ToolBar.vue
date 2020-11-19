@@ -17,7 +17,26 @@
         </li>
       </el-tooltip>
     </ul>
-    <colorPreview class="color-preview" />
+    <colorPreview v-if="mode !== 'crop'" class="color-preview" />
+    <div v-if="mode === 'crop'">
+      <div class="crop-group">
+        <div class="crop-item">
+          <span>开始X</span><el-input v-model="cropData.startX"></el-input>
+        </div>
+        <div class="crop-item">
+          <span>开始Y</span><el-input v-model="cropData.startY"></el-input>
+        </div>
+        <div class="crop-item">
+          <span>结束X</span><el-input v-model="cropData.endX"></el-input>
+        </div>
+        <div class="crop-item">
+          <span>结束Y</span><el-input v-model="cropData.endY"></el-input>
+        </div>
+        <el-button type="primary" @click="handleClickCrop()"
+          >确定裁剪</el-button
+        >
+      </div>
+    </div>
   </div>
 </template>
 
@@ -25,6 +44,7 @@
 import { computed, reactive, ref } from "vue";
 import colorPreview from "./colorPreview.vue";
 import { useStore } from "../composables/useStore";
+import { useCrop } from "../composables/useCrop";
 export default {
   name: "ToolBar",
   components: {
@@ -32,7 +52,15 @@ export default {
   },
   setup() {
     const store: any = useStore();
+    const { cropNewLayer } = useCrop();
+    const mode = computed(() => store.state.canvasModule.mode);
     const toolActiveIndex = ref(0);
+    const cropData = ref({
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0
+    });
     const tools = reactive([
       {
         id: "tool-pencil",
@@ -126,7 +154,7 @@ export default {
       },
       {
         id: "tool-crop",
-        title: "Crop Tool - Resize Drawing Canvas",
+        title: "裁剪工具 ",
         mode: "crop",
         active: false
       },
@@ -140,6 +168,7 @@ export default {
     const activeTools = computed(() =>
       tools.filter((tool: any) => tool.active)
     );
+
     function toolSelect(index: number) {
       toolActiveIndex.value = index;
       store.dispatch(
@@ -147,10 +176,18 @@ export default {
         activeTools.value[index].mode
       );
     }
+
+    function handleClickCrop() {
+      cropNewLayer(cropData.value);
+    }
+
     return {
       activeTools,
       toolActiveIndex,
-      toolSelect
+      toolSelect,
+      mode,
+      cropData,
+      handleClickCrop
     };
   }
 };
@@ -235,7 +272,7 @@ export default {
   background-position: -34px -200px;
 }
 #tool-crop .toolbar-icon {
-  background-position: -1px -232px;
+  background: url(../assets/crop.svg);
 }
 #tool-gradient .toolbar-icon {
   background-position: -34px -232px;
@@ -243,5 +280,29 @@ export default {
 .color-preview {
   margin-top: 20px;
   z-index: 2;
+}
+.crop-group {
+  margin-top: 15px;
+  padding: 5px;
+  color: #fff;
+  .crop-item {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    span {
+      font-size: 12px;
+      min-width: 35px;
+    }
+    ::v-deep(.el-input) {
+      width: calc(100% - 40px);
+      .el-input__inner {
+        height: 25px;
+      }
+    }
+  }
+  ::v-deep(.el-button) {
+    width: 100%;
+  }
 }
 </style>

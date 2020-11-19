@@ -86,8 +86,8 @@ import { usePreview } from "../composables/usePreview";
 export default {
   setup() {
     const { cancelSelect } = useSelect();
-    const { toUndoStack, TYPE } = useDoState();
     const { mergeCanvas } = usePreview();
+    const { toUndoStack, TYPE } = useDoState();
     const {
       changeLayerName,
       renameStart,
