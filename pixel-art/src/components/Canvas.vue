@@ -15,6 +15,12 @@
       "
     >
       <canvas
+        class="pos-absoulte pe-none layer-select"
+        ref="selectcanvas"
+        :width="selectArea.diffX"
+        :height="selectArea.diffY"
+      />
+      <canvas
         class="pos-absoulte pe-none layer-shadow layer-background"
         ref="backgroundCanvas"
         :width="store.state.canvasModule.width"
@@ -37,12 +43,6 @@
         ref="aboveCanvas"
         :width="store.state.canvasModule.width"
         :height="store.state.canvasModule.height"
-      />
-      <canvas
-        class="pos-absoulte pe-none layer-select"
-        ref="selectcanvas"
-        :width="selectArea.diffX"
-        :height="selectArea.diffY"
       />
       <canvas
         class="pos-absoulte pe-none layer-shadow"
