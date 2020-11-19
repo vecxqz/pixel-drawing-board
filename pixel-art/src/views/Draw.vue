@@ -39,8 +39,12 @@ export default {
   }
   &-canvas {
     flex: 1;
+    width: calc(100% - 330px);
     overflow: auto;
-    align-items: center;
+    position: relative;
+    // align-items: center;
+    // justify-content: center;
+    // display: flex;
   }
 }
 .area-mid {

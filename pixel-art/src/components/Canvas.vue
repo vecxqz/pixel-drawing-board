@@ -534,8 +534,8 @@ export default {
 
 <style lang="scss" scoped>
 #canvas {
-  user-select: none;
   border-top: 1px solid rgba(0, 0, 0, 0.5);
+  user-select: none;
   background-color: #141518;
 }
 .pe-none {
@@ -565,6 +565,10 @@ export default {
   left: 0;
 }
 #canvas-container {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
   margin: 0 auto;
+  flex-shrink: 0;
 }
 </style>
