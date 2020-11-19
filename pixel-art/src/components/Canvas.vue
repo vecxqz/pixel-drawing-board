@@ -1,5 +1,11 @@
 <template>
-  <div id="canvas">
+  <div
+    id="canvas"
+    :element-loading-text="loadingText"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+    v-loading.fullscreen.lock="loadingFin"
+  >
     <div
       id="canvas-container"
       class="pos-relative"
@@ -156,6 +162,8 @@ export default {
     const belowCanvas = ref(undefined);
     const tempCanvas = ref(undefined);
     const imageData = ref(undefined);
+    const loadingFin = ref(true);
+    const loadingText = ref("正在创建工程，请稍等");
     // const isboundary = ref(false);
     const boundaryMeta = reactive({
       startX: 0,
@@ -220,6 +228,7 @@ export default {
       // 根据有没有本地数据判断是新建工程还是读取本地工程
       if (guid) {
         await loadServer();
+        loadingText.value = "正在读取工程文件，请稍等";
       } else {
         if (pages === null) {
           store.dispatch("canvasModule/CREATE_PAGE");
@@ -291,6 +300,8 @@ export default {
         .subscribe(e => {
           handleMouseMove(e as MouseEvent);
         });
+
+      loadingFin.value = false;
     });
 
     function mergeCanvas() {
@@ -567,7 +578,9 @@ export default {
       belowCanvas,
       tempCanvas,
       imageData,
-      canvasMeta
+      canvasMeta,
+      loadingFin,
+      loadingText
     };
   }
 };

@@ -2,17 +2,20 @@
   <div id="toolbar">
     <div class="title">工具</div>
     <ul class="toolbar-list">
-      <li
-        class="toolbar-item"
-        :class="{ active: toolActiveIndex === index }"
+      <el-tooltip
         v-for="(tool, index) in activeTools"
-        :title="tool.title"
-        :id="tool.id"
         :key="tool.id"
-        @click="toolSelect(index, $event)"
+        :content="tool.title"
       >
-        <div class="toolbar-icon"></div>
-      </li>
+        <li
+          class="toolbar-item"
+          :class="{ active: toolActiveIndex === index }"
+          :id="tool.id"
+          @click="toolSelect(index, $event)"
+        >
+          <div class="toolbar-icon"></div>
+        </li>
+      </el-tooltip>
     </ul>
     <colorPreview class="color-preview" />
   </div>
@@ -33,19 +36,19 @@ export default {
     const tools = reactive([
       {
         id: "tool-pencil",
-        title: "Pencil Tool",
+        title: "画笔工具",
         mode: "pencil",
         active: true
       },
       {
         id: "tool-mirror-pencil",
-        title: "Mirror Tool",
+        title: "镜像工具",
         mode: "mirrorPencil",
         active: true
       },
       {
         id: "tool-eraser",
-        title: "Eraser Tool",
+        title: "橡皮擦工具",
         mode: "eraser",
         active: true
       },
@@ -57,49 +60,49 @@ export default {
       },
       {
         id: "tool-line",
-        title: "Line Tool",
+        title: "直线工具",
         mode: "line",
         active: true
       },
       {
         id: "tool-square",
-        title: "Square Tool",
+        title: "矩形工具",
         mode: "square",
         active: true
       },
       {
         id: "tool-circle",
-        title: "Circle Tool",
+        title: "圆形工具",
         mode: "circle",
         active: true
       },
       {
         id: "tool-bucket",
-        title: "Bucket Tool",
+        title: "油漆桶工具",
         mode: "bucket",
         active: true
       },
       {
         id: "tool-color-picker",
-        title: "Color Picker Tool",
+        title: "吸管工具",
         mode: "colorPicker",
         active: true
       },
       {
         id: "tool-move",
-        title: "Move Tool",
+        title: "移动工具",
         mode: "move",
         active: true
       },
       {
         id: "tool-select",
-        title: "Select Tool",
+        title: "选择工具",
         mode: "select",
         active: true
       },
       {
         id: "tool-text",
-        title: "Text Tool",
+        title: "文本工具",
         mode: "text",
         active: false
       },
