@@ -1,30 +1,49 @@
 <template>
   <div>当前选中层{{ currentLayer.layerName }}</div>
   <div class="btn-group">
-    <span class="btn-layer-operate" @click="createLayer">
-      <img src="../assets/create.svg" class="layer-create" />
-    </span>
-    <span class="btn-layer-operate" @click="upLayer(currentLayerIndex)">
-      <img src="../assets/arrow.svg" class="layer-up" />
-    </span>
-    <span class="btn-layer-operate" @click="downLayer(currentLayerIndex)">
-      <img src="../assets/arrow.svg" class="layer-down" />
-    </span>
-    <span class="btn-layer-operate" @click="rename(currentLayerIndex)">
-      <img src="../assets/rename.svg" class="layer-rename" />
-    </span>
-    <span class="btn-layer-operate" @click="copyLayer(currentLayerIndex)">
-      <img src="../assets/copy.svg" class="layer-copy" />
-    </span>
-    <span class="btn-layer-operate" @click="mergeUpLayer(currentLayerIndex)">
-      <img src="../assets/merge.svg" class="layer-merge-up" />
-    </span>
-    <span class="btn-layer-operate" @click="mergeDownLayer(currentLayerIndex)">
-      <img src="../assets/merge.svg" class="layer-merge-down" />
-    </span>
-    <span @click="deleteLayerA(currentLayerIndex)" class="btn-layer-operate">
-      <img src="../assets/trash.svg" />
-    </span>
+    <el-tooltip content="创建图层">
+      <span class="btn-layer-operate" @click="createLayer">
+        <img src="../assets/create.svg" class="layer-create" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="上移图层">
+      <span class="btn-layer-operate" @click="upLayer(currentLayerIndex)">
+        <img src="../assets/arrow.svg" class="layer-up" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="下移图层">
+      <span class="btn-layer-operate" @click="downLayer(currentLayerIndex)">
+        <img src="../assets/arrow.svg" class="layer-down" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="图层重命名">
+      <span class="btn-layer-operate" @click="rename(currentLayerIndex)">
+        <img src="../assets/rename.svg" class="layer-rename" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="复制图层">
+      <span class="btn-layer-operate" @click="copyLayer(currentLayerIndex)">
+        <img src="../assets/copy.svg" class="layer-copy" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="向上合并图层">
+      <span class="btn-layer-operate" @click="mergeUpLayer(currentLayerIndex)">
+        <img src="../assets/merge.svg" class="layer-merge-up" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="向下合并图层">
+      <span
+        class="btn-layer-operate"
+        @click="mergeDownLayer(currentLayerIndex)"
+      >
+        <img src="../assets/merge.svg" class="layer-merge-down" />
+      </span>
+    </el-tooltip>
+    <el-tooltip content="删除图层">
+      <span @click="deleteLayerA(currentLayerIndex)" class="btn-layer-operate">
+        <img src="../assets/trash.svg" />
+      </span>
+    </el-tooltip>
   </div>
   <ul>
     <li

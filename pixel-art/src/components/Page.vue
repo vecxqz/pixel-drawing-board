@@ -160,6 +160,7 @@ export default {
 .page-operate-group {
   display: flex;
   .page-operate-item {
+    cursor: pointer;
     margin: 0 10px;
   }
 }
@@ -191,6 +192,7 @@ export default {
 .page-preview-image {
   width: 90px;
   height: 90px;
+  image-rendering: pixelated;
 }
 .preview-page {
   overflow: hidden;

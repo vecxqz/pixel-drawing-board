@@ -23,7 +23,9 @@ export function useColorPicker() {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     const { rgb: color } = calcColor(imageData, columnIndex, rowIndex);
-    store.dispatch("canvasModule/SET_COLOR", color);
+    console.log(color);
+    store.state.canvasModule.primaryColor = color;
+    // store.dispatch("canvasModule/SET_COLOR", color);
   }
 
   function mouseMove(e: MouseEvent) {
@@ -36,7 +38,8 @@ export function useColorPicker() {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     const { rgb: color } = calcColor(imageData, columnIndex, rowIndex);
-    store.dispatch("canvasModule/SET_COLOR", color);
+    store.state.canvasModule.primaryColor = color;
+    // store.dispatch("canvasModule/SET_COLOR", color);
   }
   function mouseUp(e: MouseEvent) {
     const imageData = canvasCtx.value.getImageData(
@@ -48,7 +51,8 @@ export function useColorPicker() {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
     const { rgb: color } = calcColor(imageData, columnIndex, rowIndex);
-    store.dispatch("canvasModule/SET_COLOR", color);
+    store.state.canvasModule.primaryColor = color;
+    // store.dispatch("canvasModule/SET_COLOR", color);
   }
   return { mouseDown, mouseMove, mouseUp };
 }

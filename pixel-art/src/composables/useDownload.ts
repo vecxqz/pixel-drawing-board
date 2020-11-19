@@ -3,6 +3,7 @@ import { useStore } from "./useStore";
 export function useDownload() {
   const store: any = useStore();
   const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
+  const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const currentPageIndex = computed(
     () => store.state.canvasModule.currentPageIndex
   );
@@ -34,10 +35,11 @@ export function useDownload() {
   }
   function getDownloadImageBlob(scale = 5) {
     // console.log(tempCanvasCtx.value);
-    const { pages, currentPageIndex } = store.state.canvasModule;
+    const { pages } = store.state.canvasModule;
     const { width, height } = tempCanvasCtx.value.canvas;
     tempCanvasCtx.value.clearRect(0, 0, width, height);
-    const { imageData } = pages[currentPageIndex];
+    // const { imageData } = pages[currentPageIndex];
+    const imageData = canvasCtx.value.getImageData(0, 0, width, height);
     const scaleImageDataResult = scaleImageData(
       imageData,
       scale,
