@@ -40,6 +40,12 @@ export function useDoState() {
     () => store.state.canvasModule.canvasCtx as CanvasRenderingContext2D
   );
 
+  function clearRedoStack() {
+    store.state.canvasModule.redo = [];
+  }
+  function clearUndoStack() {
+    store.state.canvasModule.undo = [];
+  }
   function toRedoStack(redoData: any) {
     store.state.canvasModule.redo.push(redoData);
   }
@@ -70,7 +76,7 @@ export function useDoState() {
       currentLayerIndex,
       currentPageIndex,
       layerData,
-      layerData: { canvasImageData }
+      layerData: { imageData }
     } = data;
     const previousData = {
       ...data,
@@ -85,7 +91,7 @@ export function useDoState() {
     store.state.canvasModule.pages[currentPageIndex].layers[
       currentLayerIndex
     ] = layerData;
-    canvasCtx.value.putImageData(canvasImageData, 0, 0);
+    canvasCtx.value.putImageData(imageData, 0, 0);
     chooseLayer(currentLayerIndex);
     setPreview();
     return previousData;
@@ -294,5 +300,13 @@ export function useDoState() {
     };
     return functionData[TYPE];
   }
-  return { toRedoStack, toUndoStack, redo, undo, TYPE };
+  return {
+    toRedoStack,
+    toUndoStack,
+    redo,
+    undo,
+    TYPE,
+    clearRedoStack,
+    clearUndoStack
+  };
 }

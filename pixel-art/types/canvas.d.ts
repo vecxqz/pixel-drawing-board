@@ -18,14 +18,14 @@ declare interface layerMeta {
   layerName: string;
   width: number;
   height: number;
-  canvasImageDataString: string;
-  canvasImageData!: CanvasImageData;
+  imageDataString: string;
+  imageData: imageData;
   key: string | number;
 }
 /** 单页数据类型*/
 declare interface page {
   pageName: string;
-  key: string|number;
+  key: string | number;
   previewUrl: string;
   imageData: string;
   imageDataString: string;
@@ -67,8 +67,14 @@ declare interface selectArea {
   startY?: number;
   endX?: number;
   endY?: number;
+  diffX?: number;
+  diffY?: number;
   data?: layer;
   isSet?: Boolean;
   isMove?: Boolean;
-  isClickOut?: Boolean;
+  isClickOutSide?: Boolean;
+  moveFinishImageData?: CanvasImageData; // 每次移动时没有阴影选择区的imagedata
+  selectImageData?: CanvasImageData; //选择区域数据
+  tempImageData?: CanvasImageData;
+  selectClearImageData?: CanvasImageData; //没有被选取区域的大画布数据
 }

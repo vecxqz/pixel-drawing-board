@@ -1,17 +1,18 @@
 import { computed, toRaw } from "vue";
 import { useStore } from "./useStore";
+import { initLayer, initGrid } from "../utils/canvas";
 
 export function useCanvas() {
-  function createImageData(width: number, height: number) {
-    return new ImageData(width, height);
-  }
+  const store: any = useStore();
+
   function calcColor(
     imageData: ImageData,
     columnIndex: number,
     rowIndex: number
   ) {
-    const { height, data } = imageData;
-    const index = (columnIndex + rowIndex * height) * 4;
+    const { width, height, data } = imageData;
+    let index = 0;
+    index = (columnIndex + rowIndex * width) * 4;
     // console.log(columnIndex, rowIndex, index);
     const r = data[index];
     const g = data[index + 1];
@@ -50,5 +51,16 @@ export function useCanvas() {
 
     return "#" + r + g + b;
   }
-  return { createImageData, calcColor };
+
+  function parseBackground(canvasCtx: CanvasRenderingContext2D) {
+    const { width, height, gridSize } = store.state.canvasModule;
+    const layer: layer = initLayer(width, height, gridSize);
+    for (let i = 0; i < layer.length; i++)
+      for (let j = 0; j < layer[i].length; j++) {
+        const cell = layer[i][j];
+        const { backgroundColor } = cell;
+        initGrid(canvasCtx, layer, i, j, backgroundColor);
+      }
+  }
+  return { calcColor, parseBackground };
 }

@@ -1,7 +1,5 @@
 import { drawGridB } from "./canvas";
-import { useCanvas } from "../composables/useCanvas";
 import Color from "color";
-const { calcColor } = useCanvas();
 function boundaryFill4( //递归填充
   canvasCtx: CanvasRenderingContext2D,
   // imageData: ImageData,
@@ -35,26 +33,39 @@ function boundaryFill4( //递归填充
     }
   }
 }
-/**
- * 扫描线种子填充函数
- * @param canvasCtx 上下文
- * @param imageData 图层数据
- * @param x 横轴坐标
- * @param y 纵轴坐标
- * @param w 画布宽度
- * @param h 画布高度
- * @param newColor 新填充颜色
- * @param oldColor 旧填充颜色
- * @param callback 绘制回调函数
- */
+
+function calcColor(
+  imageData: ImageData,
+  columnIndex: number,
+  rowIndex: number
+) {
+  const { width, height, data } = imageData;
+  let index = 0;
+  index = (columnIndex + rowIndex * width) * 4;
+  // console.log(columnIndex, rowIndex, index);
+  const r = data[index];
+  const g = data[index + 1];
+  const b = data[index + 2];
+  const a = data[index + 3] / 255;
+  return {
+    r,
+    g,
+    b,
+    a,
+    rgba: `rgba(${r}, ${g}, ${b}, ${a})`,
+    rgb: `rgb(${r}, ${g}, ${b})`
+  };
+}
+
 function changeColorByImageData(
   imageData: ImageData,
   columnIndex: number,
   rowIndex: number,
   { r, g, b }: { r: number; g: number; b: number }
 ) {
-  const { height, data } = imageData;
-  const index = (columnIndex + rowIndex * height) * 4;
+  const { width, height, data } = imageData;
+  let index = 0;
+  index = (columnIndex + rowIndex * width) * 4;
   data[index] = r; // r
   data[index + 1] = g; // g
   data[index + 2] = b; // b
@@ -92,6 +103,7 @@ function ScanLineFill(
     // 3.向左右填充（在当前点所在扫描线扫描）
     if (color === oldColor) {
       //填充颜色
+      // debugger;
       changeColorByImageData(imageData, x, y, { r, g, b });
       const { x: nxl, y: nyl1 } = Fill(
         imageData,

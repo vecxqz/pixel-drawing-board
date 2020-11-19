@@ -21,6 +21,7 @@ export function useBucket() {
   function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
+    console.log(columnIndex, rowIndex);
     // const oldColor = currentLayer.value[columnIndex][rowIndex].color,
     const imageData = canvasCtx.value.getImageData(
       0,

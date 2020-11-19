@@ -26,4 +26,5 @@ export interface CanvasState {
   redo: Array<any>;
   undo: Array<any>;
   animationSpeed: number;
+  guid: string;
 }

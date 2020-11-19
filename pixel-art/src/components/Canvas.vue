@@ -1,13 +1,25 @@
 <template>
-  <div id="canvas">
+  <div
+    id="canvas"
+    :element-loading-text="loadingText"
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+    v-loading.fullscreen.lock="loadingFin"
+  >
     <div
       id="canvas-container"
       class="pos-relative"
       :style="
-        `width:${800 * scale}px;
-        height:${800 * scale}px`
+        `width:${canvasMeta.width * scale}px;
+        height:${canvasMeta.height * scale}px`
       "
     >
+      <canvas
+        class="pos-absoulte pe-none layer-select"
+        ref="selectcanvas"
+        :width="selectArea.diffX"
+        :height="selectArea.diffY"
+      />
       <canvas
         class="pos-absoulte pe-none layer-shadow layer-background"
         ref="backgroundCanvas"
@@ -33,12 +45,6 @@
         :height="store.state.canvasModule.height"
       />
       <canvas
-        class="pos-absoulte pe-none layer-select"
-        ref="selectcanvas"
-        :width="selectArea.diffX"
-        :height="selectArea.diffY"
-      />
-      <canvas
         class="pos-absoulte pe-none layer-shadow"
         ref="layerShandowCanvas"
         style="visibility: hidden"
@@ -57,7 +63,6 @@
 </template>
 
 <script lang="ts">
-import { v4 } from "uuid";
 import { useColor } from "../composables/useColor";
 import { usePencil } from "../composables/usePencil";
 import { useMirrorPencil } from "../composables/useMirrorPencil";
@@ -69,24 +74,23 @@ import { useCircle } from "../composables/useCircle";
 import { useEraser } from "../composables/useEraser";
 import { useSelect } from "../composables/useSelect";
 import { useMousePosition } from "../composables/usePosition";
-import { userPreview } from "../composables/userPreview";
+import { usePreview } from "../composables/usePreview";
 import { useMove } from "../composables/useMove";
 import { useDoState } from "../composables/useDoState";
 import { usePage } from "../composables/usePage";
-import { initGrid } from "../utils/canvas";
 import { isUndefined } from "../utils/common";
-import { initLayer } from "../utils/canvas";
 import { useFile } from "../composables/useFile";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
 import { useStore } from "../composables/useStore";
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useCanvas } from "../composables/useCanvas";
 export default {
   name: "Canvas",
   setup() {
-    const router = useRouter();
     const store: any = useStore();
+    const { parseBackground } = useCanvas();
     const {
       mouseDown: pencilMouseDown,
       mouseMove: pencilMouseMove,
@@ -131,7 +135,8 @@ export default {
       mouseDown: selectMouseDown,
       mouseMove: selectMouseMove,
       mouseUp: selectMouseUp,
-      selectArea: selectArea
+      selectArea: selectArea,
+      cancelSelect
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
@@ -143,12 +148,12 @@ export default {
       mouseMove: moveMouseMove,
       mouseUp: moveMouseUp
     } = useMove();
+    const route = useRoute();
     const { setCurrentColor } = useColor();
-    const { setCanvasPreviewByImageData, setPageImageData } = userPreview();
+    const { mergeCanvas } = usePreview();
     const { toUndoStack, TYPE, redo, undo } = useDoState();
     const { choose: choosePage } = usePage();
-    const { loadLocal } = useFile();
-    const scale = ref(1);
+    const { loadLocal, loadServer, setCanvasSizeData } = useFile();
     const canvas = ref(undefined);
     const selectcanvas = ref(undefined);
     const layerShandowCanvas = ref(undefined);
@@ -157,6 +162,8 @@ export default {
     const belowCanvas = ref(undefined);
     const tempCanvas = ref(undefined);
     const imageData = ref(undefined);
+    const loadingFin = ref(true);
+    const loadingText = ref("正在创建工程，请稍等");
     // const isboundary = ref(false);
     const boundaryMeta = reactive({
       startX: 0,
@@ -168,31 +175,28 @@ export default {
     const backgroundCanvasCtx = computed(
       () => store.state.canvasModule.backgroundCanvasCtx
     );
-    const shadowCanvasCtx = computed(
-      () => store.state.canvasModule.shadowLayerCanvasCtx
+    const canvasMeta = computed(() => ({
+      width: store.state.canvasModule.canvasMetaWidth,
+      height: store.state.canvasModule.canvasMetaHeight
+    }));
+    const scale = computed(() => store.state.canvasModule.scale);
+    watch(
+      () => store.state.canvasModule.mode,
+      (newVal, oldVal) => {
+        if (oldVal === "select" && oldVal !== newVal) {
+          cancelSelect();
+          mergeCanvas();
+        }
+      }
     );
-    const tempCanvasCtx = computed(
-      () => store.state.canvasModule.tempCanvasCtx
-    );
-    const belowCanvasCtx = computed(
-      () => store.state.canvasModule.belowCanvasCtx
-    );
-    const aboveCanvasCtx = computed(
-      () => store.state.canvasModule.aboveCanvasCtx
-    );
-    onMounted(() => {
+    onMounted(async () => {
       // 屏蔽右键菜单
       window.oncontextmenu = function(e: MouseEvent) {
         e.preventDefault();
       };
-      router.push({
-        name: "DrawPixelDetail",
-        params: {
-          id: v4()
-        }
-      });
       const pages = JSON.parse(localStorage.getItem("pages") as string);
-      setCanvasData();
+      const { params } = route;
+      const { id: guid } = params;
       const canvasContainer: HTMLElement = window.document.getElementById(
         "canvas-container"
       ) as HTMLElement;
@@ -209,16 +213,21 @@ export default {
       store.dispatch("canvasModule/SET_ABOVE_CANVASCTX", aboveCanvas.value);
       store.dispatch("canvasModule/SET_BELOW_CANVASCTX", belowCanvas.value);
       store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas.value);
-
-      loadLocal();
-      parseBackground();
       // 根据有没有本地数据判断是新建工程还是读取本地工程
-      if (pages === null) {
-        store.dispatch("canvasModule/CREATE_PAGE");
+      if (guid) {
+        await loadServer();
+        loadingText.value = "正在读取工程文件，请稍等";
       } else {
-        const { currentPageIndex } = store.state.canvasModule;
-        choosePage(currentPageIndex);
+        if (pages === null) {
+          store.dispatch("canvasModule/CREATE_PAGE");
+        } else {
+          loadLocal();
+        }
       }
+      parseBackground(backgroundCanvasCtx.value);
+      setCanvasSizeData();
+      const { currentPageIndex } = store.state.canvasModule;
+      choosePage(currentPageIndex);
       nextTick(() => {
         mergeCanvas();
       });
@@ -243,12 +252,12 @@ export default {
       const mouseWheel = fromEvent(canvasContainer, "mousewheel");
       mouseWheel.pipe().subscribe((e: any) => {
         const { deltaY } = e;
-        if (deltaY > 0 && scale.value > 1) {
-          scale.value = scale.value / 2;
+        if (deltaY > 0 && store.state.canvasModule.scale > 1) {
+          store.state.canvasModule.scale = store.state.canvasModule.scale / 2;
           store.state.canvasModule.size = store.state.canvasModule.size / 2;
         }
-        if (deltaY < 0 && scale.value < 8) {
-          scale.value = scale.value * 2;
+        if (deltaY < 0 && store.state.canvasModule.scale < 8) {
+          store.state.canvasModule.scale = store.state.canvasModule.scale * 2;
           store.state.canvasModule.size = store.state.canvasModule.size * 2;
         }
         e.preventDefault();
@@ -279,69 +288,10 @@ export default {
         .subscribe(e => {
           handleMouseMove(e as MouseEvent);
         });
-    });
-    function parseBackground() {
-      const { width, height, gridSize } = store.state.canvasModule;
-      const layer: layer = initLayer(width, height, gridSize);
-      for (let i = 0; i < layer.length; i++)
-        for (let j = 0; j < layer.length; j++) {
-          const cell = layer[i][j];
-          const { backgroundColor } = cell;
-          initGrid(backgroundCanvasCtx.value, layer, i, j, backgroundColor);
-        }
-    }
-    function setCanvasData() {
-      const { width } = store.state.canvasModule;
-      store.state.canvasModule.size = 800 / width;
-    }
 
-    function mergeCanvas() {
-      const { width, height } = store.state.canvasModule;
-      store.state.canvasModule.pages[
-        store.state.canvasModule.currentPageIndex
-      ].layers[
-        store.state.canvasModule.currentLayerIndex
-      ].canvasImageData = canvasCtx.value.getImageData(0, 0, width, height);
-      const backgroundMeta = {
-        layerName: "background",
-        canvasImageData: backgroundCanvasCtx.value.getImageData(
-          0,
-          0,
-          width,
-          height
-        )
-      };
-      const belowMeta = {
-        layerName: "below",
-        canvasImageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const aboveMeta = {
-        layerName: "above",
-        canvasImageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const currentMeta = {
-        layerName: "current",
-        canvasImageData: canvasCtx.value.getImageData(0, 0, width, height)
-      };
-      const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
-      const pageImageArray = [belowMeta, currentMeta, aboveMeta];
-      tempCanvasCtx.value.drawImage(belowCanvasCtx.value.canvas, 0, 0);
-      tempCanvasCtx.value.drawImage(canvasCtx.value.canvas, 0, 0);
-      tempCanvasCtx.value.drawImage(aboveCanvasCtx.value.canvas, 0, 0);
-      store.state.canvasModule.pages[
-        store.state.canvasModule.currentPageIndex
-      ].imageData = tempCanvasCtx.value.getImageData(0, 0, width, height);
-      setCanvasPreviewByImageData(
-        canvasArray,
-        tempCanvasCtx.value,
-        shadowCanvasCtx.value
-      );
-      setPageImageData(
-        pageImageArray,
-        tempCanvasCtx.value,
-        shadowCanvasCtx.value
-      );
-    }
+      loadingFin.value = false;
+    });
+
     function handleMouseMove(e: MouseEvent) {
       const { mode } = store.state.canvasModule;
       let columnIndex = Math.floor(e.offsetX / store.state.canvasModule.size),
@@ -354,8 +304,8 @@ export default {
         pencilMouseMove(e);
       }
       if (mode === "line") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         lineMouseMove(e);
       }
       if (mode === "eraser") {
@@ -365,21 +315,21 @@ export default {
         bucketMouseMove();
       }
       if (mode === "square") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         squareMouseMove(e);
       }
       if (mode === "colorPicker") {
         colorPickerMouseMove(e);
       }
       if (mode === "circle") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         circleMouseMove(e);
       }
       if (mode === "select") {
-        canvasImageDataSave();
-        canvasImageDataUse();
+        imageDataSave();
+        imageDataUse();
         selectMouseMove(e);
       }
       if (mode === "mirrorPencil") {
@@ -389,21 +339,21 @@ export default {
         moveMouseMove(e);
       }
     }
-    function canvasImageDataSave() {
-      // console.log("canvasImageDataSave");
+    function imageDataSave() {
+      // console.log("imageDataSave");
       const { width, height } = store.state.canvasModule;
       // 存储在进行绘制之前的画布数据
       if (isUndefined(imageData.value)) {
         imageData.value = canvasCtx.value.getImageData(0, 0, width, height);
       }
     }
-    function canvasImageDataUse() {
-      // console.log("canvasImageDataUse");
+    function imageDataUse() {
+      // console.log("imageDataUse");
       if (!isUndefined(imageData.value)) {
         canvasCtx.value.putImageData(imageData.value, 0, 0);
       }
     }
-    function canvasImageDataSaveClean() {
+    function imageDataSaveClean() {
       imageData.value = undefined;
     }
     function handleMouseDown(e: MouseEvent) {
@@ -413,25 +363,6 @@ export default {
         width: layerWidth,
         height: layerHeight
       } = store.state.canvasModule;
-      toUndoStack(
-        {
-          currentLayerIndex,
-          currentPageIndex,
-          layerData: {
-            ...store.state.canvasModule.pages[currentPageIndex].layers[
-              currentLayerIndex
-            ],
-            canvasImageData: canvasCtx.value.getImageData(
-              0,
-              0,
-              layerWidth,
-              layerHeight
-            )
-          },
-          type: TYPE.LAYER_DATA_CHANGE
-        },
-        true
-      );
       const canvasContainer: HTMLElement = window.document.getElementById(
         "canvas-container"
       ) as HTMLElement;
@@ -448,6 +379,27 @@ export default {
       const { mode } = store.state.canvasModule;
       setCurrentColor(e);
       recordMouseDownPosition(e);
+      if (mode !== "select") {
+        toUndoStack(
+          {
+            currentLayerIndex,
+            currentPageIndex,
+            layerData: {
+              ...store.state.canvasModule.pages[currentPageIndex].layers[
+                currentLayerIndex
+              ],
+              imageData: canvasCtx.value.getImageData(
+                0,
+                0,
+                layerWidth,
+                layerHeight
+              )
+            },
+            type: TYPE.LAYER_DATA_CHANGE
+          },
+          true
+        );
+      }
       if (mode === "pencil") {
         pencilMouseDown(e);
       }
@@ -470,7 +422,29 @@ export default {
         eraserMouseDown(e);
       }
       if (mode === "select") {
-        selectMouseDown(e);
+        const prevImageData = selectMouseDown(e);
+        if (prevImageData) {
+          toUndoStack(
+            {
+              currentLayerIndex,
+              currentPageIndex,
+              layerData: {
+                ...store.state.canvasModule.pages[currentPageIndex].layers[
+                  currentLayerIndex
+                ],
+                imageData: prevImageData
+                // imageData: canvasCtx.value.getImageData(
+                //   0,
+                //   0,
+                //   layerWidth,
+                //   layerHeight
+                // )
+              },
+              type: TYPE.LAYER_DATA_CHANGE
+            },
+            true
+          );
+        }
       }
       if (mode === "mirrorPencil") {
         mirrorPencilMouseDown(e);
@@ -495,27 +469,27 @@ export default {
         store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       }
       if (mode === "pencil") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         pencilMouseUp(e);
       }
       if (mode === "line") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         lineMouseUp(e);
       }
       if (mode === "bucket") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         bucketMouseUp();
       }
       if (mode === "square") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         squareMouseUp(e);
       }
       if (mode === "circle") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         circleMouseUp(e);
       }
       if (mode === "bucket") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
       }
       if (mode === "colorPicker") {
         colorPickerMouseUp(e);
@@ -524,11 +498,11 @@ export default {
         eraserMouseUp(e);
       }
       if (mode === "select") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         selectMouseUp(e);
       }
       if (mode === "mirrorPencil") {
-        canvasImageDataSaveClean();
+        imageDataSaveClean();
         mirrorPencilMouseUp(e);
       }
       if (mode === "move") {
@@ -549,7 +523,10 @@ export default {
       aboveCanvas,
       belowCanvas,
       tempCanvas,
-      imageData
+      imageData,
+      canvasMeta,
+      loadingFin,
+      loadingText
     };
   }
 };
@@ -557,6 +534,7 @@ export default {
 
 <style lang="scss" scoped>
 #canvas {
+  user-select: none;
   border-top: 1px solid rgba(0, 0, 0, 0.5);
   background-color: #141518;
 }
