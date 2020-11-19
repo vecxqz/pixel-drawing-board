@@ -45,6 +45,6 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.TOKEN }}
           ARGS: "-avzr --delete"
           SOURCE: "dist/"
-          REMOTE_HOST: "141.164.62.52"
+          REMOTE_HOST: ${{ secrets.HOST_NAME }}
           REMOTE_USER: "root"
           TARGET: "/var/www/pixel"
