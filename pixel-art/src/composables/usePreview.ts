@@ -1,7 +1,23 @@
 import { useStore } from "./useStore";
+import { computed } from "vue";
 
-export function userPreview() {
+export function usePreview() {
   const store: any = useStore();
+  const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
+  const backgroundCanvasCtx = computed(
+    () => store.state.canvasModule.backgroundCanvasCtx
+  );
+  const shadowCanvasCtx = computed(
+    () => store.state.canvasModule.shadowLayerCanvasCtx
+  );
+  const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
+  const belowCanvasCtx = computed(
+    () => store.state.canvasModule.belowCanvasCtx
+  );
+  const aboveCanvasCtx = computed(
+    () => store.state.canvasModule.aboveCanvasCtx
+  );
+
   function setCanvasPreview(
     canvasCtxs: Array<CanvasRenderingContext2D>,
     targetcanvasCtx: CanvasRenderingContext2D
@@ -66,9 +82,54 @@ export function userPreview() {
       currentPageIndex
     ].imageData = targetcanvasCtx.getImageData(0, 0, width, height);
   }
+
+  function mergeCanvas() {
+    const { width, height } = store.state.canvasModule;
+    store.state.canvasModule.pages[
+      store.state.canvasModule.currentPageIndex
+    ].layers[
+      store.state.canvasModule.currentLayerIndex
+    ].imageData = canvasCtx.value.getImageData(0, 0, width, height);
+    const backgroundMeta = {
+      layerName: "background",
+      imageData: backgroundCanvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const belowMeta = {
+      layerName: "below",
+      imageData: belowCanvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const aboveMeta = {
+      layerName: "above",
+      imageData: aboveCanvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const currentMeta = {
+      layerName: "current",
+      imageData: canvasCtx.value.getImageData(0, 0, width, height)
+    };
+    const canvasArray = [backgroundMeta, belowMeta, currentMeta, aboveMeta];
+    const pageImageArray = [belowMeta, currentMeta, aboveMeta];
+    tempCanvasCtx.value.drawImage(belowCanvasCtx.value.canvas, 0, 0);
+    tempCanvasCtx.value.drawImage(canvasCtx.value.canvas, 0, 0);
+    tempCanvasCtx.value.drawImage(aboveCanvasCtx.value.canvas, 0, 0);
+    store.state.canvasModule.pages[
+      store.state.canvasModule.currentPageIndex
+    ].imageData = tempCanvasCtx.value.getImageData(0, 0, width, height);
+    setCanvasPreviewByImageData(
+      canvasArray,
+      tempCanvasCtx.value,
+      shadowCanvasCtx.value
+    );
+    setPageImageData(
+      pageImageArray,
+      tempCanvasCtx.value,
+      shadowCanvasCtx.value
+    );
+  }
+
   return {
     setCanvasPreview,
     setPageImageData,
-    setCanvasPreviewByImageData
+    setCanvasPreviewByImageData,
+    mergeCanvas
   };
 }

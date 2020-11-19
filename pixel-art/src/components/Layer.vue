@@ -82,10 +82,12 @@ import { useSelect } from "../composables/useSelect";
 import { useLayerName } from "../composables/useLayerName";
 import { useDoState } from "../composables/useDoState";
 import { useChoose } from "../composables/useChoose";
+import { usePreview } from "../composables/usePreview";
 export default {
   setup() {
     const { cancelSelect } = useSelect();
     const { toUndoStack, TYPE } = useDoState();
+    const { mergeCanvas } = usePreview();
     const {
       changeLayerName,
       renameStart,
@@ -110,41 +112,49 @@ export default {
     const { chooseLayer } = useChoose();
     function createLayer() {
       cancelSelect();
+      mergeCanvas();
       const data: any = create();
       toUndoStack({ ...data, type: TYPE.LAYER_CREATE }, true);
     }
     function deleteLayerA(index: number) {
       cancelSelect();
+      mergeCanvas();
       const data = deleteLayer(index);
       toUndoStack({ ...data, type: TYPE.LAYER_DELETE }, true);
     }
     function upLayer(index: number) {
       cancelSelect();
+      mergeCanvas();
       const data = up(index);
       toUndoStack({ ...data, type: TYPE.LAYER_UP }, true);
     }
     function downLayer(index: number) {
       cancelSelect();
+      mergeCanvas();
       const data = down(index);
       toUndoStack({ ...data, type: TYPE.LAYER_DOWN }, true);
     }
     function copyLayer(index: number) {
       cancelSelect();
+      mergeCanvas();
       const data = copy(index);
       toUndoStack({ ...data, type: TYPE.LAYER_COPY }, true);
     }
     function mergeUpLayer(index: number) {
       cancelSelect();
+      mergeCanvas();
       const data = mergeUp(index);
       toUndoStack({ ...data, type: TYPE.LAYER_MERGE_UP }, true);
     }
     function mergeDownLayer(index: number) {
       cancelSelect();
+      mergeCanvas();
       const data = mergeDown(index);
       toUndoStack({ ...data, type: TYPE.LAYER_MERGE_DOWN }, true);
     }
     function handleChooseLayer(index: number) {
       cancelSelect();
+      mergeCanvas();
       chooseLayer(index);
     }
     return {

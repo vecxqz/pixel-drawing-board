@@ -1,13 +1,13 @@
 import { computed, ref, nextTick, toRaw } from "vue";
 import { useStore } from "./useStore";
-import { userPreview } from "./userPreview";
+import { usePreview } from "./usePreview";
 import { useChoose } from "./useChoose";
 
 import clone from "lodash/clone";
 import cloneDeep from "lodash/cloneDeep";
 export function useLayer() {
   const store: any = useStore();
-  const { setCanvasPreviewByImageData } = userPreview();
+  const { setCanvasPreviewByImageData } = usePreview();
   const { chooseLayer } = useChoose();
   const layers = computed(() => {
     if (

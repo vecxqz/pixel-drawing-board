@@ -4,6 +4,7 @@ import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
 export function useSelect() {
   const { startX, startY, endX, endY } = useMousePosition();
+
   const isSet = computed(() => store.state.canvasModule.selectArea.isSet);
   const isMove = computed(() => store.state.canvasModule.selectArea.isMove);
   const isClickOutSide = computed(
@@ -41,6 +42,7 @@ export function useSelect() {
   //   diffX: 0,
   //   diffY: 0
   // });
+
   const selectArea = computed(() => {
     return store.state.canvasModule.selectArea;
   });
