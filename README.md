@@ -1,1 +1,1 @@
-# pixel-drawing-board
+# pixel-art
