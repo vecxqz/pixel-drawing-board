@@ -42,7 +42,7 @@ jobs:
       - name: Deploy to Server
         uses: burnett01/rsync-deployments@4.1
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.token }}
+          SSH_PRIVATE_KEY: ${{ secrets.TOKEN }}
           ARGS: "-avzr --delete"
           SOURCE: "dist/"
           REMOTE_HOST: "141.164.62.52"
