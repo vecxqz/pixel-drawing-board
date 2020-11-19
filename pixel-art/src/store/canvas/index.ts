@@ -39,7 +39,7 @@ const module: Module<CanvasState, any> = {
     selectArea: {
       isSet: false,
       isMove: false,
-      isClickOut: false,
+      isClickOutSide: true,
       startX: undefined,
       startY: undefined,
       endX: undefined,

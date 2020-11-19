@@ -4,9 +4,11 @@ import { useStore } from "./useStore";
 import { useMousePosition } from "./usePosition";
 export function useSelect() {
   const { startX, startY, endX, endY } = useMousePosition();
-  const isSet = ref(false);
-  const isMove = ref(false);
-  const isClickOutSide = ref(true);
+  const isSet = computed(() => store.state.canvasModule.selectArea.isSet);
+  const isMove = computed(() => store.state.canvasModule.selectArea.isMove);
+  const isClickOutSide = computed(
+    () => store.state.canvasModule.selectArea.isClickOutSide
+  );
   const store: any = useStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const selectCanvasCtx = computed(
@@ -19,28 +21,38 @@ export function useSelect() {
   const size = computed(() => {
     return store.state.canvasModule.size;
   });
-  const moveFinishImageData = ref(null); // 每次移动时没有阴影选择区的imagedata
-  const selectImageData = ref(null); //选择区域数据
-  const tempImageData = ref(null);
-  const selectClearImageData = ref(null); //没有被选取区域的大画布数据
-  const firstClear = ref(false);
-  const selectArea = reactive({
-    startX: 0,
-    startY: 0,
-    endX: 0,
-    endY: 0,
-    diffX: 0,
-    diffY: 0
+  const moveFinishImageData = computed(() => {
+    return store.state.canvasModule.selectArea.moveFinishImageData;
+  }); // 每次移动时没有阴影选择区的imagedata
+  const selectImageData = computed(() => {
+    return store.state.canvasModule.selectArea.selectImageData;
+  }); //选择区域数据
+  const tempImageData = computed(() => {
+    return store.state.canvasModule.selectArea.tempImageData;
+  });
+  const selectClearImageData = computed(() => {
+    return store.state.canvasModule.selectArea.selectClearImageData;
+  }); //没有被选取区域的大画布数据
+  // const selectArea = reactive({
+  //   startX: 0,
+  //   startY: 0,
+  //   endX: 0,
+  //   endY: 0,
+  //   diffX: 0,
+  //   diffY: 0
+  // });
+  const selectArea = computed(() => {
+    return store.state.canvasModule.selectArea;
   });
 
   function setSetStatus(status: boolean) {
-    isSet.value = status;
+    store.state.canvasModule.selectArea.isSet = status;
   }
   function setMoveStatus(status: boolean) {
-    isMove.value = status;
+    store.state.canvasModule.selectArea.isMove = status;
   }
   function setClickOutSideStatus(status: boolean) {
-    isClickOutSide.value = status;
+    store.state.canvasModule.selectArea.isClickOutSide = status;
   }
 
   function isInSelectArea(
@@ -71,43 +83,50 @@ export function useSelect() {
     endX: number;
     endY: number;
   }) {
-    selectArea.startX = Math.min(startX, endX);
-    selectArea.startY = Math.min(startY, endY);
-    selectArea.endX = Math.max(startX, endX);
-    selectArea.endY = Math.max(startY, endY);
-    selectArea.diffX = selectArea.endX - selectArea.startX;
-    selectArea.diffY = selectArea.endY - selectArea.startY;
-    if (selectArea.diffX !== 0) selectArea.diffX += 1;
-    if (selectArea.diffY !== 0) selectArea.diffY += 1;
+    store.state.canvasModule.selectArea.startX = Math.min(startX, endX);
+    store.state.canvasModule.selectArea.startY = Math.min(startY, endY);
+    store.state.canvasModule.selectArea.endX = Math.max(startX, endX);
+    store.state.canvasModule.selectArea.endY = Math.max(startY, endY);
+    store.state.canvasModule.selectArea.diffX =
+      store.state.canvasModule.selectArea.endX -
+      store.state.canvasModule.selectArea.startX;
+    store.state.canvasModule.selectArea.diffY =
+      store.state.canvasModule.selectArea.endY -
+      store.state.canvasModule.selectArea.startY;
+    if (store.state.canvasModule.selectArea.diffX !== 0)
+      store.state.canvasModule.selectArea.diffX += 1;
+    if (store.state.canvasModule.selectArea.diffY !== 0)
+      store.state.canvasModule.selectArea.diffY += 1;
   }
 
   function mouseDown(e: MouseEvent) {
     // 没设置选取区域前存储画布像素信息
     if (!isSet.value) {
-      tempImageData.value = canvasCtx.value.getImageData(
+      store.state.canvasModule.selectArea.tempImageData = canvasCtx.value.getImageData(
         0,
         0,
         width.value,
         height.value
       );
       // 存储未产生阴影前的画布数据
-      moveFinishImageData.value = canvasCtx.value.getImageData(
+      store.state.canvasModule.selectArea.moveFinishImageData = canvasCtx.value.getImageData(
         0,
         0,
         width.value,
         height.value
       );
     }
+    console.log();
     tempCanvasCtx.value.putImageData(tempImageData.value, 0, 0);
     // 如果设置了选择区域则判断是否点击在选择区域内
     if (isSet.value) {
       const isInSelectAreaFlag = isInSelectArea(
         startX.value,
         startY.value,
-        selectArea.startX,
-        selectArea.startY,
-        selectArea.endX,
-        selectArea.endY
+        selectArea.value.startX,
+        selectArea.value.startY,
+        selectArea.value.endX,
+        selectArea.value.endY
       );
       if (isInSelectAreaFlag) {
         setSetStatus(true);
@@ -117,30 +136,30 @@ export function useSelect() {
         tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
         tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
         const clearImageData = tempCanvasCtx.value.getImageData(
-          selectArea.startX,
-          selectArea.startY,
-          selectArea.diffX,
-          selectArea.diffY
+          selectArea.value.startX,
+          selectArea.value.startY,
+          selectArea.value.diffX,
+          selectArea.value.diffY
         );
         // 清除选择阴影
         canvasCtx.value.clearRect(
-          selectArea.startX,
-          selectArea.startY,
-          selectArea.diffX,
-          selectArea.diffY
+          selectArea.value.startX,
+          selectArea.value.startY,
+          selectArea.value.diffX,
+          selectArea.value.diffY
         );
         // 绘制被选择阴影清除时,同时被清除的原区域数据
         selectCanvasCtx.value.clearRect(
           0,
           0,
-          selectArea.diffX,
-          selectArea.diffY
+          selectArea.value.diffX,
+          selectArea.value.diffY
         );
         selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
         canvasCtx.value.drawImage(
           selectCanvasCtx.value.canvas,
-          selectArea.startX,
-          selectArea.startY
+          selectArea.value.startX,
+          selectArea.value.startY
         );
         // 说明在点击区域内,进入移动
       } else {
@@ -168,7 +187,7 @@ export function useSelect() {
       startY: selectAreaStartY,
       diffX: selectAreaDiffX,
       diffY: selectAreaDiffY
-    } = selectArea;
+    } = selectArea.value;
     if (!isSet.value && selectAreaDiffX !== 0 && selectAreaDiffY !== 0) {
       // console.log(
       //   selectAreaStartX,
@@ -256,13 +275,13 @@ export function useSelect() {
       endY: selectAreaEndY,
       diffX: selectAreaDiffX,
       diffY: selectAreaDiffY
-    } = selectArea;
+    } = selectArea.value;
     // 设置区域颜色
     if (!isSet.value && selectAreaDiffX !== 0 && selectAreaDiffY !== 0) {
       // 先获取选择区域像素信息再绘制阴影
       canvasCtx.value.putImageData(tempImageData.value, 0, 0);
       // 存储被选中区域的imagedata
-      selectImageData.value = canvasCtx.value.getImageData(
+      store.state.canvasModule.selectArea.selectImageData = canvasCtx.value.getImageData(
         selectAreaStartX,
         selectAreaStartY,
         selectAreaDiffX,
@@ -276,7 +295,7 @@ export function useSelect() {
         selectAreaDiffX,
         selectAreaDiffY
       );
-      selectClearImageData.value = tempCanvasCtx.value.getImageData(
+      store.state.canvasModule.selectArea.selectClearImageData = tempCanvasCtx.value.getImageData(
         0,
         0,
         width.value,
@@ -312,7 +331,11 @@ export function useSelect() {
       });
       const tempColor = color.value;
       tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
-      tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
+      tempCanvasCtx.value.putImageData(
+        store.state.canvasModule.selectArea.selectClearImageData,
+        0,
+        0
+      );
       const clearImageData = tempCanvasCtx.value.getImageData(
         selectAreaStartX + diffX,
         selectAreaStartY + diffY,
@@ -358,53 +381,64 @@ export function useSelect() {
   }
 
   function cancelSelect() {
-    const maxX = selectArea.startX;
-    const maxY = selectArea.startY;
+    if (!isSet.value) return;
+    const maxX = selectArea.value.startX;
+    const maxY = selectArea.value.startY;
     // 获取被选择区域合并的画布上的数据
     tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
     tempCanvasCtx.value.putImageData(selectClearImageData.value, 0, 0);
     const clearImageData = tempCanvasCtx.value.getImageData(
-      selectArea.startX,
-      selectArea.startY,
-      selectArea.diffX,
-      selectArea.diffY
+      selectArea.value.startX,
+      selectArea.value.startY,
+      selectArea.value.diffX,
+      selectArea.value.diffY
     );
     // 清除选择阴影
     canvasCtx.value.clearRect(
-      selectArea.startX,
-      selectArea.startY,
-      selectArea.diffX,
-      selectArea.diffY
+      selectArea.value.startX,
+      selectArea.value.startY,
+      selectArea.value.diffX,
+      selectArea.value.diffY
     );
 
     // 绘制被选择阴影清除时同时被清除的原区域数据
-    selectCanvasCtx.value.clearRect(0, 0, selectArea.diffX, selectArea.diffY);
+    selectCanvasCtx.value.clearRect(
+      0,
+      0,
+      selectArea.value.diffX,
+      selectArea.value.diffY
+    );
     selectCanvasCtx.value.putImageData(clearImageData, 0, 0);
     canvasCtx.value.drawImage(
       selectCanvasCtx.value.canvas,
-      selectArea.startX,
-      selectArea.startY
+      selectArea.value.startX,
+      selectArea.value.startY
     );
     // 绘制被选择区域
-    selectCanvasCtx.value.clearRect(0, 0, selectArea.diffX, selectArea.diffY);
+    selectCanvasCtx.value.clearRect(
+      0,
+      0,
+      selectArea.value.diffX,
+      selectArea.value.diffY
+    );
     selectCanvasCtx.value.putImageData(selectImageData.value, 0, 0);
     canvasCtx.value.drawImage(
       selectCanvasCtx.value.canvas,
-      selectArea.startX,
-      selectArea.startY
+      selectArea.value.startX,
+      selectArea.value.startY
     );
     // 结束 状态重置
     setClickOutSideStatus(true);
     setSetStatus(false);
     setMoveStatus(false);
-    tempImageData.value = canvasCtx.value.getImageData(
+    store.state.canvasModule.selectArea.tempImageData = canvasCtx.value.getImageData(
       0,
       0,
       width.value,
       height.value
     );
-    selectClearImageData.value = null;
-    selectImageData.value = null;
+    store.state.canvasModule.selectArea.selectClearImageData = null;
+    store.state.canvasModule.selectArea.selectImageData = null;
     setSelectArea({
       startX: 0,
       startY: 0,

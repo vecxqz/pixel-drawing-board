@@ -51,7 +51,7 @@
       @dblclick="rename(currentLayerIndex)"
       :key="layer.key"
       class="layer"
-      @click="chooseLayer(layerReverse.length - index - 1)"
+      @click="handleChooseLayer(layerReverse.length - index - 1)"
     >
       <div
         v-if="+renameIndex !== layerReverse.length - index - 1"
@@ -78,11 +78,13 @@
 
 <script lang="ts">
 import { useLayer } from "../composables/useLayer";
+import { useSelect } from "../composables/useSelect";
 import { useLayerName } from "../composables/useLayerName";
 import { useDoState } from "../composables/useDoState";
 import { useChoose } from "../composables/useChoose";
 export default {
   setup() {
+    const { cancelSelect } = useSelect();
     const { toUndoStack, TYPE } = useDoState();
     const {
       changeLayerName,
@@ -105,35 +107,46 @@ export default {
       currentLayerIndex,
       currentLayer
     } = useLayer();
+    const { chooseLayer } = useChoose();
     function createLayer() {
+      cancelSelect();
       const data: any = create();
       toUndoStack({ ...data, type: TYPE.LAYER_CREATE }, true);
     }
     function deleteLayerA(index: number) {
+      cancelSelect();
       const data = deleteLayer(index);
       toUndoStack({ ...data, type: TYPE.LAYER_DELETE }, true);
     }
     function upLayer(index: number) {
+      cancelSelect();
       const data = up(index);
       toUndoStack({ ...data, type: TYPE.LAYER_UP }, true);
     }
     function downLayer(index: number) {
+      cancelSelect();
       const data = down(index);
       toUndoStack({ ...data, type: TYPE.LAYER_DOWN }, true);
     }
     function copyLayer(index: number) {
+      cancelSelect();
       const data = copy(index);
       toUndoStack({ ...data, type: TYPE.LAYER_COPY }, true);
     }
     function mergeUpLayer(index: number) {
+      cancelSelect();
       const data = mergeUp(index);
       toUndoStack({ ...data, type: TYPE.LAYER_MERGE_UP }, true);
     }
     function mergeDownLayer(index: number) {
+      cancelSelect();
       const data = mergeDown(index);
       toUndoStack({ ...data, type: TYPE.LAYER_MERGE_DOWN }, true);
     }
-    const { chooseLayer } = useChoose();
+    function handleChooseLayer(index: number) {
+      cancelSelect();
+      chooseLayer(index);
+    }
     return {
       currentLayer,
       upLayer,
@@ -149,7 +162,7 @@ export default {
       currentLayerIndex,
       renameFinish,
       blurInput,
-      chooseLayer,
+      handleChooseLayer,
       changeLayerName,
       renameStart,
       createLayer
