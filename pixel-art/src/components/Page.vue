@@ -198,12 +198,16 @@ export default {
   }
 }
 .page-preview-item {
-  margin: 4px;
   display: flex;
-}
-.page-preview-image {
   width: 90px;
   height: 90px;
+  margin: 4px;
+  justify-content: center;
+  align-items: center;
+}
+.page-preview-image {
+  width: fit-content;
+  height: fit-content;
   image-rendering: pixelated;
 }
 .preview-page {
