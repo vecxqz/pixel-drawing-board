@@ -57,11 +57,15 @@
 import { usePage } from "../composables/usePage";
 import { useStore } from "../composables/useStore";
 import { useDoState } from "../composables/useDoState";
+import { useSelect } from "../composables/useSelect";
+import { usePreview } from "../composables/usePreview";
 import { ref, onMounted, watch } from "vue";
 export default {
   name: "Page",
   setup() {
     const store: any = useStore();
+    const { cancelSelect } = useSelect();
+    const { mergeCanvas } = usePreview();
     const { toUndoStack, TYPE } = useDoState();
     const speed = ref(store.state.canvasModule.animationSpeed);
     watch(speed, newVal => {
@@ -81,18 +85,26 @@ export default {
       setAnimationPreview();
     });
     function createPage(index: number) {
+      cancelSelect();
+      mergeCanvas();
       const data: any = create(index);
       toUndoStack({ ...data, type: TYPE.PAGE_CREATE }, true);
     }
     function deletePageA(index: number) {
+      cancelSelect();
+      mergeCanvas();
       const data: any = deletePage(index);
       toUndoStack({ ...data, type: TYPE.PAGE_DELETE }, true);
     }
     function copyPage(index: number) {
+      cancelSelect();
+      mergeCanvas();
       const data: any = copy(index);
       toUndoStack({ ...data, type: TYPE.PAGE_COPY }, true);
     }
     function movePage(index: number, mode: string) {
+      cancelSelect();
+      mergeCanvas();
       if (mode === "left") {
         const data: any = move(index, mode);
         toUndoStack({ ...data, type: TYPE.PAGE_TO_LEFT }, true);
