@@ -31,7 +31,7 @@ export function usePage() {
     () => store.state.canvasModule.aboveCanvasCtx
   );
   const animationPreviewUrl = ref("");
-  const { setCanvasPreview } = usePreview();
+  const { mergeCanvas } = usePreview();
   function create(index: number) {
     const imageData = tempCanvasCtx.value.createImageData(
       width.value,
@@ -60,10 +60,9 @@ export function usePage() {
       layerMeta
     );
     store.state.canvasModule.currentPageIndex += 1;
+    store.state.canvasModule.currentLayerIndex = 0;
     canvasCtx.value.clearRect(0, 0, width.value, height.value);
-    nextTick(() => {
-      setCanvasPreview([backgroundCanvasCtx.value], shadowCanvasCtx.value);
-    });
+    mergeCanvas();
     return {
       currentPageIndex: store.state.canvasModule.currentPageIndex
     };
