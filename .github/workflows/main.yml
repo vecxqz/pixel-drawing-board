@@ -34,6 +34,7 @@ jobs:
 
       - name: npm install and build
         run: |
+          cd pixel-art
           npm install
           npm run build
         env:
