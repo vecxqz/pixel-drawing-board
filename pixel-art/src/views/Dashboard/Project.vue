@@ -6,18 +6,17 @@
       :key="project.guid"
     >
       <div v-if="project.data">
-        <router-link
-          :to="{ name: 'DrawPixelDetail', params: { id: project.guid } }"
-        >
-          <img :src="project.data.pages[0].previewUrl" alt="" srcset="" />
-        </router-link>
+        <img
+          class="cur-pointer"
+          @click="openPorjectPage(project.guid)"
+          :src="project.data.pages[0].previewUrl"
+          alt=""
+          srcset=""
+        />
         <div class="project-title">
-          <router-link
-            v-if="!project.edit"
-            :to="{ name: 'DrawPixelDetail', params: { id: project.guid } }"
-          >
+          <div class="cur-pointer" @click="openPorjectPage(project.guid)">
             {{ project.data.title }}
-          </router-link>
+          </div>
           <el-input
             v-if="project.edit"
             ref="elInputRef"
@@ -58,6 +57,7 @@
 
 <script lang="ts">
 import { nextTick, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   getAllPagesData,
   removePagesData,
@@ -68,6 +68,7 @@ export default {
   setup() {
     const projectList = ref([{}]);
     const elInputRef = ref(null);
+    const router = useRouter();
 
     onMounted(async () => {
       await parseProjectList();
@@ -131,13 +132,23 @@ export default {
       });
     }
 
+    async function openPorjectPage(guid: number) {
+      const url = await router.resolve({
+        name: "DrawPixelDetail",
+        params: {
+          id: guid
+        }
+      });
+      window.open(url.href, "_blank");
+    }
+
     return {
       projectList,
       remove,
       handleEditBlur,
       changeToEditStatus,
       handleEditEnter,
-      elInputRef
+      openPorjectPage
     };
   }
 };
@@ -179,7 +190,10 @@ export default {
   }
 }
 
-::v-deep .el-card__body {
+::v-deep(.el-card__body) {
   padding: 0;
+}
+.cur-pointer {
+  cursor: pointer;
 }
 </style>
