@@ -1,7 +1,9 @@
 ## 简介
 
 Pixel Art 是一个像素艺术创作工具
-[在线预览](https://binarystudio.cc/)
+[在线预览](https://binarystudio.cc/)  
+<img src="../pixel-drawing-board/docs/dashboard-1.png" style="height:150px" />  
+<img src="../pixel-drawing-board/docs/canvas-1.png" style="height:150px" />
 
 ## 构成
 
