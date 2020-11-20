@@ -7,8 +7,8 @@ name: CI
 on:
   push:
     branches: develop/dev
-  tags:
-    - v*
+    tags:
+      - v*
 #   pull_request:
 #     branches: [ develop/dev ]
 
