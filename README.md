@@ -72,4 +72,4 @@ npm run build
 ## Lciense
 
 [GPL-3.0](https://github.com/vecxqz/to-do-in-2020/blob/develop/dev/LICENSE)  
-Copyright (C) <2019> \<vecxqz>
+Copyright (C) <2020> \<vecxqz>
