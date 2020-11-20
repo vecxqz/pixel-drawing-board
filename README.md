@@ -2,8 +2,8 @@
 
 Pixel Art 是一个像素艺术创作工具
 [在线预览](https://binarystudio.cc/)  
-<img src="../pixel-drawing-board/docs/dashboard-1.png" style="height:150px" />  
-<img src="../pixel-drawing-board/docs/canvas-1.png" style="height:150px" />
+<img src="https://github.com/vecxqz/to-do-in-2020/blob/develop/dev/docs/dashboard-1.png?raw=true" style="height:150px" />  
+<img src="https://raw.githubusercontent.com/vecxqz/to-do-in-2020/develop/dev/docs/canvas-1.png?raw=true)" style="height:150px" />
 
 ## 构成
 
