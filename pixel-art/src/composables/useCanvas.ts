@@ -1,9 +1,9 @@
 import { computed, toRaw } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { initLayer, initGrid } from "../utils/canvas";
 
 export function useCanvas() {
-  const store: any = useStore();
+  const store = useWrapStore();
 
   function calcColor(
     imageData: ImageData,
@@ -53,8 +53,8 @@ export function useCanvas() {
   }
 
   function parseBackground(canvasCtx: CanvasRenderingContext2D) {
-    const { width, height, gridSize } = store.state.canvasModule;
-    const layer: layer = initLayer(width, height, gridSize);
+    const { width, height, size } = store.state.canvasModule;
+    const layer: layer = initLayer(width, height, size);
     for (let i = 0; i < layer.length; i++)
       for (let j = 0; j < layer[i].length; j++) {
         const cell = layer[i][j];

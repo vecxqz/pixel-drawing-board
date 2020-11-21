@@ -1,11 +1,11 @@
 import { computed, nextTick, ref, toRaw } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import cloneDeep from "lodash/cloneDeep";
 import { initLayer } from "../utils/canvas";
 import { usePreview } from "./usePreview";
 import clone from "lodash/clone";
 export function usePage() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const currentPageIndex = computed(
     () => store.state.canvasModule.currentPageIndex
   );
@@ -88,7 +88,7 @@ export function usePage() {
       if (i === mergIndex) {
         // 说明下层数据已合并完，清除临时层的画布内容，绘制上层数据
         // 如果该层存在数据，则把该层数据绘制到canvas上
-        tempCanvasCtx.value.clearRect(0, 0, width, height);
+        tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
         if (imageData) {
           canvasCtx.value.putImageData(imageData, 0, 0);
         }
@@ -100,7 +100,7 @@ export function usePage() {
         aboveCanvasCtx.value.drawImage(canvas, 0, 0);
       }
     }
-    tempCanvasCtx.value.clearRect(0, 0, width, height);
+    tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
   }
   function copy(index: number) {
     const page: page = cloneDeep(toRaw(store.state.canvasModule.pages[index]));

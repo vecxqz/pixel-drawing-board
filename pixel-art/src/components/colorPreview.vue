@@ -30,14 +30,14 @@
 
 <script lang="ts">
 import { computed, ref } from "vue";
-import { useStore } from "../composables/useStore";
+import { useWrapStore } from "../store/index";
 import colorPicker from "./colorPicker/main.vue";
 export default {
   components: {
     colorPicker
   },
   setup() {
-    const store: any = useStore();
+    const store = useWrapStore();
     const primaryColorVisible = ref(false);
     const secondaryColorVisible = ref(false);
     const primaryColor = computed(() => store.state.canvasModule.primaryColor);

@@ -1,12 +1,12 @@
 import { computed, createCommentVNode } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { usePreview } from "../composables/usePreview";
 import { useLayer } from "./useLayer";
 import { useDoState } from "../composables/useDoState";
 import cloneDeep from "lodash/cloneDeep";
 
 export function useCrop() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const { toUndoStack, TYPE } = useDoState();
   const { createLayerByData } = useLayer();
   const { mergeCanvas } = usePreview();

@@ -153,12 +153,12 @@
 import { useDoState } from "../composables/useDoState";
 import { useDownload } from "../composables/useDownload";
 import { useFile } from "../composables/useFile";
-import { useStore } from "../composables/useStore";
+import { useWrapStore } from "../store/index";
 import { ref, computed, reactive, onMounted } from "vue";
 export default {
   name: "ToolHeader",
   setup() {
-    const store: any = useStore();
+    const store = useWrapStore();
     const { redo, undo } = useDoState();
     const { downloadImage, downloadImageGIF } = useDownload();
     const dialogVisible = ref(false);

@@ -1,10 +1,10 @@
 import { computed, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useStore } from "./useStore";
 import { useCanvas } from "./useCanvas";
 import { usePreview } from "./usePreview";
 import { useDoState } from "./useDoState";
 import { reactive } from "vue";
+import { useWrapStore } from "../store/index";
 
 import {
   getGuid,
@@ -22,7 +22,7 @@ export function useFile() {
   const { parseBackground } = useCanvas();
   const { clearRedoStack, clearUndoStack } = useDoState();
   const { mergeCanvas } = usePreview();
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const backgroundCanvasCtx = computed(
     () => store.state.canvasModule.backgroundCanvasCtx
@@ -213,7 +213,7 @@ export function useFile() {
   // https://stackoverflow.com/questions/55620592/react-node-trouble-sending-imagedata-to-server
   async function loadServer() {
     const { params } = route;
-    const { id: guid } = params;
+    const { id: guid } = params as { id: string };
     const {
       data: { data: pages }
     } = await getPagesData({

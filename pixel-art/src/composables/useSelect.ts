@@ -1,6 +1,6 @@
 import { drawGridB, clearGridB } from "../utils/canvas";
 import { computed, reactive, nextTick, toRaw, ref } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { useMousePosition } from "./usePosition";
 export function useSelect() {
   const { startX, startY, endX, endY } = useMousePosition();
@@ -10,7 +10,7 @@ export function useSelect() {
   const isClickOutSide = computed(
     () => store.state.canvasModule.selectArea.isClickOutSide
   );
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const selectCanvasCtx = computed(
     () => store.state.canvasModule.selectCanvasCtx

@@ -1,8 +1,8 @@
 import { bresenhamLineCircle, clearGridB } from "../utils/canvas";
 import { computed } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 export function useEraser() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const size = computed(() => {
     return store.state.canvasModule.size;

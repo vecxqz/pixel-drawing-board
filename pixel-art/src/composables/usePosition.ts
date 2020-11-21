@@ -1,7 +1,7 @@
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { computed, ref } from "vue";
 export function useMousePosition() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const size = computed(() => {
     return store.state.canvasModule.size;
   });

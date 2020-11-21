@@ -1,8 +1,8 @@
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { computed } from "vue";
 
 export function usePreview() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const backgroundCanvasCtx = computed(
     () => store.state.canvasModule.backgroundCanvasCtx

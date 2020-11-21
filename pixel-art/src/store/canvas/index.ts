@@ -5,47 +5,29 @@ import { Module } from "vuex";
 import { CanvasState } from "./type";
 const module: Module<CanvasState, any> = {
   namespaced: true,
-  state: () => ({
+  state: (): CanvasState => ({
     mode: "pencil",
-    color: "rgb(100, 200, 150)",
-    primaryColor: "rgb(10, 200, 150)",
-    secondaryColor: "rgb(190, 255, 255)",
-    currentLayerIndex: 0,
+    color: "rgb(0,0,0)",
+    primaryColor: "rgb(0,0,0)",
+    secondaryColor: "rgb(255,255,255)",
     currentPageIndex: 0,
+    currentLayerIndex: 0,
     currentRowIndex: 0,
     currentColumnIndex: 0,
-    previewUrl: "",
-    pages: [],
-    guid: "",
-    width: 40,
-    height: 40,
-    canvasMetaWidth: 40,
-    canvasMetaHeight: 40,
-    scale: 1,
-    gridSize: 1,
+    pages: [] as any,
+    width: 32,
+    height: 32,
+    canvasMetaHeight: 0,
+    canvasMetaWidth: 0,
     size: 1,
-    tempLayer: [],
-    canvasCtx: undefined,
-    selectCanvasCtx: undefined,
-    aboveCanvasCtx: undefined,
-    backgroundCanvasCtx: undefined,
-    belowCanvasCtx: undefined,
-    shadowLayerCanvasCtx: undefined,
-    tempCanvasCtx: undefined,
-    imageData: undefined,
-    animationSpeed: 1000,
-    undo: [],
-    redo: [],
-    selectArea: {
-      isSet: false,
-      isMove: false,
-      isClickOutSide: true,
-      startX: undefined,
-      startY: undefined,
-      endX: undefined,
-      endY: undefined,
-      data: undefined
-    },
+    scale: 1,
+    selectCanvasCtx: undefined as any,
+    aboveCanvasCtx: undefined as any,
+    canvasCtx: undefined as any,
+    belowCanvasCtx: undefined as any,
+    backgroundCanvasCtx: undefined as any,
+    shadowLayerCanvasCtx: undefined as any,
+    tempCanvasCtx: {} as any,
     eventPoint: {
       startPoint: {
         e: undefined,
@@ -67,7 +49,22 @@ const module: Module<CanvasState, any> = {
         x: undefined,
         y: undefined
       }
-    }
+    } as any,
+    selectArea: {
+      isSet: false,
+      isMove: false,
+      isClickOutSide: true,
+      startX: undefined,
+      startY: undefined,
+      endX: undefined,
+      endY: undefined,
+      data: undefined
+    } as any,
+    previewUrl: "",
+    redo: [],
+    undo: [],
+    animationSpeed: 1000,
+    guid: ""
   }),
   mutations: {
     ...CanvasMutations

@@ -1,8 +1,8 @@
 import { computed, ref, nextTick } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 
 export function useChoose() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const backgroundCanvasCtx = computed(
     () =>

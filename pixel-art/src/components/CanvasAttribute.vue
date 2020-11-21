@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { computed, reactive } from "vue";
-import { useStore } from "../composables/useStore";
+import { useWrapStore } from "../store/index";
 import layer from "./Layer.vue";
 export default {
   name: "CanvasAttribute",
@@ -26,7 +26,7 @@ export default {
     layer
   },
   setup() {
-    const store: any = useStore();
+    const store = useWrapStore();
     const colors = reactive([
       "red",
       "yellow",

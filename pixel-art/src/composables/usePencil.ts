@@ -1,8 +1,8 @@
 import { drawGridB, bresenhamLine } from "../utils/canvas";
 import { computed, reactive } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 export function usePencil() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const width = computed(() => store.state.canvasModule.width);
   const shadowLayerCanvasCtx = computed(

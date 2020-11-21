@@ -1,8 +1,7 @@
-function initLayer(width: number, height: number, gridSize: number): layer {
+function initLayer(width: number, height: number, size: number): layer {
   const gridMeta: layer = [];
-  for (let column = 0; column < Math.floor(width / gridSize); column += 1) {
-    for (let row = 0; row < Math.floor(height / gridSize); row += 1) {
-      const size = gridSize;
+  for (let column = 0; column < Math.floor(width / size); column += 1) {
+    for (let row = 0; row < Math.floor(height / size); row += 1) {
       const x = column * size;
       const y = row * size;
       const columnIndex = column;

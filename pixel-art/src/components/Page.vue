@@ -55,7 +55,7 @@
 
 <script lang="ts">
 import { usePage } from "../composables/usePage";
-import { useStore } from "../composables/useStore";
+import { useWrapStore } from "../store/index";
 import { useDoState } from "../composables/useDoState";
 import { useSelect } from "../composables/useSelect";
 import { usePreview } from "../composables/usePreview";
@@ -63,7 +63,7 @@ import { ref, onMounted, watch } from "vue";
 export default {
   name: "Page",
   setup() {
-    const store: any = useStore();
+    const store = useWrapStore();
     const { cancelSelect } = useSelect();
     const { mergeCanvas } = usePreview();
     const { toUndoStack, TYPE } = useDoState();

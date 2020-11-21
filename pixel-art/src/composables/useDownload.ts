@@ -1,7 +1,7 @@
 import { computed, nextTick } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 export function useDownload() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const tempCanvasCtx = computed(() => store.state.canvasModule.tempCanvasCtx);
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const currentPageIndex = computed(

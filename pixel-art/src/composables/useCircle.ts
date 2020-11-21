@@ -1,9 +1,9 @@
 import { bresenhamLineCircle, drawGridB } from "../utils/canvas";
 import { computed } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { useMousePosition } from "./usePosition";
 export function useCircle() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {

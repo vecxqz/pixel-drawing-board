@@ -43,7 +43,7 @@
 <script lang="ts">
 import { computed, reactive, ref } from "vue";
 import colorPreview from "./colorPreview.vue";
-import { useStore } from "../composables/useStore";
+import { useWrapStore } from "../store/index";
 import { useCrop } from "../composables/useCrop";
 export default {
   name: "ToolBar",
@@ -51,7 +51,7 @@ export default {
     colorPreview
   },
   setup() {
-    const store: any = useStore();
+    const store = useWrapStore();
     const { cropNewLayer } = useCrop();
     const mode = computed(() => store.state.canvasModule.mode);
     const toolActiveIndex = ref(0);

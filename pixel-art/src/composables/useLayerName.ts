@@ -1,8 +1,8 @@
 import { computed, ref, nextTick } from "vue";
 import { useDoState } from "./useDoState";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 export function useLayerName() {
-  const store: any = useStore();
+  const store = useWrapStore();
   const { toUndoStack, TYPE } = useDoState();
   const renameIndex = ref(-1);
   const renameElement = ref(null);

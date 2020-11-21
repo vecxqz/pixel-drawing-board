@@ -82,14 +82,14 @@ import { isUndefined } from "../utils/common";
 import { useFile } from "../composables/useFile";
 import { fromEvent, animationFrameScheduler } from "rxjs";
 import { concatAll, map, takeUntil, tap, throttleTime } from "rxjs/operators";
-import { useStore } from "../composables/useStore";
+import { useWrapStore } from "../store/index";
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useCanvas } from "../composables/useCanvas";
 export default {
   name: "Canvas",
   setup() {
-    const store: any = useStore();
+    const store = useWrapStore();
     const { parseBackground } = useCanvas();
     const {
       mouseDown: pencilMouseDown,
@@ -161,7 +161,7 @@ export default {
     const aboveCanvas = ref(undefined);
     const belowCanvas = ref(undefined);
     const tempCanvas = ref(undefined);
-    const imageData = ref(undefined);
+    const imageData = ref(undefined as ImageData | undefined);
     const loadingFin = ref(true);
     const loadingText = ref("正在创建工程，请稍等");
     // const isboundary = ref(false);
@@ -349,8 +349,9 @@ export default {
     }
     function imageDataUse() {
       // console.log("imageDataUse");
+      console.log(imageData.value);
       if (!isUndefined(imageData.value)) {
-        canvasCtx.value.putImageData(imageData.value, 0, 0);
+        canvasCtx.value.putImageData(imageData.value as ImageData, 0, 0);
       }
     }
     function imageDataSaveClean() {

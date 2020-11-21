@@ -1,5 +1,5 @@
 import { computed } from "vue";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import { useChoose } from "./useChoose";
 import { useLayer } from "./useLayer";
 import { usePage } from "./usePage";
@@ -35,7 +35,7 @@ export function useDoState() {
   const { chooseLayer } = useChoose();
   const redoStack = computed(() => store.state.canvasModule.redo);
   const undoStack = computed(() => store.state.canvasModule.undo);
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(
     () => store.state.canvasModule.canvasCtx as CanvasRenderingContext2D
   );

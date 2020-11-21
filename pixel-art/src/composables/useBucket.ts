@@ -1,12 +1,12 @@
 import { ScanLineFill, boundaryFill4 } from "../utils/fill";
 import { computed } from "vue";
 import { useCanvas } from "./useCanvas";
-import { useStore } from "./useStore";
+import { useWrapStore } from "../store/index";
 import Color from "color";
 
 export function useBucket() {
   const { calcColor } = useCanvas();
-  const store: any = useStore();
+  const store = useWrapStore();
   const canvasCtx = computed(() => store.state.canvasModule.canvasCtx);
   const color = computed(() => store.state.canvasModule.color);
   const size = computed(() => {
