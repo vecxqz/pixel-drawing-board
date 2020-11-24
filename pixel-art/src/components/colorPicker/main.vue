@@ -64,6 +64,7 @@
         <span>#</span>
         <input @input="hexInputFilter($event)" v-model="colorHex" />
       </div>
+      <el-button @click="popupHide" class="btn-sure">确定</el-button>
     </div>
   </div>
 </template>
@@ -193,7 +194,7 @@ export default {
       colorHex.value = Color.hsv([h, s, v])
         .hex()
         .slice(1);
-      console.log(Color.hsv([h, s, v]));
+      // console.log(Color.hsv([h, s, v]));
       newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
       context.emit("update:emitColor", newColor.value);
     }
@@ -214,10 +215,13 @@ export default {
       const h = hues.value,
         s = saturation.value,
         v = value.value;
+      // console.log(h, s, v);
+      // console.log(`hsl(${newH}, ${newS}%, ${newL}%)`)
       const [r, g, b] = Color.hsv([h, s, v]).rgb().color;
-      const [newH, newS, newL] = Color.hsv([h, s, v]).hsl().color;
+      // console.log(r, g, b);
+      const [newH, newS, newL] = Color.hsv([h, 100, 100]).hsl().color;
       chooseColor.value = `hsl(${newH}, ${newS}%, ${newL}%)`;
-      console.log(r, g, b);
+      // console.log(r, g, b);
       rgbMeta.r = Math.round(r);
       rgbMeta.g = Math.round(g);
       rgbMeta.b = Math.round(b);
@@ -246,7 +250,8 @@ export default {
       const c = Color(color);
       const [r, g, b] = c.color;
       const [h, s, v] = c.hsv().color;
-      const [newH, newS, newL] = c.hsl().color;
+      const [newH, newS, newL] = Color.hsv([h, 100, 100]).hsl().color;
+      // console.log(newH, newS, newL);
       const { top: satCursorTop, left: satCursorLeft } = calcSatCursorPos(
         color
       );
@@ -377,6 +382,7 @@ export default {
   border: 1px solid rgba(0, 0, 0, 0.5);
   background: #333;
   color: rgb(255, 255, 255);
+  user-select: none;
 }
 .pos-absolute {
   position: absolute;
@@ -498,8 +504,14 @@ export default {
     width: 14px;
   }
   input {
-    width: 105px;
+    width: 55px;
   }
+}
+.btn-sure {
+  width: 44px;
+  height: 20px;
+  padding: 2px;
+  margin-left: 6px;
 }
 .hideen {
   display: none;
