@@ -18,23 +18,30 @@
             <div
               :class="{ highlight: mode === 'file' }"
               class="op-item"
-              @click="mode = 'file'"
+              @click="modeChange('file')"
             >
               新建工程
             </div>
             <div
               :class="{ highlight: mode === 'save' }"
               class="op-item"
-              @click="mode = 'save'"
+              @click="modeChange('save')"
             >
               保存工程
             </div>
             <div
               :class="{ highlight: mode === 'download' }"
               class="op-item"
-              @click="mode = 'download'"
+              @click="modeChange('download')"
             >
               下载图片
+            </div>
+            <div
+              :class="{ highlight: mode === 'import' }"
+              class="op-item"
+              @click="modeChange('import')"
+            >
+              导入图片
             </div>
           </el-aside>
           <el-main class="main">
@@ -142,6 +149,16 @@
                 </el-row>
               </div>
             </div>
+            <div v-if="mode === 'import'" :class="`mode-${mode}`">
+              <el-button @click="importImage.click()">导入图片</el-button>
+              <input
+                class="dis-none"
+                type="file"
+                name="importImage"
+                ref="importImage"
+                id=""
+              />
+            </div>
           </el-main>
         </el-container>
       </template>
@@ -154,18 +171,26 @@ import { useDoState } from "../composables/useDoState";
 import { useDownload } from "../composables/useDownload";
 import { useFile } from "../composables/useFile";
 import { useWrapStore } from "../store/index";
-import { ref, computed, reactive, onMounted } from "vue";
+import { ref, computed, reactive, onMounted, nextTick } from "vue";
+import { useLayer } from "../composables/useLayer";
+import { useSelect } from "../composables/useSelect";
+import { usePreview } from "../composables/usePreview";
+
 export default {
   name: "ToolHeader",
   setup() {
     const store = useWrapStore();
-    const { redo, undo } = useDoState();
+    const { cancelSelect } = useSelect();
+    const { mergeCanvas } = usePreview();
+    const { create } = useLayer();
+    const { toUndoStack, TYPE, redo, undo } = useDoState();
     const { downloadImage, downloadImageGIF } = useDownload();
     const dialogVisible = ref(false);
     const { save, reset } = useFile();
     const mode = ref("file");
     const layerScale = ref(1);
     const gifScale = ref(1);
+    const importImage = ref(undefined as unknown);
     const sclaeOptions = ref([] as Array<any>);
     const canvasMeta = reactive({
       width: 40,
@@ -198,9 +223,18 @@ export default {
         (({
           file: "文件",
           download: "下载",
-          save: "保存"
+          save: "保存",
+          import: "导入"
         } as any)[mode.value])
     );
+    const canvasWidth = computed(() => store.state.canvasModule.width);
+    const canvasHeight = computed(() => store.state.canvasModule.height);
+    // const currentPageIndex = computed(
+    //   () => store.state.canvasModule.currentPageIndex
+    // );
+    // const currentLayerIndex = computed(
+    //   () => store.state.canvasModule.currentLayerIndex
+    // );
 
     onMounted(() => {
       sclaeOptions.value = new Array(20)
@@ -210,6 +244,13 @@ export default {
           value: index + 1
         }));
     });
+
+    function createLayer() {
+      cancelSelect();
+      mergeCanvas();
+      const data: any = create();
+      toUndoStack({ ...data, type: TYPE.LAYER_CREATE }, true);
+    }
 
     function handleClickSave() {
       save();
@@ -231,6 +272,50 @@ export default {
     function handleClickFile() {
       dialogVisible.value = true;
     }
+    function handleUpload(e: any) {
+      const files = e.target.files;
+      const fileReader = new FileReader();
+
+      fileReader.onload = (e: any) => {
+        const { result } = e.target;
+
+        const image = new Image();
+        // iw/ih = cw/ch
+        // ih = iw*ch/cw
+        image.onload = () => {
+          let widthScale = canvasWidth.value / image.width;
+          let heightScale = canvasHeight.value / image.height;
+          let width = heightScale > 1 ? image.width : image.width * widthScale;
+          let height =
+            heightScale > 1 ? image.height : image.height * widthScale;
+          console.log(width, height);
+          createLayer();
+          store.state.canvasModule.canvasCtx.drawImage(
+            image,
+            0,
+            0,
+            width,
+            height
+          );
+          mergeCanvas();
+        };
+
+        image.src = result;
+      };
+
+      fileReader.readAsDataURL(files[0]);
+    }
+    function modeChange(modeValue: string) {
+      mode.value = modeValue;
+      if (modeValue === "import") {
+        nextTick(() => {
+          (importImage.value as Element).addEventListener(
+            "change",
+            handleUpload
+          );
+        });
+      }
+    }
     return {
       redo,
       undo,
@@ -248,7 +333,9 @@ export default {
       gifScale,
       sclaeOptions,
       handleCLickCreate,
-      handleClickFile
+      handleClickFile,
+      importImage,
+      modeChange
     };
   }
 };
@@ -262,6 +349,9 @@ export default {
 }
 .dis-flex {
   display: flex;
+}
+.dis-none {
+  display: none;
 }
 .operators {
   height: 100%;

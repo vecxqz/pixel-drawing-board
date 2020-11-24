@@ -14,7 +14,7 @@ const module: Module<CanvasState, any> = {
     currentLayerIndex: 0,
     currentRowIndex: 0,
     currentColumnIndex: 0,
-    pages: [] as any,
+    pages: [] as Array<page>,
     width: 32,
     height: 32,
     canvasMetaHeight: 0,
