@@ -53,7 +53,8 @@ export function useCanvas() {
   }
 
   function parseBackground(canvasCtx: CanvasRenderingContext2D) {
-    const { width, height, size } = store.state.canvasModule;
+    const { width, height } = store.state.canvasModule;
+    const size = 1;
     const layer: layer = initLayer(width, height, size);
     for (let i = 0; i < layer.length; i++)
       for (let j = 0; j < layer[i].length; j++) {
