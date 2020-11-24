@@ -2,7 +2,7 @@
   <div class="login-box">
     <div id="mask"></div>
     <div class="login-container">
-      <div>登录</div>
+      <div v-op="'login'">登录</div>
       <el-form :model="form" ref="formRef" :rules="rules">
         <el-form-item label="账号" prop="username">
           <el-input v-model="form.username" placeholder="你的账号"></el-input>

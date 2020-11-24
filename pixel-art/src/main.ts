@@ -5,6 +5,7 @@ import store, { storeTypeKey } from "./store";
 import { provideStore } from "./composables/useStore";
 import "element-plus/lib/theme-chalk/index.css";
 import ElementPlus from "element-plus";
+import op from "./directives/op";
 // import installElementPlus from "./plugins/element.js";
 
 const app = createApp({
@@ -15,6 +16,7 @@ const app = createApp({
 });
 
 // installElementPlus(app);
+app.directive("op", op);
 
 app
   .use(store, storeTypeKey)
