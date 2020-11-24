@@ -120,8 +120,10 @@ ul {
   border: 2px solid rgba(122, 139, 235, 0.315);
 }
 .image-preview {
-  height: fit-content;
+  min-width: 100px;
   max-width: 100%;
+  max-height: 200px;
+  background-color: #fff;
   image-rendering: pixelated;
 }
 .attribute-box {

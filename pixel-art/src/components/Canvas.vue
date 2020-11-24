@@ -1,19 +1,13 @@
 <template>
   <div
     id="canvas"
+    ref="canvasBox"
     :element-loading-text="loadingText"
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)"
     v-loading.fullscreen.lock="loadingFin"
   >
-    <div
-      id="canvas-container"
-      class="pos-relative"
-      :style="
-        `width:${canvasMeta.width * scale}px;
-        height:${canvasMeta.height * scale}px`
-      "
-    >
+    <div id="canvas-container" class="pos-relative" :style="cnavasStyle">
       <canvas
         class="pos-absoulte pe-none layer-select"
         ref="selectcanvas"
@@ -155,6 +149,7 @@ export default {
     const { choose: choosePage } = usePage();
     const { loadLocal, loadServer, setCanvasSizeData } = useFile();
     const canvas = ref(undefined);
+    const canvasBox = ref(undefined as unknown);
     const selectcanvas = ref(undefined);
     const layerShandowCanvas = ref(undefined);
     const backgroundCanvas = ref(undefined);
@@ -163,6 +158,7 @@ export default {
     const tempCanvas = ref(undefined);
     const imageData = ref(undefined as ImageData | undefined);
     const loadingFin = ref(true);
+    const posStyle = ref({ top: "50%", transform: "translateY(-50%)" });
     const loadingText = ref("正在创建工程，请稍等");
     // const isboundary = ref(false);
     const boundaryMeta = reactive({
@@ -180,6 +176,12 @@ export default {
       height: store.state.canvasModule.canvasMetaHeight
     }));
     const scale = computed(() => store.state.canvasModule.scale);
+    const cnavasStyle = computed(() => ({
+      top: posStyle.value.top,
+      transform: posStyle.value.transform,
+      width: `${canvasMeta.value.width * scale.value}px`,
+      height: `${canvasMeta.value.height * scale.value}px`
+    }));
     watch(
       () => store.state.canvasModule.mode,
       (newVal, oldVal) => {
@@ -259,6 +261,15 @@ export default {
         if (deltaY < 0 && store.state.canvasModule.scale < 8) {
           store.state.canvasModule.scale = store.state.canvasModule.scale * 2;
           store.state.canvasModule.size = store.state.canvasModule.size * 2;
+        }
+        const { clientHeight } = canvasBox.value as Element;
+        if (clientHeight < canvasMeta.value.width * scale.value) {
+          posStyle.value = {
+            top: "0",
+            transform: "translateY(0)"
+          };
+        } else {
+          posStyle.value = { top: "50%", transform: "translateY(-50%)" };
         }
         e.preventDefault();
       });
@@ -525,9 +536,10 @@ export default {
       belowCanvas,
       tempCanvas,
       imageData,
-      canvasMeta,
       loadingFin,
-      loadingText
+      loadingText,
+      canvasBox,
+      cnavasStyle
     };
   }
 };

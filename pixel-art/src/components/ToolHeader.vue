@@ -272,10 +272,13 @@ export default {
     function handleClickFile() {
       dialogVisible.value = true;
     }
-    function handleUpload(e: any) {
-      const files = e.target.files;
-      const fileReader = new FileReader();
+    function handleUpload(inputChangeEvent: any) {
+      const input = inputChangeEvent.target;
+      const files = input.files;
+      const { length } = files;
 
+      if (length < 0) return;
+      const fileReader = new FileReader();
       fileReader.onload = (e: any) => {
         const { result } = e.target;
 
@@ -285,19 +288,27 @@ export default {
         image.onload = () => {
           let widthScale = canvasWidth.value / image.width;
           let heightScale = canvasHeight.value / image.height;
-          let width = heightScale > 1 ? image.width : image.width * widthScale;
-          let height =
-            heightScale > 1 ? image.height : image.height * widthScale;
-          console.log(width, height);
+          let whScale = image.width / image.height;
           createLayer();
-          store.state.canvasModule.canvasCtx.drawImage(
-            image,
-            0,
-            0,
-            width,
-            height
-          );
+          if (widthScale > 1 || heightScale > 1) {
+            store.state.canvasModule.canvasCtx.drawImage(image, 0, 0);
+          } else {
+            let width = widthScale > 1 ? image.width : image.width * widthScale;
+            let height =
+              heightScale > 1
+                ? image.height
+                : (image.height * heightScale) / whScale;
+            console.log(width, height);
+            store.state.canvasModule.canvasCtx.drawImage(
+              image,
+              0,
+              0,
+              width,
+              height
+            );
+          }
           mergeCanvas();
+          input.value = "";
         };
 
         image.src = result;

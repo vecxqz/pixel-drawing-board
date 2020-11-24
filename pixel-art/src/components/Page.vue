@@ -206,8 +206,10 @@ export default {
   align-items: center;
 }
 .page-preview-image {
-  height: fit-content;
+  min-width: 90px;
   max-width: 100%;
+  max-height: 200px;
+  background-color: #fff;
   image-rendering: pixelated;
 }
 .preview-page {
