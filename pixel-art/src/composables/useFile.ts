@@ -15,6 +15,7 @@ import {
 } from "../utils/request/canvas";
 import cloneDeep from "lodash/cloneDeep";
 import { get } from "js-cookie";
+import { Message } from "element-plus/lib/message";
 
 export function useFile() {
   const router = useRouter();
@@ -69,11 +70,13 @@ export function useFile() {
       }
     }
     const token = get("token");
+    let result;
     if (token) {
-      saveServer();
+      result = await saveServer();
     } else {
-      saveLocal();
+      result = await saveLocal();
     }
+    return result;
   }
 
   async function saveServer() {
@@ -122,8 +125,8 @@ export function useFile() {
         pagesClone[i].layers[li].imageData = null;
       }
     }
-    setCanvasData(formData);
-    setPagesData({
+    const resultCanvas = await setCanvasData(formData);
+    const resultPages = await setPagesData({
       canvasId: guid,
       data: {
         title: "untitled",
@@ -132,6 +135,11 @@ export function useFile() {
         pages: pagesClone
       }
     });
+    Message({
+      type: "success",
+      message: "保存成功"
+    });
+    return true;
   }
 
   function setCanvasSizeData() {
@@ -195,6 +203,7 @@ export function useFile() {
   function saveLocal() {
     const { pages } = store.state.canvasModule;
     localStorage.setItem("pages", JSON.stringify(pages));
+    return true;
   }
 
   // https://stackoverflow.com/questions/55620592/react-node-trouble-sending-imagedata-to-server
@@ -268,7 +277,7 @@ export function useFile() {
       targetImageData.data[i] = data[i];
     }
   }
-  
+
   return {
     save,
     loadLocal,

@@ -11,7 +11,12 @@
       <!-- <li class="operator-item">全屏</li> -->
     </ul>
 
-    <el-dialog :title="title" width="800px" v-model="dialogVisible">
+    <el-dialog
+      @close="resetDialogStatus"
+      :title="title"
+      width="800px"
+      v-model="dialogVisible"
+    >
       <template v-slot:default>
         <el-container>
           <el-aside class="aside">
@@ -99,14 +104,16 @@
                 <div>尺寸</div>
                 <div>
                   <el-select
-                    style="z-index:9999"
                     v-model="layerScale"
                     placeholder="请选择下载图片比例"
                   >
                     <el-option
                       v-for="item in sclaeOptions"
                       :key="item.value"
-                      :label="item.label"
+                      :label="
+                        `${item.label * canvasWidth}px * ${item.label *
+                          canvasHeight}px`
+                      "
                       :value="item.value"
                     >
                     </el-option>
@@ -122,14 +129,16 @@
                 <div>尺寸</div>
                 <div>
                   <el-select
-                    style="z-index:9999"
                     v-model="gifScale"
                     placeholder="请选择下载图片比例"
                   >
                     <el-option
                       v-for="item in sclaeOptions"
                       :key="item.value"
-                      :label="item.label"
+                      :label="
+                        `${item.label * canvasWidth}px * ${item.label *
+                          canvasHeight}px`
+                      "
                       :value="item.value"
                     >
                     </el-option>
@@ -250,26 +259,33 @@ export default {
       toUndoStack({ ...data, type: TYPE.LAYER_CREATE }, true);
     }
 
-    function handleClickSave() {
-      save();
-      dialogVisible.value = false;
+    async function handleClickSave() {
+      const result = await save();
+      if (result) {
+        dialogVisible.value = false;
+      }
     }
+
     function handleCLickCreate() {
       reset({ width: canvasMeta.width, height: canvasMeta.height });
       dialogVisible.value = false;
     }
+
     function handleCLickReset() {
       const { width, height } = store.state.canvasModule;
       reset({ width, height });
       dialogVisible.value = false;
     }
+
     function usePreset(width: number, height: number) {
       canvasMeta.width = width;
       canvasMeta.height = height;
     }
+
     function handleClickFile() {
       dialogVisible.value = true;
     }
+
     function handleUpload(inputChangeEvent: any) {
       const input = inputChangeEvent.target;
       const files = input.files;
@@ -288,7 +304,7 @@ export default {
           let heightScale = canvasHeight.value / image.height;
           let whScale = image.width / image.height;
           createLayer();
-          if (widthScale > 1 || heightScale > 1) {
+          if (widthScale >= 1 || heightScale >= 1) {
             store.state.canvasModule.canvasCtx.drawImage(image, 0, 0);
           } else {
             let width = widthScale > 1 ? image.width : image.width * widthScale;
@@ -314,6 +330,7 @@ export default {
 
       fileReader.readAsDataURL(files[0]);
     }
+
     function modeChange(modeValue: string) {
       mode.value = modeValue;
       if (modeValue === "import") {
@@ -325,6 +342,13 @@ export default {
         });
       }
     }
+
+    function resetDialogStatus() {
+      mode.value = "file";
+      layerScale.value = 1;
+      gifScale.value = 1;
+    }
+
     return {
       redo,
       undo,
@@ -344,7 +368,10 @@ export default {
       handleCLickCreate,
       handleClickFile,
       importImage,
-      modeChange
+      modeChange,
+      resetDialogStatus,
+      canvasWidth,
+      canvasHeight
     };
   }
 };
@@ -455,5 +482,11 @@ export default {
       }
     }
   }
+}
+</style>
+
+<style lang="scss">
+.el-popper {
+  z-index: 99999;
 }
 </style>
