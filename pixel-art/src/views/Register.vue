@@ -127,7 +127,7 @@ export default {
     cursor: pointer;
   }
 }
-::v-deep .el-input__inner {
+::v-deep(.el-input__inner) {
   width: 220px;
   padding: 0 0 0 10px;
   outline: none;

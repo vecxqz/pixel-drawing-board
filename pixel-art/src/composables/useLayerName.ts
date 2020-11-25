@@ -7,6 +7,7 @@ export function useLayerName() {
   const renameIndex = ref(-1);
   const renameElement = ref(null);
   const tempName = ref("");
+
   function changeLayerName(event: any) {
     const { currentPageIndex } = store.state.canvasModule;
     if (
@@ -18,6 +19,7 @@ export function useLayerName() {
       ].layerName = event.target.value;
     }
   }
+
   function rename(index: number) {
     console.log("rename", index);
     renameIndex.value = index;
@@ -27,11 +29,13 @@ export function useLayerName() {
       }
     });
   }
+
   function blurInput() {
     if (renameElement.value) {
       (renameElement.value as any).blur();
     }
   }
+  
   function renameStart() {
     console.log(renameIndex.value);
     const { currentPageIndex } = store.state.canvasModule;
@@ -40,6 +44,7 @@ export function useLayerName() {
         renameIndex.value
       ].layerName;
   }
+
   function renameFinish() {
     const { currentPageIndex, currentLayerIndex } = store.state.canvasModule;
     const fininaName =
@@ -63,6 +68,7 @@ export function useLayerName() {
     }
     renameIndex.value = -1;
   }
+  
   return {
     changeLayerName,
     renameStart,

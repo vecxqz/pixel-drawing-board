@@ -64,6 +64,7 @@ export function useLayer() {
     chooseLayer(index);
     return { currentPageIndex, currentLayerIndex: index };
   }
+
   function createLayerByData(data: any) {
     const { currentPageIndex, currentLayerIndex, currentLayerData } = data;
     // console.log(currentLayerData);
@@ -79,6 +80,7 @@ export function useLayer() {
       currentLayerIndex
     };
   }
+
   function up(index: number) {
     if (currentLayerIndex.value !== layers.value.length - 1) {
       const { currentPageIndex } = store.state.canvasModule;
@@ -107,6 +109,7 @@ export function useLayer() {
       };
     }
   }
+
   function down(index: number) {
     if (currentLayerIndex.value !== 0) {
       // 此处先把要交换的下层canvas imagedata取出，并绘制到当前画布
@@ -183,6 +186,7 @@ export function useLayer() {
       };
     }
   }
+
   function deleteLayer(index: number) {
     const { currentPageIndex } = store.state.canvasModule;
     const length =
@@ -235,6 +239,7 @@ export function useLayer() {
     setPreview();
     return deleteData;
   }
+
   function mergeUp(index: number) {
     if (index === layers.value.length - 1) {
       return;
@@ -281,6 +286,7 @@ export function useLayer() {
     deleteLayer(index);
     return mergeUpData;
   }
+
   function mergeDown(index: number) {
     if (index === 0) {
       return;
@@ -329,6 +335,7 @@ export function useLayer() {
     deleteLayer(index);
     return mergeDownData;
   }
+
   function copy(index: number) {
     const { currentPageIndex, width, height } = store.state.canvasModule;
     let newLayerData = clone(
@@ -387,6 +394,7 @@ export function useLayer() {
       shadowCanvasCtx.value
     );
   }
+  
   return {
     create,
     up,

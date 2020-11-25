@@ -160,6 +160,7 @@ export default {
           chooseHues(e);
         });
     });
+
     function chooseSat(e: MouseEvent) {
       const satDom = areaSat.value;
       const { clientX, clientY } = e;
@@ -198,6 +199,7 @@ export default {
       newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
       context.emit("update:emitColor", newColor.value);
     }
+
     function chooseHues(e: MouseEvent) {
       const huesDom = areaHues.value;
       const { clientY } = e;
@@ -231,9 +233,11 @@ export default {
         .slice(1);
       context.emit("update:emitColor", newColor.value);
     }
+
     function popupHide() {
       context.emit("update:visible", false);
     }
+
     function calcSatCursorPos(color: string) {
       const c = Color(color);
       const hsv = c.hsv().color;
@@ -246,6 +250,7 @@ export default {
         left: `${satCursorLeft - 5}px`
       };
     }
+
     function setBoardView(color: string, { ingoreHex } = { ingoreHex: false }) {
       const c = Color(color);
       const [r, g, b] = c.color;
@@ -268,6 +273,7 @@ export default {
       value.value = Math.round(v);
       if (!ingoreHex) colorHex.value = c.hex().slice(1);
     }
+
     function calcHuesCursorPos(color: string) {
       const c = Color(color);
       const [h] = c.hsv().color;
@@ -276,6 +282,7 @@ export default {
         top: `${hueCursorTop - 4}px`
       };
     }
+
     function rgbInputFilter(e: any, mode: string) {
       let value = e.target.value;
       if (value.length > 3) {
@@ -292,6 +299,7 @@ export default {
       const { r, g, b } = rgbMeta;
       setBoardView(`rgb(${r}, ${g}, ${b})`);
     }
+
     function hsvInputFilter(e: any, mode: string) {
       let inputValue = e.target.value;
       if (inputValue.length > 3) {
@@ -335,6 +343,7 @@ export default {
       rgbMeta.b = Math.round(b);
       setBoardView(`rgb(${r}, ${g}, ${b})`);
     }
+
     function hexInputFilter(e: any) {
       let inputValue = e.target.value;
       let r, g, b;
@@ -352,6 +361,7 @@ export default {
         (r = 0), (g = 0), (b = 0);
       }
     }
+
     return {
       color,
       chooseSat,
@@ -473,9 +483,6 @@ export default {
 }
 .cursor-hues {
   position: absolute;
-  // width: 15px;
-  // height: 10px;
-  // border: 1px solid black;
   z-index: 1;
   cursor: pointer;
   pointer-events: none;

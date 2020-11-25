@@ -37,6 +37,7 @@ export function useMousePosition() {
       store.state.canvasModule.eventPoint.endPoint.e.offsetY / size.value
     )
   );
+
   function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
@@ -46,6 +47,7 @@ export function useMousePosition() {
       y: rowIndex
     });
   }
+
   function mouseMove(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
@@ -55,6 +57,7 @@ export function useMousePosition() {
       y: rowIndex
     });
   }
+  
   function mouseUp(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);

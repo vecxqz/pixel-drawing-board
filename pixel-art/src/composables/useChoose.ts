@@ -31,6 +31,7 @@ export function useChoose() {
     }
     return [];
   });
+
   function chooseLayer(index: number) {
     const {
       width,
@@ -74,6 +75,7 @@ export function useChoose() {
     }
     tempCanvasCtx.value.clearRect(0, 0, width, height);
   }
+  
   return {
     chooseLayer
   };

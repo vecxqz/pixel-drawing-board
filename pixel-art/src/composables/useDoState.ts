@@ -20,7 +20,7 @@ export function useDoState() {
     LAYER_DOWN = "LAYER_DOWN", // 下移层
     LAYER_MERGE_UP = "LAYER_MERGE_UP", // 向上合并层
     LAYER_MERGE_DOWN = "LAYER_MERGE_DOWN", // 向下合并层
-    LAYER_MERGE_CANCEL = "LAYER_MERGE_CANCEL" // 取消合并图层
+    LAYER_MERGE_CANCEL = "LAYER_MERGE_CANCEL", // 取消合并图层
   }
   const {
     deleteLayer,
@@ -43,12 +43,15 @@ export function useDoState() {
   function clearRedoStack() {
     store.state.canvasModule.redo = [];
   }
+
   function clearUndoStack() {
     store.state.canvasModule.undo = [];
   }
+
   function toRedoStack(redoData: any) {
     store.state.canvasModule.redo.push(redoData);
   }
+
   function redo() {
     console.log("redo");
     const redoData = store.state.canvasModule.redo.pop();
@@ -58,12 +61,14 @@ export function useDoState() {
       toUndoStack(undoData);
     }
   }
+
   function toUndoStack(undoData: any, clearFlag = false) {
     store.state.canvasModule.undo.push(undoData);
     if (clearFlag) {
       store.state.canvasModule.redo = [];
     }
   }
+
   function undo() {
     const undoData = store.state.canvasModule.undo.pop();
     if (undoData) {
@@ -71,6 +76,7 @@ export function useDoState() {
       toRedoStack(redoData);
     }
   }
+
   function LAYER_DATA_CHANGE(data: any) {
     const {
       currentLayerIndex,
@@ -180,6 +186,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function LAYER_MERGE_UP(data: any) {
     const { currentLayerData, curretOtherLayerData } = data;
     // console.log(currentLayerData, curretOtherLayerData);
@@ -194,6 +201,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function LAYER_MERGE_DOWN(data: any) {
     const { currentLayerData, curretOtherLayerData } = data;
     createLayerByData(currentLayerData);
@@ -207,6 +215,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function LAYER_MERGE_CANCEL(data: any) {
     const { currentLayerData, curretOtherLayerData } = data;
     let previousData = {};
@@ -228,6 +237,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function PAGE_CREATE(data: any) {
     const { currentPageIndex: deleteIndex } = data;
     const { currentPageIndex, currentPageData } = deletePage(
@@ -240,6 +250,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function PAGE_DELETE(data: any) {
     console.log(data);
     const { currentPageIndex } = createPageByData(data);
@@ -249,6 +260,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function PAGE_COPY(data: any) {
     const { currentPageIndex: deleteIndex } = data;
     console.log(deleteIndex);
@@ -262,6 +274,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function PAGE_TO_LEFT(data: any) {
     const { currentPageIndex: moveIndex } = data;
     const { currentPageIndex } = move(moveIndex, "right") as any;
@@ -271,6 +284,7 @@ export function useDoState() {
     };
     return previousData;
   }
+
   function PAGE_TO_RIGHT(data: any) {
     const { currentPageIndex: moveIndex } = data;
     const { currentPageIndex } = move(moveIndex, "left") as any;
@@ -280,6 +294,9 @@ export function useDoState() {
     };
     return previousData;
   }
+
+  function RESET_PROJECT(data: any) {}
+
   function getFunction(TYPE: string) {
     const functionData: { [key: string]: Function } = {
       LAYER_DATA_CHANGE: LAYER_DATA_CHANGE,
@@ -300,6 +317,7 @@ export function useDoState() {
     };
     return functionData[TYPE];
   }
+
   return {
     toRedoStack,
     toUndoStack,

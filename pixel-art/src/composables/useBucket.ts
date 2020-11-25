@@ -18,6 +18,7 @@ export function useBucket() {
   const height = computed(() => {
     return store.state.canvasModule.height;
   });
+
   function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
@@ -56,12 +57,15 @@ export function useBucket() {
       // );
     }
   }
+
   function mouseMove() {
     console.log("bucket mouse move");
   }
+
   function mouseUp() {
     console.log("bucket mouse up");
   }
+  
   return {
     mouseDown,
     mouseMove,

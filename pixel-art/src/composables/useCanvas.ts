@@ -1,4 +1,3 @@
-import { computed, toRaw } from "vue";
 import { useWrapStore } from "../store/index";
 import { initLayer, initGrid } from "../utils/canvas";
 
@@ -27,6 +26,7 @@ export function useCanvas() {
       rgb: `rgb(${r}, ${g}, ${b})`
     };
   }
+
   function RGBAToHexA(argR: number, argG: number, argB: number, argA: number) {
     let r: string = argR.toString(16),
       g: string = argG.toString(16),
@@ -40,6 +40,7 @@ export function useCanvas() {
 
     return "#" + r + g + b + a;
   }
+
   function RGBToHex(argR: number, argG: number, argB: number) {
     let r: string = argR.toString(16),
       g: string = argG.toString(16),
@@ -63,5 +64,6 @@ export function useCanvas() {
         initGrid(canvasCtx, layer, i, j, backgroundColor);
       }
   }
+
   return { calcColor, parseBackground };
 }

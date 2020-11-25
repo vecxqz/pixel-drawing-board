@@ -1,4 +1,3 @@
-import { drawGrid } from "../utils/canvas";
 import { computed } from "vue";
 import { useWrapStore } from "../store/index";
 import { useCanvas } from "./useCanvas";
@@ -41,6 +40,7 @@ export function useColorPicker() {
     store.state.canvasModule.primaryColor = color;
     // store.dispatch("canvasModule/SET_COLOR", color);
   }
+
   function mouseUp(e: MouseEvent) {
     const imageData = canvasCtx.value.getImageData(
       0,

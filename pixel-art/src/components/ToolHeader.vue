@@ -7,7 +7,7 @@
       <li class="operator-item" @click="undo">撤销</li>
       <li class="operator-item" @click="redo">还原</li>
       <li class="operator-item" @click="handleClickSave">保存画布</li>
-      <li class="operator-item" @click="handleCLickReset">清除画布</li>
+      <li class="operator-item" @click="handleCLickReset">重置画布</li>
       <!-- <li class="operator-item">全屏</li> -->
     </ul>
 
@@ -96,61 +96,59 @@
             </div>
             <div v-if="mode === 'download'" :class="`mode-${mode}`">
               <div class="download-line">
-                <el-row :gutter="20">
-                  <el-col :span="6"><div>尺寸</div> </el-col>
-                  <el-col :span="6"
-                    ><el-select
-                      style="z-index:9999"
-                      v-model="layerScale"
-                      placeholder="请选择下载图片比例"
-                    >
-                      <el-option
-                        v-for="item in sclaeOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      >
-                      </el-option> </el-select
-                  ></el-col>
-                  <el-col :span="6"
-                    ><el-button
-                      type="primary"
-                      @click="downloadImage(layerScale)"
-                      >下载</el-button
-                    ></el-col
+                <div>尺寸</div>
+                <div>
+                  <el-select
+                    style="z-index:9999"
+                    v-model="layerScale"
+                    placeholder="请选择下载图片比例"
                   >
-                </el-row>
+                    <el-option
+                      v-for="item in sclaeOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    >
+                    </el-option>
+                  </el-select>
+                </div>
+                <div>
+                  <el-button type="primary" @click="downloadImage(layerScale)"
+                    >下载</el-button
+                  >
+                </div>
               </div>
               <div class="download-line">
-                <el-row :gutter="20">
-                  <el-col :span="6"><div>尺寸</div> </el-col>
-                  <el-col :span="6">
-                    <el-select
-                      style="z-index:9999"
-                      v-model="gifScale"
-                      placeholder="请选择下载图片比例"
+                <div>尺寸</div>
+                <div>
+                  <el-select
+                    style="z-index:9999"
+                    v-model="gifScale"
+                    placeholder="请选择下载图片比例"
+                  >
+                    <el-option
+                      v-for="item in sclaeOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
                     >
-                      <el-option
-                        v-for="item in sclaeOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      >
-                      </el-option>
-                    </el-select>
-                  </el-col>
-                  <el-col :span="6">
-                    <el-button
-                      type="primary"
-                      @click="downloadImageGIF(gifScale)"
-                      >下载GIF</el-button
-                    >
-                  </el-col>
-                </el-row>
+                    </el-option>
+                  </el-select>
+                </div>
+                <div>
+                  <el-button type="primary" @click="downloadImageGIF(gifScale)"
+                    >下载GIF</el-button
+                  >
+                </div>
               </div>
             </div>
             <div v-if="mode === 'import'" :class="`mode-${mode}`">
-              <el-button @click="importImage.click()">导入图片</el-button>
+              <el-button
+                class="btn-import"
+                type="primary"
+                @click="importImage.click()"
+                >导入图片</el-button
+              >
               <input
                 class="dis-none"
                 type="file"
@@ -438,11 +436,29 @@ export default {
   .btn-save {
     width: 100%;
   }
+  .btn-import {
+    width: 100%;
+  }
   ::v-deep(.el-input-number) {
     width: 100%;
   }
   .download-line {
+    display: flex;
+    align-items: center;
     margin: 10px 0;
+    > div {
+      &:nth-of-type(1) {
+        flex-shrink: 1;
+        margin-right: 20px;
+      }
+      &:nth-of-type(2) {
+        flex-shrink: 1;
+      }
+      &:nth-of-type(3) {
+        flex-shrink: 1;
+        margin-left: 20px;
+      }
+    }
   }
 }
 </style>

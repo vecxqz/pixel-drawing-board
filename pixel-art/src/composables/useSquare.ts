@@ -14,6 +14,7 @@ export function useSquare() {
   function mouseDown(e: MouseEvent) {
     console.log("square mouseDown");
   }
+  
   // 拖拽时绘制矩形
   function mouseMove(e: MouseEvent) {
     drawSquare(
@@ -31,6 +32,7 @@ export function useSquare() {
       }
     );
   }
+
   // 鼠标松开时，把矩形绘制，并修改数据
   function mouseUp(e: MouseEvent) {
     drawSquare(

@@ -33,6 +33,7 @@ export function useDownload() {
     tempCanvasCtx.value.canvas.height = height;
     return url;
   }
+
   function getDownloadImageBlob(scale = 5) {
     // console.log(tempCanvasCtx.value);
     const { pages } = store.state.canvasModule;
@@ -53,6 +54,7 @@ export function useDownload() {
     tempCanvasCtx.value.canvas.height = height;
     return fetch(url).then(res => res.blob());
   }
+
   function getImage(imageData: ImageData, scale: number) {
     const { width, height } = tempCanvasCtx.value.canvas;
     tempCanvasCtx.value.clearRect(0, 0, width, height);
@@ -65,12 +67,7 @@ export function useDownload() {
     tempCanvasCtx.value.canvas.height = height * scale;
     tempCanvasCtx.value.putImageData(scaleImageDataResult, 0, 0);
     const url = tempCanvasCtx.value.canvas.toDataURL("image/png", 1);
-    const img = document.createElement("img");
-    document.body.appendChild(img);
-    img.style.position = "fixed";
-    img.style.left = "0";
-    img.style.top = "0";
-    img.style.zIndex = "-99";
+    const img = new Image();
     img.src = url;
     tempCanvasCtx.value.canvas.width = width;
     tempCanvasCtx.value.canvas.height = height;
@@ -80,6 +77,7 @@ export function useDownload() {
       };
     });
   }
+
   /* https://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas */
   function scaleImageData(
     imageData: ImageData,
@@ -113,11 +111,13 @@ export function useDownload() {
 
     return scaled;
   }
+
   function downloadImage(scale = 5) {
     getDownloadImageBlob(scale).then(blob => {
       createDownload(`image${Math.random() * 100}.png`, blob);
     });
   }
+
   // https://github.com/jnordberg/gif.js/issues/115
   function downloadImageGIF(scale = 5) {
     var gif = new GIF({
@@ -136,13 +136,13 @@ export function useDownload() {
     Promise.all(imgs).then(imgs => {
       imgs.forEach(img => gif.addFrame(img, { delay: animationSpeed.value }));
       gif.render();
-      // imgs.forEach((img: any) => document.body.removeChild(img));
     });
     gif.on("finished", function(blob: any) {
       // window.open(URL.createObjectURL(blob));
       createDownload(`image${Math.random() * 100}.gif`, blob);
     });
   }
+
   function createDownload(fileName: string, blob: any) {
     const aTag = document.createElement("a");
     aTag.download = fileName;
@@ -151,6 +151,7 @@ export function useDownload() {
     aTag.click();
     URL.revokeObjectURL(blob);
   }
+
   return {
     downloadImage,
     getDownloadImageBlob,

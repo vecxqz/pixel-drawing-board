@@ -70,18 +70,7 @@ function parseLayer(canvas: HTMLCanvasElement, layerMeta: layer): void {
     }
   }
 }
-function drawGrid(
-  canvasCtx: CanvasRenderingContext2D,
-  layerMeta: layer,
-  columnIndex: number,
-  rowIndex: number,
-  color: string
-): void {
-  const { x, y, size } = layerMeta[columnIndex][rowIndex];
-  canvasCtx.fillStyle = color;
-  // console.log(color, x, y, size, size);
-  canvasCtx.fillRect(x, y, size, size);
-}
+
 function drawGridB(
   canvasCtx: CanvasRenderingContext2D,
   {
@@ -99,15 +88,7 @@ function drawGridB(
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(columnIndex, rowIndex, size, size);
 }
-function clearGrid(
-  canvasCtx: CanvasRenderingContext2D,
-  layerMeta: layer,
-  columnIndex: number,
-  rowIndex: number
-): void {
-  const { x, y, size } = layerMeta[columnIndex][rowIndex];
-  canvasCtx.clearRect(x, y, size, size);
-}
+
 function clearGridB(
   canvasCtx: CanvasRenderingContext2D,
   {
@@ -132,6 +113,7 @@ function clearGridB(
   canvasCtx.putImageData(imageData, 0, 0);
   // canvasCtx.clearRect(columnIndex, rowIndex, size, size);
 }
+
 function initGrid(
   canvasCtx: CanvasRenderingContext2D,
   layerMeta: layer,
@@ -143,6 +125,7 @@ function initGrid(
   canvasCtx.fillStyle = color;
   canvasCtx.fillRect(x, y, size, size);
 }
+
 function bresenhamLine(
   x1: number,
   y1: number,
@@ -263,6 +246,7 @@ function drawGridGroup(
   canvasCtx.fillRect(x, y, size * (maxX - minX + 1), size * (maxY - minY + 1));
   canvasCtx.globalAlpha = 1;
 }
+
 function drawSelectArea(
   canvasCtx: CanvasRenderingContext2D,
   selectCanvasCtx: CanvasRenderingContext2D,
@@ -345,14 +329,12 @@ function drawSquare(
 export {
   initLayer,
   parseLayer,
-  drawGrid,
   initGrid,
   bresenhamLine,
   bresenhamLineCircle,
   drawGridGroup,
   drawSelectArea,
   drawSquare,
-  clearGrid,
   drawGridB,
   clearGridB
 };

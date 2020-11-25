@@ -24,6 +24,7 @@ export function useMove() {
     );
     // console.log(startX.value, startY.value);
   }
+
   function mouseMove(e: MouseEvent) {
     // console.log(endX.value, endY.value);
     // console.log(endX.value - startX.value, endY.value - startY.value);
@@ -33,6 +34,7 @@ export function useMove() {
     canvasCtx.value.clearRect(0, 0, width.value, height.value);
     canvasCtx.value.putImageData(imageData as ImageData, diffX, diffY);
   }
+  
   function mouseUp(e: MouseEvent) {
     // console.log(endX.value - startX.value, endY.value - startY.value);
     const diffX = endX.value - startX.value;

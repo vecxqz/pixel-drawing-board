@@ -15,6 +15,7 @@ export function useCircle() {
   function mouseDown(e: MouseEvent) {
     console.log("circle mouseDown");
   }
+
   // 拖拽时绘制圆形
   function mouseMove(e: MouseEvent) {
     // 防止圆贴着圆心形成的直角坐标系的边飘逸
@@ -52,6 +53,7 @@ export function useCircle() {
       }
     );
   }
+  
   // 鼠标松开时，把矩形绘制，并修改数据
   function mouseUp(e: MouseEvent) {
     // 防止圆贴着圆心形成的直角坐标系的边飘逸

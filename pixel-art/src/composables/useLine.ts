@@ -14,6 +14,7 @@ export function useLine() {
   function mouseDown(e: MouseEvent) {
     console.log("line mouse move");
   }
+
   function mouseMove(e: MouseEvent) {
     bresenhamLine(
       startX.value,
@@ -30,6 +31,7 @@ export function useLine() {
       }
     );
   }
+  
   function mouseUp(e: MouseEvent) {
     console.log(startX.value, startY.value, endX.value, endY.value);
     bresenhamLine(

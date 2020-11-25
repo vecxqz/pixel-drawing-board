@@ -132,21 +132,6 @@ export function useFile() {
         pages: pagesClone
       }
     });
-
-    // fetch("/canvas", {
-    //   method: "POST",
-    //   body: formData
-    // })
-    //   // request as ArrayBuffer
-    //   .then(response => response.arrayBuffer())
-    //   .then(buffer => {
-    //     console.log(buffer);
-    //     // create a new View over our ArrayBuffer
-    //     // const data = new Uint8ClampedArray(buffer);
-    //     // console.log(data);
-    //     // const new_img = new ImageData(data, img.width, img.height);
-    //     // return new_img;
-    //   });
   }
 
   function setCanvasSizeData() {
@@ -181,6 +166,7 @@ export function useFile() {
         store.state.canvasModule.canvasMetaHeight / height;
     }
   }
+
   function reset({ width = 40, height = 40 } = {}) {
     console.log(width, height);
     localStorage.removeItem("pages");
@@ -205,6 +191,7 @@ export function useFile() {
       mergeCanvas();
     });
   }
+
   function saveLocal() {
     const { pages } = store.state.canvasModule;
     localStorage.setItem("pages", JSON.stringify(pages));
@@ -275,11 +262,13 @@ export function useFile() {
     }
     console.log(pages);
   }
+
   function updateimageData(data: any, targetImageData: ImageData) {
     for (let i = 0; i < data.length; i++) {
       targetImageData.data[i] = data[i];
     }
   }
+  
   return {
     save,
     loadLocal,
