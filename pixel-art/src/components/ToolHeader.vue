@@ -48,6 +48,13 @@
             >
               导入图片
             </div>
+            <div
+              :class="{ highlight: mode === 'importPublic' }"
+              class="op-item"
+              @click="modeChange('importPublic')"
+            >
+              导入分享工程
+            </div>
           </el-aside>
           <el-main class="main">
             <div v-if="mode === 'file'" :class="`mode-${mode}`">
@@ -166,6 +173,9 @@
                 id=""
               />
             </div>
+            <div v-if="mode === 'importPublic'" :class="`mode-${mode}`">
+              ...建设中...
+            </div>
           </el-main>
         </el-container>
       </template>
@@ -231,7 +241,8 @@ export default {
           file: "文件",
           download: "下载",
           save: "保存",
-          import: "导入"
+          import: "导入",
+          importPublic: "导入分享工程"
         } as any)[mode.value])
     );
     const canvasWidth = computed(() => store.state.canvasModule.width);
@@ -418,6 +429,9 @@ export default {
 }
 ::v-deep(.el-dialog__body) {
   padding: 0;
+  .el-container {
+    min-height: 350px;
+  }
 }
 .aside {
   max-width: 200px;

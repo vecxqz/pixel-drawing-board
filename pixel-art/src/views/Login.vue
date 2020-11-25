@@ -22,6 +22,9 @@
             >注册</el-button
           >
         </el-form-item>
+        <router-link :to="{ name: 'EntryDrawPixelDetail' }"
+          ><el-button class="btn-demo">体验</el-button></router-link
+        >
       </el-form>
     </div>
   </div>
@@ -128,12 +131,16 @@ export default {
     margin-top: 40px;
   }
   &-login,
-  &-register {
+  &-register,
+  &-demo {
     width: 105px;
     border-radius: 0.3rem;
     box-shadow: 1px 1px 4px 0px #6d6d6d66;
     text-align: center;
     cursor: pointer;
+  }
+  &-demo {
+    width: 100%;
   }
 }
 ::v-deep(.el-input__inner) {
