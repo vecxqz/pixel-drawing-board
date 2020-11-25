@@ -351,11 +351,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#toolHeader {
-  height: 40px;
-  color: #fff;
-  background-color: #333;
-}
 .dis-flex {
   display: flex;
 }

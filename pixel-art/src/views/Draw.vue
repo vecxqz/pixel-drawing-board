@@ -1,11 +1,11 @@
 <template>
-  <ToolHeader />
+  <ToolHeader id="toolHeader" />
   <div class="dis-flex area-mid">
     <ToolBar class="area-tool" />
     <PixleCanvas class="area-canvas" />
     <CanvasAttribute class="area-attribute" />
   </div>
-  <Page class="page" />
+  <Page class="page" id="pagePreview" />
 </template>
 <script>
 import PixleCanvas from "@/components/Canvas.vue";
@@ -47,8 +47,24 @@ export default {
     // display: flex;
   }
 }
+#toolHeader {
+  flex: 0 0 40px;
+  height: 40px;
+  color: #fff;
+  background-color: #333;
+}
 .area-mid {
-  flex: 1;
-  height: calc(100% - 172px);
+  flex: 1 1 auto;
+  height: calc(100% - 180px);
+}
+#pagePreview {
+  display: flex;
+  flex: 0 0 140px;
+  height: 140px;
+  padding: 4px 0 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
+  background-color: #333;
+  color: #fff;
+  font-size: 14px;
 }
 </style>

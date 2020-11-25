@@ -263,7 +263,7 @@ export default {
           store.state.canvasModule.size = store.state.canvasModule.size * 2;
         }
         const { clientHeight } = canvasBox.value as Element;
-        if (clientHeight < canvasMeta.value.width * scale.value) {
+        if (clientHeight < canvasMeta.value.height * scale.value) {
           posStyle.value = {
             top: "0",
             transform: "translateY(0)"
@@ -550,6 +550,40 @@ export default {
   border-top: 1px solid rgba(0, 0, 0, 0.5);
   user-select: none;
   background-color: #141518;
+  // 滚动条整体部分
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  // 滚动条里面的小方块，能向上向下移动（或往左往右移动，取决于是垂直滚动条还是水平滚动条）
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: rgb(209, 205, 205);
+    &:hover {
+      background: rgb(238, 235, 235);
+    }
+  }
+  //  滚动条的轨道（里面装有Thumb）
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    background: #000;
+  }
+  // 滚动条的轨道的两端按钮，允许通过点击微调小方块的位置
+  &::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+  }
+  // 边角，即两个滚动条的交汇处
+  &::-webkit-scrollbar-corner {
+    width: 0;
+    height: 0;
+  }
+  //  内层轨道，滚动条中间部分（除去）
+  // &::-webkit-scrollbar-track-piece{
+
+  // }
 }
 .pe-none {
   pointer-events: none;
