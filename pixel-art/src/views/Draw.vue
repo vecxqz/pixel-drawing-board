@@ -55,7 +55,7 @@ export default {
 }
 .area-mid {
   flex: 1 1 auto;
-  height: calc(100% - 180px);
+  height: calc(100% - 178px);
 }
 #pagePreview {
   display: flex;
