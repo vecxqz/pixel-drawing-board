@@ -506,7 +506,7 @@ export default {
   }
 }
 .color-hex {
-    display: inline-block;
+  display: inline-block;
   span {
     display: inline-block;
     width: 14px;
