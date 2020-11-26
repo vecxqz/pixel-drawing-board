@@ -298,6 +298,8 @@ export default {
       rgbMeta[mode] = value;
       const { r, g, b } = rgbMeta;
       setBoardView(`rgb(${r}, ${g}, ${b})`);
+      newColor.value = `rgb(${r}, ${g}, ${b})`;
+      context.emit("update:emitColor", newColor.value);
     }
 
     function hsvInputFilter(e: any, mode: string) {
@@ -342,6 +344,8 @@ export default {
       rgbMeta.g = Math.round(g);
       rgbMeta.b = Math.round(b);
       setBoardView(`rgb(${r}, ${g}, ${b})`);
+      newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
+      context.emit("update:emitColor", newColor.value);
     }
 
     function hexInputFilter(e: any) {
@@ -357,8 +361,12 @@ export default {
         rgbMeta.g = Math.round(g);
         rgbMeta.b = Math.round(b);
         setBoardView(`rgb(${r}, ${g}, ${b})`, { ingoreHex: true });
+        newColor.value = `rgb(${r}, ${g}, ${b})`;
+        context.emit("update:emitColor", newColor.value);
       } catch (e) {
         (r = 0), (g = 0), (b = 0);
+        newColor.value = `rgb(${r}, ${g}, ${b})`;
+        context.emit("update:emitColor", newColor.value);
       }
     }
 
