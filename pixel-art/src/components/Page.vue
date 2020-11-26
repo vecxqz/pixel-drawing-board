@@ -215,7 +215,7 @@ export default {
   align-items: center;
 }
 .page-preview-image {
-  min-width: 90px;
+  min-width: 80px;
   max-width: 100%;
   max-height: 200px;
   background-color: #fff;
@@ -225,7 +225,15 @@ export default {
   overflow: hidden;
 }
 .highlight {
-  border: 3px solid rgb(230, 250, 49);
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgb(230, 250, 49);
+  }
+  // border: 3px solid rgb(230, 250, 49);
 }
 .preview-title {
   display: flex;
