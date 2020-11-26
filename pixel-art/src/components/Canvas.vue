@@ -134,8 +134,8 @@ export default {
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
-      mouseMove: recordMouseMovePosition
-      // mouseUp: recordMouseUpPosition
+      mouseMove: recordMouseMovePosition,
+      mouseUp: recordMouseUpPosition
     } = useMousePosition();
     const {
       mouseDown: moveMouseDown,
@@ -217,8 +217,8 @@ export default {
       store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas.value);
       // 根据有没有本地数据判断是新建工程还是读取本地工程
       if (guid) {
-        await loadServer();
         loadingText.value = "正在读取工程文件，请稍等";
+        await loadServer();
       } else {
         if (pages === null) {
           store.dispatch("canvasModule/CREATE_PAGE");
@@ -285,7 +285,7 @@ export default {
               takeUntil(
                 mouseUp.pipe(
                   tap(e => {
-                    console.log("mouseUp");
+                    // console.log("mouseUp");
                     handleMouseUp(e as MouseEvent);
                   })
                 )
@@ -360,7 +360,7 @@ export default {
     }
     function imageDataUse() {
       // console.log("imageDataUse");
-      console.log(imageData.value);
+      // console.log(imageData.value);
       if (!isUndefined(imageData.value)) {
         canvasCtx.value.putImageData(imageData.value as ImageData, 0, 0);
       }
@@ -480,6 +480,7 @@ export default {
         store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
         store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       }
+      recordMouseUpPosition(e);
       if (mode === "pencil") {
         imageDataSaveClean();
         pencilMouseUp(e);

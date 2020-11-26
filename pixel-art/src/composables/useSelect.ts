@@ -263,11 +263,16 @@ export function useSelect() {
       canvasCtx.value.fillStyle = tempColor;
     }
   }
-  
+
   function mouseUp(e: MouseEvent) {
     const tempFillStyle = canvasCtx.value.fillStyle;
     // 点击外部区域或是没有绘制才记录
-    if (isClickOutSide.value) {
+    if (
+      isClickOutSide.value &&
+      startX.value !== endX.value &&
+      startY.value !== endY.value
+    ) {
+      console.log(startX.value, endX.value, startY.value, endY.value);
       setSelectArea({
         startX: startX.value,
         startY: startY.value,
