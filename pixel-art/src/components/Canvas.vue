@@ -1,19 +1,13 @@
 <template>
   <div
     id="canvas"
+    ref="canvasBox"
     :element-loading-text="loadingText"
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)"
     v-loading.fullscreen.lock="loadingFin"
   >
-    <div
-      id="canvas-container"
-      class="pos-relative"
-      :style="
-        `width:${canvasMeta.width * scale}px;
-        height:${canvasMeta.height * scale}px`
-      "
-    >
+    <div id="canvas-container" class="pos-relative" :style="cnavasStyle">
       <canvas
         class="pos-absoulte pe-none layer-select"
         ref="selectcanvas"
@@ -140,8 +134,8 @@ export default {
     } = useSelect();
     const {
       mouseDown: recordMouseDownPosition,
-      mouseMove: recordMouseMovePosition
-      // mouseUp: recordMouseUpPosition
+      mouseMove: recordMouseMovePosition,
+      mouseUp: recordMouseUpPosition
     } = useMousePosition();
     const {
       mouseDown: moveMouseDown,
@@ -155,6 +149,7 @@ export default {
     const { choose: choosePage } = usePage();
     const { loadLocal, loadServer, setCanvasSizeData } = useFile();
     const canvas = ref(undefined);
+    const canvasBox = ref(undefined as unknown);
     const selectcanvas = ref(undefined);
     const layerShandowCanvas = ref(undefined);
     const backgroundCanvas = ref(undefined);
@@ -163,6 +158,7 @@ export default {
     const tempCanvas = ref(undefined);
     const imageData = ref(undefined as ImageData | undefined);
     const loadingFin = ref(true);
+    const posStyle = ref({ top: "50%", transform: "translateY(-50%)" });
     const loadingText = ref("正在创建工程，请稍等");
     // const isboundary = ref(false);
     const boundaryMeta = reactive({
@@ -180,6 +176,12 @@ export default {
       height: store.state.canvasModule.canvasMetaHeight
     }));
     const scale = computed(() => store.state.canvasModule.scale);
+    const cnavasStyle = computed(() => ({
+      top: posStyle.value.top,
+      transform: posStyle.value.transform,
+      width: `${canvasMeta.value.width * scale.value}px`,
+      height: `${canvasMeta.value.height * scale.value}px`
+    }));
     watch(
       () => store.state.canvasModule.mode,
       (newVal, oldVal) => {
@@ -215,8 +217,8 @@ export default {
       store.dispatch("canvasModule/SET_TEMP_LAYER_CANVASCTX", tempCanvas.value);
       // 根据有没有本地数据判断是新建工程还是读取本地工程
       if (guid) {
-        await loadServer();
         loadingText.value = "正在读取工程文件，请稍等";
+        await loadServer();
       } else {
         if (pages === null) {
           store.dispatch("canvasModule/CREATE_PAGE");
@@ -260,6 +262,15 @@ export default {
           store.state.canvasModule.scale = store.state.canvasModule.scale * 2;
           store.state.canvasModule.size = store.state.canvasModule.size * 2;
         }
+        const { clientHeight } = canvasBox.value as Element;
+        if (clientHeight < canvasMeta.value.height * scale.value) {
+          posStyle.value = {
+            top: "0",
+            transform: "translateY(0)"
+          };
+        } else {
+          posStyle.value = { top: "50%", transform: "translateY(-50%)" };
+        }
         e.preventDefault();
       });
       mouseDown
@@ -274,7 +285,7 @@ export default {
               takeUntil(
                 mouseUp.pipe(
                   tap(e => {
-                    console.log("mouseUp");
+                    // console.log("mouseUp");
                     handleMouseUp(e as MouseEvent);
                   })
                 )
@@ -349,7 +360,7 @@ export default {
     }
     function imageDataUse() {
       // console.log("imageDataUse");
-      console.log(imageData.value);
+      // console.log(imageData.value);
       if (!isUndefined(imageData.value)) {
         canvasCtx.value.putImageData(imageData.value as ImageData, 0, 0);
       }
@@ -469,6 +480,7 @@ export default {
         store.dispatch("canvasModule/SET_COLUMN_INDEX", columnIndex);
         store.dispatch("canvasModule/SET_ROW_INDEX", rowIndex);
       }
+      recordMouseUpPosition(e);
       if (mode === "pencil") {
         imageDataSaveClean();
         pencilMouseUp(e);
@@ -525,9 +537,10 @@ export default {
       belowCanvas,
       tempCanvas,
       imageData,
-      canvasMeta,
       loadingFin,
-      loadingText
+      loadingText,
+      canvasBox,
+      cnavasStyle
     };
   }
 };
@@ -538,6 +551,40 @@ export default {
   border-top: 1px solid rgba(0, 0, 0, 0.5);
   user-select: none;
   background-color: #141518;
+  // 滚动条整体部分
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  // 滚动条里面的小方块，能向上向下移动（或往左往右移动，取决于是垂直滚动条还是水平滚动条）
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: rgb(209, 205, 205);
+    &:hover {
+      background: rgb(238, 235, 235);
+    }
+  }
+  //  滚动条的轨道（里面装有Thumb）
+  &::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    background: #000;
+  }
+  // 滚动条的轨道的两端按钮，允许通过点击微调小方块的位置
+  &::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+  }
+  // 边角，即两个滚动条的交汇处
+  &::-webkit-scrollbar-corner {
+    width: 0;
+    height: 0;
+  }
+  //  内层轨道，滚动条中间部分（除去）
+  // &::-webkit-scrollbar-track-piece{
+
+  // }
 }
 .pe-none {
   pointer-events: none;

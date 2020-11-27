@@ -15,6 +15,7 @@ import {
 } from "../utils/request/canvas";
 import cloneDeep from "lodash/cloneDeep";
 import { get } from "js-cookie";
+import { Message } from "element-plus/lib/message";
 
 export function useFile() {
   const router = useRouter();
@@ -69,11 +70,13 @@ export function useFile() {
       }
     }
     const token = get("token");
+    let result;
     if (token) {
-      saveServer();
+      result = await saveServer();
     } else {
-      saveLocal();
+      result = await saveLocal();
     }
+    return result;
   }
 
   async function saveServer() {
@@ -122,8 +125,8 @@ export function useFile() {
         pagesClone[i].layers[li].imageData = null;
       }
     }
-    setCanvasData(formData);
-    setPagesData({
+    const resultCanvas = await setCanvasData(formData);
+    const resultPages = await setPagesData({
       canvasId: guid,
       data: {
         title: "untitled",
@@ -132,21 +135,11 @@ export function useFile() {
         pages: pagesClone
       }
     });
-
-    // fetch("/canvas", {
-    //   method: "POST",
-    //   body: formData
-    // })
-    //   // request as ArrayBuffer
-    //   .then(response => response.arrayBuffer())
-    //   .then(buffer => {
-    //     console.log(buffer);
-    //     // create a new View over our ArrayBuffer
-    //     // const data = new Uint8ClampedArray(buffer);
-    //     // console.log(data);
-    //     // const new_img = new ImageData(data, img.width, img.height);
-    //     // return new_img;
-    //   });
+    Message({
+      type: "success",
+      message: "保存成功"
+    });
+    return true;
   }
 
   function setCanvasSizeData() {
@@ -181,6 +174,7 @@ export function useFile() {
         store.state.canvasModule.canvasMetaHeight / height;
     }
   }
+
   function reset({ width = 40, height = 40 } = {}) {
     console.log(width, height);
     localStorage.removeItem("pages");
@@ -205,9 +199,11 @@ export function useFile() {
       mergeCanvas();
     });
   }
+
   function saveLocal() {
     const { pages } = store.state.canvasModule;
     localStorage.setItem("pages", JSON.stringify(pages));
+    return true;
   }
 
   // https://stackoverflow.com/questions/55620592/react-node-trouble-sending-imagedata-to-server
@@ -275,11 +271,13 @@ export function useFile() {
     }
     console.log(pages);
   }
+
   function updateimageData(data: any, targetImageData: ImageData) {
     for (let i = 0; i < data.length; i++) {
       targetImageData.data[i] = data[i];
     }
   }
+
   return {
     save,
     loadLocal,

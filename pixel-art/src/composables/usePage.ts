@@ -32,6 +32,7 @@ export function usePage() {
   );
   const animationPreviewUrl = ref("");
   const { mergeCanvas } = usePreview();
+  
   function create(index: number) {
     const imageData = tempCanvasCtx.value.createImageData(
       width.value,
@@ -67,6 +68,7 @@ export function usePage() {
       currentPageIndex: store.state.canvasModule.currentPageIndex
     };
   }
+
   function choose(index: number) {
     store.state.canvasModule.currentPageIndex = index;
     store.state.canvasModule.currentLayerIndex = 0;
@@ -102,6 +104,7 @@ export function usePage() {
     }
     tempCanvasCtx.value.clearRect(0, 0, width.value, height.value);
   }
+
   function copy(index: number) {
     const page: page = cloneDeep(toRaw(store.state.canvasModule.pages[index]));
     store.state.canvasModule.pages.splice(index, 0, page);
@@ -110,6 +113,7 @@ export function usePage() {
       currentPageIndex: store.state.canvasModule.currentPageIndex
     };
   }
+  
   function deletePage(index: number) {
     const pageLength = store.state.canvasModule.pages.length;
     if (pageLength > 1) {
@@ -125,6 +129,7 @@ export function usePage() {
       };
     }
   }
+
   function createPageByData(data: any) {
     const { currentPageIndex, currentPageData } = data;
     // console.log(currentPageData);
@@ -134,6 +139,7 @@ export function usePage() {
       currentPageIndex
     };
   }
+
   function move(index: number, mode: string) {
     interface step {
       [key: string]: any;
@@ -157,6 +163,7 @@ export function usePage() {
       mode: mode
     };
   }
+
   return {
     pages,
     create,

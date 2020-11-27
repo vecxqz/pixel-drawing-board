@@ -14,7 +14,11 @@
           srcset=""
         />
         <div class="project-title">
-          <div class="cur-pointer" @click="openPorjectPage(project.guid)">
+          <div
+            v-if="!project.edit"
+            class="cur-pointer"
+            @click="openPorjectPage(project.guid)"
+          >
             {{ project.data.title }}
           </div>
           <el-input
@@ -26,13 +30,16 @@
             :autofocus="true"
           ></el-input>
           <div class="op-group">
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-edit"
-              @click="changeToEditStatus(index)"
-              circle
-            ></el-button>
+            <el-tooltip content="重命名">
+              <el-button
+                type="primary"
+                size="mini"
+                class="btn-rename"
+                icon="el-icon-edit"
+                @click="changeToEditStatus(index)"
+                circle
+              ></el-button>
+            </el-tooltip>
             <el-popconfirm
               title="确定删除该工程？"
               confirmButtonText="确定"
@@ -40,12 +47,16 @@
               @confirm="remove($event, project.guid)"
             >
               <template #reference>
-                <el-button
-                  type="danger"
-                  icon="el-icon-delete"
-                  size="mini"
-                  circle
-                ></el-button>
+                <span>
+                  <el-tooltip content="删除工程">
+                    <el-button
+                      type="danger"
+                      icon="el-icon-delete"
+                      size="mini"
+                      circle
+                    ></el-button>
+                  </el-tooltip>
+                </span>
               </template>
             </el-popconfirm>
           </div>
@@ -128,6 +139,7 @@ export default {
       (projectList.value[index] as any).edit = true;
       nextTick(() => {
         const el = elInputRef.value as any;
+        console.log(el);
         el.focus();
       });
     }
@@ -148,7 +160,8 @@ export default {
       handleEditBlur,
       changeToEditStatus,
       handleEditEnter,
-      openPorjectPage
+      openPorjectPage,
+      elInputRef
     };
   }
 };
@@ -195,5 +208,8 @@ export default {
 }
 .cur-pointer {
   cursor: pointer;
+}
+.btn-rename {
+  margin-right: 5px;
 }
 </style>

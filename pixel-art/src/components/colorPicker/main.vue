@@ -64,6 +64,7 @@
         <span>#</span>
         <input @input="hexInputFilter($event)" v-model="colorHex" />
       </div>
+      <el-button @click="popupHide" class="btn-sure">确定</el-button>
     </div>
   </div>
 </template>
@@ -159,6 +160,7 @@ export default {
           chooseHues(e);
         });
     });
+
     function chooseSat(e: MouseEvent) {
       const satDom = areaSat.value;
       const { clientX, clientY } = e;
@@ -193,10 +195,11 @@ export default {
       colorHex.value = Color.hsv([h, s, v])
         .hex()
         .slice(1);
-      console.log(Color.hsv([h, s, v]));
+      // console.log(Color.hsv([h, s, v]));
       newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
       context.emit("update:emitColor", newColor.value);
     }
+
     function chooseHues(e: MouseEvent) {
       const huesDom = areaHues.value;
       const { clientY } = e;
@@ -214,10 +217,13 @@ export default {
       const h = hues.value,
         s = saturation.value,
         v = value.value;
+      // console.log(h, s, v);
+      // console.log(`hsl(${newH}, ${newS}%, ${newL}%)`)
       const [r, g, b] = Color.hsv([h, s, v]).rgb().color;
-      const [newH, newS, newL] = Color.hsv([h, s, v]).hsl().color;
+      // console.log(r, g, b);
+      const [newH, newS, newL] = Color.hsv([h, 100, 100]).hsl().color;
       chooseColor.value = `hsl(${newH}, ${newS}%, ${newL}%)`;
-      console.log(r, g, b);
+      // console.log(r, g, b);
       rgbMeta.r = Math.round(r);
       rgbMeta.g = Math.round(g);
       rgbMeta.b = Math.round(b);
@@ -227,9 +233,11 @@ export default {
         .slice(1);
       context.emit("update:emitColor", newColor.value);
     }
+
     function popupHide() {
       context.emit("update:visible", false);
     }
+
     function calcSatCursorPos(color: string) {
       const c = Color(color);
       const hsv = c.hsv().color;
@@ -242,11 +250,13 @@ export default {
         left: `${satCursorLeft - 5}px`
       };
     }
+
     function setBoardView(color: string, { ingoreHex } = { ingoreHex: false }) {
       const c = Color(color);
       const [r, g, b] = c.color;
       const [h, s, v] = c.hsv().color;
-      const [newH, newS, newL] = c.hsl().color;
+      const [newH, newS, newL] = Color.hsv([h, 100, 100]).hsl().color;
+      // console.log(newH, newS, newL);
       const { top: satCursorTop, left: satCursorLeft } = calcSatCursorPos(
         color
       );
@@ -263,6 +273,7 @@ export default {
       value.value = Math.round(v);
       if (!ingoreHex) colorHex.value = c.hex().slice(1);
     }
+
     function calcHuesCursorPos(color: string) {
       const c = Color(color);
       const [h] = c.hsv().color;
@@ -271,6 +282,7 @@ export default {
         top: `${hueCursorTop - 4}px`
       };
     }
+
     function rgbInputFilter(e: any, mode: string) {
       let value = e.target.value;
       if (value.length > 3) {
@@ -286,7 +298,10 @@ export default {
       rgbMeta[mode] = value;
       const { r, g, b } = rgbMeta;
       setBoardView(`rgb(${r}, ${g}, ${b})`);
+      newColor.value = `rgb(${r}, ${g}, ${b})`;
+      context.emit("update:emitColor", newColor.value);
     }
+
     function hsvInputFilter(e: any, mode: string) {
       let inputValue = e.target.value;
       if (inputValue.length > 3) {
@@ -329,7 +344,10 @@ export default {
       rgbMeta.g = Math.round(g);
       rgbMeta.b = Math.round(b);
       setBoardView(`rgb(${r}, ${g}, ${b})`);
+      newColor.value = `rgb(${rgbMeta.r}, ${rgbMeta.g}, ${rgbMeta.b})`;
+      context.emit("update:emitColor", newColor.value);
     }
+
     function hexInputFilter(e: any) {
       let inputValue = e.target.value;
       let r, g, b;
@@ -343,10 +361,15 @@ export default {
         rgbMeta.g = Math.round(g);
         rgbMeta.b = Math.round(b);
         setBoardView(`rgb(${r}, ${g}, ${b})`, { ingoreHex: true });
+        newColor.value = `rgb(${r}, ${g}, ${b})`;
+        context.emit("update:emitColor", newColor.value);
       } catch (e) {
         (r = 0), (g = 0), (b = 0);
+        newColor.value = `rgb(${r}, ${g}, ${b})`;
+        context.emit("update:emitColor", newColor.value);
       }
     }
+
     return {
       color,
       chooseSat,
@@ -377,6 +400,7 @@ export default {
   border: 1px solid rgba(0, 0, 0, 0.5);
   background: #333;
   color: rgb(255, 255, 255);
+  user-select: none;
 }
 .pos-absolute {
   position: absolute;
@@ -467,9 +491,6 @@ export default {
 }
 .cursor-hues {
   position: absolute;
-  // width: 15px;
-  // height: 10px;
-  // border: 1px solid black;
   z-index: 1;
   cursor: pointer;
   pointer-events: none;
@@ -493,13 +514,20 @@ export default {
   }
 }
 .color-hex {
+  display: inline-block;
   span {
     display: inline-block;
     width: 14px;
   }
   input {
-    width: 105px;
+    width: 55px;
   }
+}
+.btn-sure {
+  width: 44px;
+  height: 20px;
+  padding: 2px;
+  margin-left: 6px;
 }
 .hideen {
   display: none;

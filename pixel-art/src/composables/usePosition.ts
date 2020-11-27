@@ -17,26 +17,15 @@ export function useMousePosition() {
   const realHeight = computed(() => {
     return height.value / size.value;
   });
-  const startX = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.startPoint.e.offsetX / size.value
-    )
+  const startX = computed(
+    () => store.state.canvasModule.eventPoint.startPoint.x
   );
-  const startY = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.startPoint.e.offsetY / size.value
-    )
+  const startY = computed(
+    () => store.state.canvasModule.eventPoint.startPoint.y
   );
-  const endX = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.endPoint.e.offsetX / size.value
-    )
-  );
-  const endY = computed(() =>
-    Math.floor(
-      store.state.canvasModule.eventPoint.endPoint.e.offsetY / size.value
-    )
-  );
+  const endX = computed(() => store.state.canvasModule.eventPoint.endPoint.x);
+  const endY = computed(() => store.state.canvasModule.eventPoint.endPoint.y);
+
   function mouseDown(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
@@ -46,6 +35,7 @@ export function useMousePosition() {
       y: rowIndex
     });
   }
+
   function mouseMove(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);
@@ -55,6 +45,7 @@ export function useMousePosition() {
       y: rowIndex
     });
   }
+
   function mouseUp(e: MouseEvent) {
     const columnIndex = Math.floor(e.offsetX / size.value),
       rowIndex = Math.floor(e.offsetY / size.value);

@@ -2,7 +2,7 @@
   <div class="login-box">
     <div id="mask"></div>
     <div class="login-container">
-      <div>登录</div>
+      <div v-op="'login'">登录</div>
       <el-form :model="form" ref="formRef" :rules="rules">
         <el-form-item label="账号" prop="username">
           <el-input v-model="form.username" placeholder="你的账号"></el-input>
@@ -22,6 +22,9 @@
             >注册</el-button
           >
         </el-form-item>
+        <router-link :to="{ name: 'EntryDrawPixelDetail' }"
+          ><el-button class="btn-demo">体验</el-button></router-link
+        >
       </el-form>
     </div>
   </div>
@@ -128,15 +131,19 @@ export default {
     margin-top: 40px;
   }
   &-login,
-  &-register {
+  &-register,
+  &-demo {
     width: 105px;
     border-radius: 0.3rem;
     box-shadow: 1px 1px 4px 0px #6d6d6d66;
     text-align: center;
     cursor: pointer;
   }
+  &-demo {
+    width: 100%;
+  }
 }
-::v-deep .el-input__inner {
+::v-deep(.el-input__inner) {
   width: 220px;
   padding: 0 0 0 10px;
   outline: none;

@@ -68,6 +68,7 @@ export function usePencil() {
     mouseMoveStart.lastX = columnIndex;
     mouseMoveStart.lastY = rowIndex;
   }
+
   function mouseUp(e: MouseEvent) {
     console.log("pencil mouseUp");
     mouseMoveStart.currentX = 0;
@@ -75,5 +76,6 @@ export function usePencil() {
     mouseMoveStart.lastX = 0;
     mouseMoveStart.lastY = 0;
   }
+  
   return { mouseDown, mouseMove, mouseUp };
 }

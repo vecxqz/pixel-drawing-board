@@ -50,9 +50,11 @@ export function useSelect() {
   function setSetStatus(status: boolean) {
     store.state.canvasModule.selectArea.isSet = status;
   }
+
   function setMoveStatus(status: boolean) {
     store.state.canvasModule.selectArea.isMove = status;
   }
+
   function setClickOutSideStatus(status: boolean) {
     store.state.canvasModule.selectArea.isClickOutSide = status;
   }
@@ -74,6 +76,7 @@ export function useSelect() {
     }
     return false;
   }
+
   function setSelectArea({
     startX,
     startY,
@@ -172,6 +175,7 @@ export function useSelect() {
     }
     return isSet.value ? moveFinishImageData.value : undefined;
   }
+
   function mouseMove(e: MouseEvent) {
     // 点击外部区域或是没有绘制才记录
     if (isClickOutSide.value) {
@@ -259,10 +263,16 @@ export function useSelect() {
       canvasCtx.value.fillStyle = tempColor;
     }
   }
+
   function mouseUp(e: MouseEvent) {
     const tempFillStyle = canvasCtx.value.fillStyle;
     // 点击外部区域或是没有绘制才记录
-    if (isClickOutSide.value) {
+    if (
+      isClickOutSide.value &&
+      startX.value !== endX.value &&
+      startY.value !== endY.value
+    ) {
+      console.log(startX.value, endX.value, startY.value, endY.value);
       setSelectArea({
         startX: startX.value,
         startY: startY.value,

@@ -1,5 +1,5 @@
 <template>
-  <div id="preview">
+  <div>
     <div class="preview-aniamtion">
       <div class="preview-title">
         <img src="../assets/preview.svg" />预览
@@ -153,16 +153,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-#preview {
-  display: flex;
-  flex: 1;
-  max-height: 140px;
-  padding: 4px 0 4px;
-  border-top: 1px solid rgba(0, 0, 0, 0.5);
-  background-color: #333;
-  color: #fff;
-  font-size: 14px;
-}
 .preview-aniamtion {
   min-width: 120px;
   display: flex;
@@ -183,19 +173,38 @@ export default {
   display: flex;
   overflow: auto;
   &::-webkit-scrollbar {
-    width: 2px;
-    height: 5px;
+    width: 8px;
+    height: 8px;
   }
+  // 滚动条里面的小方块，能向上向下移动（或往左往右移动，取决于是垂直滚动条还是水平滚动条）
   &::-webkit-scrollbar-thumb {
     border-radius: 10px;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-    background: #fff;
+    background: rgb(209, 205, 205);
+    &:hover {
+      background: rgb(238, 235, 235);
+    }
   }
+  //  滚动条的轨道（里面装有Thumb）
   &::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
-    background: #741190;
+    background: #000;
   }
+  // 滚动条的轨道的两端按钮，允许通过点击微调小方块的位置
+  &::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+  }
+  // 边角，即两个滚动条的交汇处
+  &::-webkit-scrollbar-corner {
+    width: 0;
+    height: 0;
+  }
+  //  内层轨道，滚动条中间部分（除去）
+  // &::-webkit-scrollbar-track-piece{
+
+  // }
 }
 .page-preview-item {
   display: flex;
@@ -206,15 +215,25 @@ export default {
   align-items: center;
 }
 .page-preview-image {
-  width: fit-content;
-  height: fit-content;
+  min-width: 80px;
+  max-width: 100%;
+  max-height: 200px;
+  background-color: #fff;
   image-rendering: pixelated;
 }
 .preview-page {
   overflow: hidden;
 }
 .highlight {
-  border: 3px solid rgb(230, 250, 49);
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgb(230, 250, 49);
+  }
+  // border: 3px solid rgb(230, 250, 49);
 }
 .preview-title {
   display: flex;

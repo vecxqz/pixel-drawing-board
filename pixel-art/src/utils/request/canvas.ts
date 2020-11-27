@@ -5,6 +5,7 @@ export const getGuid = () =>
     url: "/api/canvas/guid",
     method: "GET"
   });
+
 export const setCanvasData = (data: any) =>
   request({
     url: "/api/canvas/imagedata",
@@ -34,6 +35,12 @@ export const getPagesData = ({ canvasId }: { canvasId: any }) =>
 export const getAllPagesData = () =>
   request({
     url: `/api/pages/imagedata`,
+    method: "get"
+  });
+
+export const getAllPublicPagesData = () =>
+  request({
+    url: `/api/pages/public-imagedata`,
     method: "get"
   });
 
