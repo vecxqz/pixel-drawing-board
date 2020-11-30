@@ -32,7 +32,7 @@ import { reactive, ref } from "vue";
 import { register } from "../utils/request/user";
 import { set } from "js-cookie";
 import { useRouter } from "vue-router";
-import { Message } from "element-plus/lib/message";
+import { ElMessage } from "element-plus";
 
 export default {
   setup() {
@@ -65,7 +65,7 @@ export default {
               data: { access_token }
             } = data as any;
             if (access_token) {
-              Message({
+              ElMessage({
                 type: "success",
                 message: msg
               });

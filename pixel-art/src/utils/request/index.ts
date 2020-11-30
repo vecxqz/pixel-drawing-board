@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { get } from "js-cookie";
-import { Message } from "element-plus/lib/message";
+import { ElMessage } from "element-plus";
+
 const request = axios.create();
 request.interceptors.request.use(config => {
   const token = get("token");
@@ -14,7 +15,7 @@ request.interceptors.response.use(
     const { data } = response;
     const { code, msg } = data;
     if (code >= 400) {
-      Message({
+      ElMessage({
         type: "error",
         message: msg
       });

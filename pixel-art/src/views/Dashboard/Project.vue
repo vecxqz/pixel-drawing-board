@@ -74,7 +74,7 @@ import {
   removePagesData,
   setPageTitle
 } from "../../utils/request/canvas";
-import { Message } from "element-plus/lib/message";
+import { ElMessage } from "element-plus";
 export default {
   setup() {
     const projectList = ref([{}]);
@@ -103,7 +103,7 @@ export default {
     async function remove(event: Event, guid: string) {
       const { code, msg } = (await removePagesData(guid)) as any;
       if (code === 200) {
-        Message({
+        ElMessage({
           type: "success",
           message: msg
         });
@@ -120,7 +120,7 @@ export default {
           guid: (projectList.value[index] as any).guid
         })) as any;
         if (code === 200) {
-          Message({
+          ElMessage({
             type: "success",
             message: msg
           });

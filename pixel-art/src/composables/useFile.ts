@@ -15,7 +15,7 @@ import {
 } from "../utils/request/canvas";
 import cloneDeep from "lodash/cloneDeep";
 import { get } from "js-cookie";
-import { Message } from "element-plus/lib/message";
+import { ElMessage } from "element-plus";
 
 export function useFile() {
   const router = useRouter();
@@ -135,7 +135,7 @@ export function useFile() {
         pages: pagesClone
       }
     });
-    Message({
+    ElMessage({
       type: "success",
       message: "保存成功"
     });

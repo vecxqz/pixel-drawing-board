@@ -498,9 +498,3 @@ export default {
   }
 }
 </style>
-
-<style lang="scss">
-.el-popper {
-  z-index: 99999;
-}
-</style>
